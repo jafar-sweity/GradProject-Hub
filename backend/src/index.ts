@@ -9,18 +9,16 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
-// Example Route
 app.get("/", (req, res) => {
   res.send("Hello, World!");
 });
 
-// Test database connection and sync models
 const startServer = async () => {
   try {
     await sequelize.authenticate();
     console.log("Database connected.");
 
-    await sequelize.sync({ alter: true }); // Use { force: true } for development (drops tables)
+    await sequelize.sync({ alter: true });
     console.log("Models synchronized.");
 
     app.listen(PORT, () => {

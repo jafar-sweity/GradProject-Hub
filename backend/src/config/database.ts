@@ -1,6 +1,6 @@
 import { Sequelize } from "sequelize-typescript";
 import dotenv from "dotenv";
-import { User } from "../models/user.js";
+import { User, Project, Task, Comment, Subtask } from "../models/index.js";
 
 dotenv.config();
 
@@ -11,7 +11,12 @@ const sequelize = new Sequelize({
   password: process.env.DB_PASSWORD as string,
   database: process.env.DB_NAME as string,
   dialect: "mysql",
-  logging: false, // Disable logging; default: console.log,
-  models: [User],
+  logging: false,
+  models: [User, Project, Task, Comment, Subtask],
 });
+
+sequelize.sync().then(() => {
+  console.log("Database & tables created!");
+});
+
 export default sequelize;
