@@ -1,38 +1,29 @@
-import { Model, Column, Table, DataType, HasMany } from "sequelize-typescript";
-import { Project, Task } from "./index.js";
-import { CreationOptional } from "sequelize";
+import { Table, Column, Model, DataType } from "sequelize-typescript";
 
-@Table({ tableName: "users" })
+@Table
 class User extends Model<User> {
-  @Column({ type: DataType.INTEGER, autoIncrement: true, primaryKey: true })
-  id!: CreationOptional<number>;
-
-  @Column({ type: DataType.STRING, allowNull: false })
+  @Column({
+    type: DataType.STRING,
+    allowNull: false,
+  })
   name!: string;
-
-  @Column({ type: DataType.STRING, allowNull: false, unique: true })
+  @Column({
+    type: DataType.STRING,
+    allowNull: false,
+  })
   email!: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: false,
+  })
+  password!: string;
 
   @Column({
     type: DataType.ENUM("student", "supervisor", "admin"),
     allowNull: false,
   })
-  role!: "student" | "supervisor" | "admin";
-
-  @Column({ type: DataType.STRING, allowNull: false })
-  password!: string;
-
-  @Column({ type: DataType.DATE, defaultValue: DataType.NOW })
-  createdAt!: CreationOptional<Date>;
-
-  @Column({ type: DataType.DATE, defaultValue: DataType.NOW })
-  updatedAt!: CreationOptional<Date>;
-
-  @HasMany(() => Project, { foreignKey: "supervisor_id" })
-  projects!: Project[];
-
-  @HasMany(() => Task, { foreignKey: "assigned_to" })
-  tasks!: Task[];
+  role!: string;
 }
 
 export default User;
