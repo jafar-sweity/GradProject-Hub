@@ -1,10 +1,11 @@
 import { Model, Column, Table, DataType, HasMany } from "sequelize-typescript";
 import { Project, Task } from "./index.js";
+import { CreationOptional } from "sequelize";
 
 @Table({ tableName: "users" })
 class User extends Model<User> {
   @Column({ type: DataType.INTEGER, autoIncrement: true, primaryKey: true })
-  id!: number;
+  id!: CreationOptional<number>;
 
   @Column({ type: DataType.STRING, allowNull: false })
   name!: string;
@@ -22,10 +23,10 @@ class User extends Model<User> {
   password!: string;
 
   @Column({ type: DataType.DATE, defaultValue: DataType.NOW })
-  createdAt!: Date;
+  createdAt!: CreationOptional<Date>;
 
   @Column({ type: DataType.DATE, defaultValue: DataType.NOW })
-  updatedAt!: Date;
+  updatedAt!: CreationOptional<Date>;
 
   @HasMany(() => Project, { foreignKey: "supervisor_id" })
   projects!: Project[];
