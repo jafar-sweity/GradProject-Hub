@@ -1,6 +1,14 @@
 import { Sequelize } from "sequelize-typescript";
 import dotenv from "dotenv";
-import { User, Project, Task, Comment, Subtask } from "../models/index.js";
+import {
+  User,
+  Project,
+  Task,
+  Comment,
+  Subtask,
+  Supervisor,
+  Student,
+} from "../models/index.js";
 
 dotenv.config();
 
@@ -12,7 +20,7 @@ const sequelize = new Sequelize({
   database: process.env.DB_NAME as string,
   dialect: "mysql",
   logging: false,
-  models: [User, Project, Task, Comment, Subtask],
+  models: [User, Project, Task, Comment, Subtask, Supervisor, Student],
 });
 
 sequelize.sync().then(() => {

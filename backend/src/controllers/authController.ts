@@ -2,10 +2,10 @@ import { Request, Response } from "express";
 import User from "../models/user.js";
 import { Optional } from "sequelize";
 import { NullishPropertiesOf } from "sequelize/lib/utils";
-import { isEmail } from "validator";
+import validator from "validator";
+const { isEmail } = validator;
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
-import cookieParser from "cookie-parser";
 
 // generate token
 
@@ -76,7 +76,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     maxAge: 30 * 24 * 60 * 60 * 1000,
   });
   res.status(200).json({ message: "Login successful" });
-  // dont forget to check the usr status is active or not ......... 
+  // dont forget to check the usr status is active or not .........
 };
 
 export const logout = async (req: Request, res: Response): Promise<void> => {

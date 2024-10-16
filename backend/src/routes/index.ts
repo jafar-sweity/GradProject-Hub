@@ -6,15 +6,12 @@ import authRoutes from "./auth.js";
 // import subtaskRoutes from "./subTask";
 // import commentRoutes from "./comment";
 
-const router = express.Router();
+const routes = express.Router();
+routes.use("/api/v1/users", userRoutes);
+routes.use("/api/v1/auth", authRoutes);
+// routes.use("/api/v1/projects", projectRoutes);
+// routes.use("/api/v1/tasks", taskRoutes);
+// routes.use("/api/v1/subtasks", subtaskRoutes);
+// routes.use("/api/v1/comments", commentRoutes);
 
-router.use("/users", userRoutes);
-router.use("auth", authRoutes);
-// router.use("/projects", projectRoutes);
-// router.use("/tasks", taskRoutes);
-// router.use("/subtasks", subtaskRoutes);
-// router.use("/comments", commentRoutes);
-
-export default router;
-
-// give me commit to the bug fix and the feature add 
+export default routes;

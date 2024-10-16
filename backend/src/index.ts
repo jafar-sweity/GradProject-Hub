@@ -1,6 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import sequelize from "./config/database.js";
+import routes from "./routes/index.js";
 
 dotenv.config();
 
@@ -9,9 +10,7 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
-app.get("/", (req, res) => {
-  res.send("Hello, World!");
-});
+app.use("/", routes);
 
 const startServer = async () => {
   try {

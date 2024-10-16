@@ -31,17 +31,11 @@ class Project extends Model<Project> {
   @Column({ type: DataType.DATE, allowNull: false })
   end_date!: Date;
 
-  @Column({ type: DataType.INTEGER, allowNull: false })
-  supervisor_id!: number;
-
   @Column({ type: DataType.DATE, defaultValue: DataType.NOW })
   createdAt!: Date;
 
   @Column({ type: DataType.DATE, defaultValue: DataType.NOW })
   updatedAt!: Date;
-
-  @BelongsTo(() => User, { foreignKey: "supervisor_id" })
-  supervisor!: User;
 
   @HasMany(() => Task, { foreignKey: "project_id" })
   tasks!: Task[];
