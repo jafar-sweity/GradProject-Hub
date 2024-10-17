@@ -1,17 +1,19 @@
 import {
-  Model,
-  Column,
   Table,
+  Column,
+  Model,
   DataType,
-  BelongsTo,
+  ForeignKey,
 } from "sequelize-typescript";
-import { Task } from "./index.js";
+import Task from "./task.js";
+import User from "./user.js";
 
-@Table({ tableName: "subtasks" })
-class Subtask extends Model<Subtask> {
+@Table
+class SubTask extends Model<SubTask> {
   @Column({ type: DataType.INTEGER, autoIncrement: true, primaryKey: true })
-  id!: number;
+  sub_task_id!: number;
 
+  @ForeignKey(() => Task)
   @Column({ type: DataType.INTEGER, allowNull: false })
   task_id!: number;
 
@@ -22,22 +24,23 @@ class Subtask extends Model<Subtask> {
   description!: string;
 
   @Column({
-    type: DataType.ENUM("to do", "in progress", "done"),
+    type: DataType.ENUM("Pending", "In Progress", "Completed"),
     allowNull: false,
   })
-  status!: "to do" | "in progress" | "done";
+  status!: string;
 
-  @Column({ type: DataType.DATE, allowNull: true })
-  due_date?: Date;
+  @Column({ type: DataType.DATE, allowNull: false })
+  due_date!: Date;
 
-  @Column({ type: DataType.DATE, defaultValue: DataType.NOW })
+  @ForeignKey(() => User)
+  @Column({ type: DataType.INTEGER })
+  assigned_to!: number;
+
+  @Column({ type: DataType.DATE, allowNull: false })
   createdAt!: Date;
 
-  @Column({ type: DataType.DATE, defaultValue: DataType.NOW })
+  @Column({ type: DataType.DATE, allowNull: false })
   updatedAt!: Date;
-
-  @BelongsTo(() => Task, { foreignKey: "task_id" })
-  task!: Task;
 }
 
-export default Subtask;
+export default SubTask;

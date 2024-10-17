@@ -4,25 +4,25 @@ import {
   Model,
   DataType,
   ForeignKey,
-  BelongsTo,
 } from "sequelize-typescript";
-import { User, Project } from "./index.js";
+import User from "./user.js";
+import Project from "./project.js";
 
-@Table({
-  tableName: "students",
-})
-export class Student extends Model {
+@Table
+class Student extends Model<Student> {
   @ForeignKey(() => User)
-  @Column({
-    type: DataType.INTEGER,
-    primaryKey: true,
-  })
+  @Column({ type: DataType.INTEGER, allowNull: false })
   user_id!: number;
 
   @ForeignKey(() => Project)
-  @Column({
-    type: DataType.INTEGER,
-    allowNull: false,
-  })
+  @Column({ type: DataType.INTEGER, allowNull: false })
   project_id!: number;
+
+  @Column({ type: DataType.DATE, allowNull: false })
+  createdAt!: Date;
+
+  @Column({ type: DataType.DATE, allowNull: false })
+  updatedAt!: Date;
 }
+
+export default Student;
