@@ -6,17 +6,21 @@ import {
   ForeignKey,
 } from "sequelize-typescript";
 import User from "./user.js";
-import Project from "./project.js";
 
 @Table
-class Supervisor extends Model<Supervisor> {
+class CommunityPost extends Model<CommunityPost> {
+  @Column({ type: DataType.INTEGER, autoIncrement: true, primaryKey: true })
+  post_id!: number;
+
   @ForeignKey(() => User)
   @Column({ type: DataType.INTEGER, allowNull: false })
   user_id!: number;
 
-  @ForeignKey(() => Project)
-  @Column({ type: DataType.INTEGER, allowNull: false })
-  project_id!: number;
+  @Column({ type: DataType.STRING, allowNull: false })
+  title!: string;
+
+  @Column({ type: DataType.TEXT, allowNull: false })
+  content!: string;
 
   @Column({ type: DataType.DATE, allowNull: false })
   createdAt!: Date;
@@ -25,4 +29,4 @@ class Supervisor extends Model<Supervisor> {
   updatedAt!: Date;
 }
 
-export default Supervisor;
+export default CommunityPost;

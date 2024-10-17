@@ -6,17 +6,19 @@ import {
   ForeignKey,
 } from "sequelize-typescript";
 import User from "./user.js";
-import Project from "./project.js";
 
 @Table
-class Supervisor extends Model<Supervisor> {
+class Follower extends Model<Follower> {
   @ForeignKey(() => User)
   @Column({ type: DataType.INTEGER, allowNull: false })
-  user_id!: number;
+  follower_id!: number;
 
-  @ForeignKey(() => Project)
+  @ForeignKey(() => User)
   @Column({ type: DataType.INTEGER, allowNull: false })
-  project_id!: number;
+  followed_user_id!: number;
+
+  @Column({ type: DataType.DATE, allowNull: false })
+  followed_at!: Date;
 
   @Column({ type: DataType.DATE, allowNull: false })
   createdAt!: Date;
@@ -25,4 +27,4 @@ class Supervisor extends Model<Supervisor> {
   updatedAt!: Date;
 }
 
-export default Supervisor;
+export default Follower;

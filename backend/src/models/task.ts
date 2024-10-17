@@ -1,20 +1,17 @@
 import {
-  Model,
-  Column,
   Table,
+  Column,
+  Model,
   DataType,
-  BelongsTo,
-  HasMany,
+  ForeignKey,
 } from "sequelize-typescript";
-import { Project, Subtask, User, Comment } from "./index.js";
+import Project from "./project.js";
+import User from "./user.js";
 
-@Table({ tableName: "tasks" })
+@Table
 class Task extends Model<Task> {
   @Column({ type: DataType.INTEGER, autoIncrement: true, primaryKey: true })
-  id!: number;
-
-  @Column({ type: DataType.INTEGER, allowNull: false })
-  project_id!: number;
+  task_id!: number;
 
   @Column({ type: DataType.STRING, allowNull: false })
   title!: string;
@@ -23,37 +20,27 @@ class Task extends Model<Task> {
   description!: string;
 
   @Column({
-    type: DataType.ENUM("to do", "in progress", "done"),
+    type: DataType.ENUM("Pending", "In Progress", "Completed"),
     allowNull: false,
   })
-  status!: "to do" | "in progress" | "done";
+  status!: string;
 
-  @Column({ type: DataType.ENUM("low", "medium", "high"), allowNull: false })
-  priority!: "low" | "medium" | "high";
+  @Column({ type: DataType.DATE, allowNull: false })
+  due_date!: Date;
 
-  @Column({ type: DataType.INTEGER, allowNull: true })
-  assigned_to?: number;
+  @ForeignKey(() => Project)
+  @Column({ type: DataType.INTEGER, allowNull: false })
+  project_id!: number;
 
-  @Column({ type: DataType.DATE, allowNull: true })
-  due_date?: Date;
+  @ForeignKey(() => User)
+  @Column({ type: DataType.INTEGER })
+  assigned_to!: number;
 
-  @Column({ type: DataType.DATE, defaultValue: DataType.NOW })
+  @Column({ type: DataType.DATE, allowNull: false })
   createdAt!: Date;
 
-  @Column({ type: DataType.DATE, defaultValue: DataType.NOW })
+  @Column({ type: DataType.DATE, allowNull: false })
   updatedAt!: Date;
-
-  @BelongsTo(() => User, { foreignKey: "assigned_to" })
-  assignedUser!: User;
-
-  @BelongsTo(() => Project, { foreignKey: "project_id" })
-  project!: Project;
-
-  @HasMany(() => Subtask, { foreignKey: "task_id" })
-  subtasks!: Subtask[];
-
-  @HasMany(() => Comment, { foreignKey: "task_id" })
-  comments!: Comment[];
 }
 
 export default Task;
