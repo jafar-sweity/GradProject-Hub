@@ -10,6 +10,8 @@ import Follower from "./followers.js";
 import Post from "./posts.js";
 import Message from "./messages.js";
 
+// import defineAssociations from "./associations.js";
+// defineAssociations();
 export {
   User,
   Project,

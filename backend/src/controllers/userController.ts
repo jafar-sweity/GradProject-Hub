@@ -15,7 +15,7 @@ export const getUsers = async (req: Request, res: Response): Promise<void> => {
   } catch (error) {
     res
       .status(500)
-      .json({ message: "Error fetching users", error: error.message });
+      .json({ message: "Error fetching users", error: (error as Error).message });
   }
 };
 
