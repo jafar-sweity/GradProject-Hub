@@ -1,36 +1,54 @@
-// check the authrization by check the token in the cookie
-import { Request, Response } from "express";
-import jwt from "jsonwebtoken";
 
-export const checkAuth = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const token = req.cookies.token;
+import { Request, Response, NextFunction } from "express";
+
+// Extend the Request interface to include the user property
+declare module "express-serve-static-core" {
+  interface Request {
+    user?: DecodedToken;
+  }
+}
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+const SECRET_KEY = process.env.JWT_SECRET as string; 
+
+interface DecodedToken {
+  role: string;
+
+}
+
+export const authorize = (roles: string[]) => {
+  return async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    const token = req.header("Authorization")?.replace("Bearer ", "");
+
     if (!token) {
-      res.status(401).json({ message: "Unauthorized" });
+      res.status(401).json({ error: "Authorization token is missing" });
       return;
     }
-    const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
-    res.status(200).json(decoded);
-  } catch (error) {
-    res.status(401).json({ message: "Unauthorized" });
-  }
-};
 
-// check the role of the user
-// export const checkRole = async (req: Request, res: Response): Promise<void> => {
-//   try {
-//     const token = req.cookies.token;
-//     if (!token) {
-//       res.status(401).json({ message: "Unauthorized" });
-//       return;
-//     }
-//     const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
-//     if (decoded.role !== "admin") {
-//       res.status(403).json({ message: "Forbidden" });
-//       return;
-//     }
-//     res.status(200).json(decoded);
-//   } catch (error) {
-//     res.status(401).json({ message: "Unauthorized" });
-//   }
-// };
+    try {
+      const decoded = jwt.verify(token, SECRET_KEY) as DecodedToken;
+
+      if (roles.includes(decoded.role)) {
+        req.user = decoded;
+        next();
+      } else {
+        res
+          .status(403)
+          .json({ error: "Access denied: insufficient permissions" });
+        return;
+      }
+      res.status(403).json({ error: "Invalid token" });
+      return;
+    } catch (error) {
+      res.status(403).json({ error: "Invalid token" });
+      return;
+    }
+  };
+};
