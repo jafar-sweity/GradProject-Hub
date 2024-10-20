@@ -52,3 +52,11 @@ export const authorize = (roles: string[]) => {
     }
   };
 };
+
+export const adminMiddleware = (req: Request, res: Response, next: NextFunction) => {
+  if (req.user?.role !== "admin") {
+    res.status(403).json({ error: "Access denied: insufficient permissions" });
+    return;
+  }
+  next();
+}
