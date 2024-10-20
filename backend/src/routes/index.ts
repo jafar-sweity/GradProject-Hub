@@ -19,6 +19,7 @@ routes.get("/", (req, res) => {
 routes.use("/api/v1/auth", authRoutes); // Mount authRoutes
 
 routes.use("/api/v1/users", userRoutes);
+
 // routes.use("/api/v1/projects", projectRoutes);
 // routes.use("/api/v1/tasks", taskRoutes);
 // routes.use("/api/v1/messages", messageRoutes);
