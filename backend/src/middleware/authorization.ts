@@ -32,10 +32,12 @@ export const authorize = (roles: string[]) => {
 
     try {
       const decoded = jwt.verify(token, SECRET_KEY) as DecodedToken;
+      console.log(decoded);
 
       if (roles.includes(decoded.role)) {
         req.user = decoded;
         next();
+        return;
       } else {
         res
           .status(403)
@@ -50,11 +52,3 @@ export const authorize = (roles: string[]) => {
     }
   };
 };
-
-export const adminMiddleware = (req: Request, res: Response, next: NextFunction) => {
-  if (req.user?.role !== "admin") {
-    res.status(403).json({ error: "Access denied: insufficient permissions" });
-    return;
-  }
-  next();
-}
