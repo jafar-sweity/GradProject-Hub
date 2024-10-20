@@ -1,4 +1,3 @@
-
 import { Request, Response, NextFunction } from "express";
 
 // Extend the Request interface to include the user property
@@ -12,11 +11,10 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const SECRET_KEY = process.env.JWT_SECRET as string; 
+const SECRET_KEY = process.env.JWT_SECRET as string;
 
 interface DecodedToken {
   role: string;
-
 }
 
 export const authorize = (roles: string[]) => {

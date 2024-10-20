@@ -61,21 +61,21 @@ const defineAssociations = () => {
   });
 
   // Mentorship and Followers
-  Mentorship.hasMany(Follower, {
-    foreignKey: "mentorship_id",
+  User.hasMany(Follower, {
+    foreignKey: "follower_id",
     onDelete: "CASCADE",
   });
-  Follower.belongsTo(Mentorship, { foreignKey: "mentorship_id" });
+  Follower.belongsTo(User, { foreignKey: "user_id" });
 
   // Optional relationship between Mentorship and Project
-  Mentorship.belongsTo(Project, {
-    foreignKey: "project_id",
-    onDelete: "SET NULL",
-  });
-  Project.hasMany(Mentorship, {
-    foreignKey: "project_id",
-    onDelete: "SET NULL",
-  });
+  // Mentorship.belongsTo(Project, {
+  //   foreignKey: "project_id",
+  //   onDelete: "SET NULL",
+  // });
+  // Project.hasMany(Mentorship, {
+  //   foreignKey: "project_id",
+  //   onDelete: "SET NULL",
+  // });
 };
 
 export default defineAssociations;
