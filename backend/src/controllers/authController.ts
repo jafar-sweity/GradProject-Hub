@@ -44,7 +44,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       password: hashedPassword,
       role,
     } as Optional<User, NullishPropertiesOf<User>>);
-    const token = generateToken(newUser.user_id);
+    const token = generateToken(newUser.user_id); 
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
