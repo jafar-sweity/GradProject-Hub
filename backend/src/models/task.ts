@@ -7,6 +7,7 @@ import {
 } from "sequelize-typescript";
 import Project from "./project.js";
 import User from "./user.js";
+import { allow } from "joi";
 
 @Table
 class Task extends Model<Task> {
@@ -38,6 +39,9 @@ class Task extends Model<Task> {
 
   @Column({ type: DataType.DATE, allowNull: false })
   createdAt!: Date;
+
+  @Column({ type: DataType.INTEGER })
+  estimated_hours!: number;
 
   @Column({ type: DataType.DATE, allowNull: false })
   updatedAt!: Date;

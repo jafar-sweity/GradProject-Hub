@@ -6,14 +6,12 @@ import {
   Task,
   Comment,
   Subtask,
-  Supervisor,
-  Student,
-  // Mentorship,
   Follower,
   Post,
   Message,
 } from "../models/index.js";
 import defineAssociations from "../models/associations.js";
+import { UserProjectRoles } from "../models/index.js";
 dotenv.config();
 
 const sequelize = new Sequelize({
@@ -30,12 +28,10 @@ const sequelize = new Sequelize({
     Task,
     Comment,
     Subtask,
-    Supervisor,
-    Student,
-    // Mentorship,
     Follower,
     Post,
     Message,
+    UserProjectRoles,
   ],
 });
 defineAssociations();

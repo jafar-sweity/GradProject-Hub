@@ -14,7 +14,10 @@ dotenv.config();
 const SECRET_KEY = process.env.JWT_SECRET as string;
 
 interface DecodedToken {
-  role: string;
+  role?: string;
+  id: number;
+  email?: string;
+  name?: string;
 }
 
 export const authorize = (roles: string[]) => {
@@ -32,9 +35,8 @@ export const authorize = (roles: string[]) => {
 
     try {
       const decoded = jwt.verify(token, SECRET_KEY) as DecodedToken;
-      console.log(decoded);
 
-      if (roles.includes(decoded.role)) {
+      if (decoded.role && roles.includes(decoded.role)) {
         req.user = decoded;
         next();
         return;
@@ -44,8 +46,6 @@ export const authorize = (roles: string[]) => {
           .json({ error: "Access denied: insufficient permissions" });
         return;
       }
-      res.status(403).json({ error: "Invalid token" });
-      return;
     } catch (error) {
       res.status(403).json({ error: "Invalid token" });
       return;

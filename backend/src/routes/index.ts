@@ -8,7 +8,7 @@ import userRoutes from "./user.js";
 // import commentRoutes from "./commentRoutes";
 // import mentorshipRoutes from "./mentorshipRoutes";
 import authRoutes from "./auth.js"; // Import authRoutes
-
+import projectRoutes from "./project.js";
 const routes = Router();
 
 // Mount routes
@@ -19,8 +19,8 @@ routes.get("/", (req, res) => {
 routes.use("/api/v1/auth", authRoutes); // Mount authRoutes
 
 routes.use("/api/v1/users", userRoutes);
+routes.use("/api/v1/projects", projectRoutes);
 
-// routes.use("/api/v1/projects", projectRoutes);
 // routes.use("/api/v1/tasks", taskRoutes);
 // routes.use("/api/v1/messages", messageRoutes);
 // routes.use("/api/v1/posts", postRoutes);
