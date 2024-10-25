@@ -1,6 +1,4 @@
 import User from "./user.js";
-import Student from "./student.js";
-import Supervisor from "./supervisor.js";
 import Project from "./project.js";
 import Task from "./task.js";
 import Comment from "./comment.js";
@@ -8,22 +6,14 @@ import Post from "./posts.js";
 import Message from "./messages.js";
 import Subtask from "./subTask.js";
 import Follower from "./followers.js";
-import Mentorship from "./mentorships.js";
+import UserProjectRoles from "./User_Project_Roles.js";
 
 const defineAssociations = () => {
-  // User has many Students and Supervisors
-  User.hasMany(Student, { foreignKey: "user_id", onDelete: "CASCADE" });
-  Student.belongsTo(User, { foreignKey: "user_id" });
+  User.hasMany(Task, { foreignKey: "assigned_to", onDelete: "CASCADE" });
+  Task.belongsTo(User, { foreignKey: "assigned_to" });
 
-  User.hasMany(Supervisor, { foreignKey: "user_id", onDelete: "CASCADE" });
-  Supervisor.belongsTo(User, { foreignKey: "user_id" });
-
-  // User has many Projects, Tasks, Comments, Posts, Messages
-  User.hasMany(Project, { foreignKey: "user_id", onDelete: "CASCADE" });
-  Project.belongsTo(User, { foreignKey: "user_id" });
-
-  User.hasMany(Task, { foreignKey: "user_id", onDelete: "CASCADE" });
-  Task.belongsTo(User, { foreignKey: "user_id" });
+  Project.hasMany(Task, { foreignKey: "project_id", onDelete: "CASCADE" });
+  Task.belongsTo(Project, { foreignKey: "project_id" });
 
   User.hasMany(Comment, { foreignKey: "user_id", onDelete: "CASCADE" });
   Comment.belongsTo(User, { foreignKey: "user_id" });
@@ -38,26 +28,19 @@ const defineAssociations = () => {
   Task.hasMany(Subtask, { foreignKey: "task_id", onDelete: "CASCADE" });
   Subtask.belongsTo(Task, { foreignKey: "task_id" });
 
-  // Projects and Students
-  Project.belongsToMany(Student, {
-    through: "ProjectStudent",
-    foreignKey: "project_id",
-    onDelete: "CASCADE",
-  });
-  Student.belongsToMany(Project, {
-    through: "ProjectStudent",
-    foreignKey: "student_id",
-  });
+  User.hasMany(Subtask, { foreignKey: "assigned_to", onDelete: "CASCADE" });
+  Subtask.belongsTo(User, { foreignKey: "assigned_to" });
 
-  // Projects and Supervisors
-  Project.belongsToMany(Supervisor, {
-    through: "ProjectSupervisor",
+  // Projects and Students
+  Project.belongsToMany(User, {
+    through: UserProjectRoles,
     foreignKey: "project_id",
     onDelete: "CASCADE",
   });
-  Supervisor.belongsToMany(Project, {
-    through: "ProjectSupervisor",
-    foreignKey: "supervisor_id",
+  User.belongsToMany(Project, {
+    through: UserProjectRoles,
+    foreignKey: "user_id",
+    onDelete: "CASCADE",
   });
 
   // Mentorship and Followers
@@ -66,16 +49,6 @@ const defineAssociations = () => {
     onDelete: "CASCADE",
   });
   Follower.belongsTo(User, { foreignKey: "user_id" });
-
-  // Optional relationship between Mentorship and Project
-  // Mentorship.belongsTo(Project, {
-  //   foreignKey: "project_id",
-  //   onDelete: "SET NULL",
-  // });
-  // Project.hasMany(Mentorship, {
-  //   foreignKey: "project_id",
-  //   onDelete: "SET NULL",
-  // });
 };
 
 export default defineAssociations;

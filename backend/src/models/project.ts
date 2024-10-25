@@ -1,11 +1,4 @@
-import {
-  Table,
-  Column,
-  Model,
-  DataType,
-  ForeignKey,
-} from "sequelize-typescript";
-import User from "./user.js";
+import { Table, Column, Model, DataType } from "sequelize-typescript";
 
 @Table
 class Project extends Model<Project> {
@@ -15,9 +8,8 @@ class Project extends Model<Project> {
   @Column({ type: DataType.STRING, allowNull: false })
   name!: string;
 
-  @ForeignKey(() => User)
-  @Column({ type: DataType.INTEGER, allowNull: false })
-  supervisor_id!: number;
+  @Column({ type: DataType.INTEGER })
+  supervisor_id: string;
 
   @Column({ type: DataType.DATE, allowNull: false })
   createdAt!: Date;

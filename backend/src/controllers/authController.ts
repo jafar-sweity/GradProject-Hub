@@ -8,8 +8,8 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 
 // Generate token
-const generateToken = (id: number): string => {
-  return jwt.sign({ id }, process.env.JWT_SECRET as string, {
+const generateToken = (payload: object): string => {
+  return jwt.sign(payload, process.env.JWT_SECRET as string, {
     expiresIn: "30d",
   });
 };
@@ -18,16 +18,6 @@ const generateToken = (id: number): string => {
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
     const { name, email, password, role } = req.body;
-
-    // Validate email and fields
-    if (!isEmail(email)) {
-      res.status(400).json({ message: "Invalid email" });
-      return;
-    }
-    if (!name || !email || !password || !role) {
-      res.status(400).json({ message: "All fields are required" });
-      return;
-    }
 
     // Check if user already exists
     const userExists = await User.findOne({ where: { email } });
@@ -44,7 +34,17 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       password: hashedPassword,
       role,
     } as Optional<User, NullishPropertiesOf<User>>);
-    const token = generateToken(newUser.user_id); 
+
+    const payload = {
+      user_id: newUser.user_id,
+      email: newUser.email,
+      role: newUser.role,
+      name: newUser.name,
+    };
+
+    // Ensure you are using the correct user ID field
+    const token = generateToken(payload);
+
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -68,12 +68,6 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 export const login = async (req: Request, res: Response): Promise<void> => {
   const { email, password } = req.body;
 
-  // Validate email and password
-  if (!email || !password) {
-    res.status(400).json({ message: "Email and password are required" });
-    return;
-  }
-
   // Find user by email
   const user = await User.findOne({ where: { email } });
   if (!user) {
@@ -88,14 +82,21 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     return;
   }
 
-  // Generate token and set cookie
-  const token = generateToken(user.user_id); // Ensure you are using the correct user ID field
+  const payload = {
+    user_id: user.user_id,
+    email: user.email,
+    role: user.role,
+    name: user.name,
+  };
+
+  const token = generateToken(payload); // Ensure you are using the correct user ID field
   res.cookie("token", token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production", // Secure only in production
     sameSite: "strict",
     maxAge: 30 * 24 * 60 * 60 * 1000,
   });
+
   res.status(200).json({
     message: "Login successful",
     user: { id: user.user_id, name: user.name, role: user.role },

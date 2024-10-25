@@ -6,14 +6,14 @@ import {
   updateUser,
   deleteUser,
 } from "../controllers/userController.js";
-import { adminMiddleware } from "../middleware/authraization.js";
 
+import { authorize } from "../middleware/authorization.js";
 const router = express.Router();
 
 // get all users ( admin only )
-router.get("/", adminMiddleware, getUsers);
+router.get("/", authorize(["Admin"]), getUsers);
 // create a new user ( admin only - self registration for now )
-router.post("/",createUser);
+router.post("/", createUser);
 
 router.get("/:id", getUserById);
 router.put("/:id", updateUser);
