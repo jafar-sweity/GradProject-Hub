@@ -4,6 +4,7 @@ import {
   DataType,
   Table,
   ForeignKey,
+  BelongsTo,
 } from "sequelize-typescript";
 import User from "./user.js";
 import Project from "./project.js";
@@ -28,10 +29,10 @@ class UserProjectRoles extends Model {
   project_id!: number;
 
   @Column({
-    type: DataType.ENUM("student", "supervisor", "Admin"),
+    type: DataType.ENUM("student", "supervisor", "admin"),
     allowNull: false,
   })
-  role!: "student" | "supervisor" | "Admin";
+  role!: "student" | "supervisor" | "admin";
 }
 
 export default UserProjectRoles;

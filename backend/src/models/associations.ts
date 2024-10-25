@@ -42,6 +42,8 @@ const defineAssociations = () => {
     foreignKey: "user_id",
     onDelete: "CASCADE",
   });
+  UserProjectRoles.belongsTo(User, { foreignKey: "user_id" });
+  UserProjectRoles.belongsTo(Project, { foreignKey: "project_id" });
 
   // Mentorship and Followers
   User.hasMany(Follower, {

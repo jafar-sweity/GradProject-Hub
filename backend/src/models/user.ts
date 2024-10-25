@@ -1,6 +1,20 @@
-import { Table, Column, Model, DataType } from "sequelize-typescript";
+import {
+  Table,
+  Column,
+  Model,
+  DataType,
+  BelongsToMany,
+} from "sequelize-typescript";
+import { Project, UserProjectRoles } from "./index.js";
 
-@Table
+@Table({
+  indexes: [
+    {
+      unique: true,
+      fields: ["email"],
+    },
+  ],
+})
 class User extends Model<User> {
   @Column({ type: DataType.INTEGER, autoIncrement: true, primaryKey: true })
   user_id!: number;
@@ -8,14 +22,14 @@ class User extends Model<User> {
   @Column({ type: DataType.STRING, allowNull: false })
   name!: string;
 
-  @Column({ type: DataType.STRING, allowNull: false, unique: true })
+  @Column({ type: DataType.STRING, allowNull: false })
   email!: string;
 
   @Column({ type: DataType.STRING, allowNull: false })
   password!: string;
 
   @Column({
-    type: DataType.ENUM("Student", "Supervisor", "Admin"),
+    type: DataType.ENUM("student", "supervisor", "admin"),
     allowNull: false,
   })
   role!: string;

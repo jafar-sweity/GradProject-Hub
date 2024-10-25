@@ -36,7 +36,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     } as Optional<User, NullishPropertiesOf<User>>);
 
     const payload = {
-      user_id: newUser.user_id,
+      id: newUser.user_id,
       email: newUser.email,
       role: newUser.role,
       name: newUser.name,
@@ -83,7 +83,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
   }
 
   const payload = {
-    user_id: user.user_id,
+    id: user.user_id,
     email: user.email,
     role: user.role,
     name: user.name,
