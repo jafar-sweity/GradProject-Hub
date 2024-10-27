@@ -7,7 +7,6 @@ import {
 } from "sequelize-typescript";
 import Project from "./project.js";
 import User from "./user.js";
-import { allow } from "joi";
 
 @Table
 class Task extends Model<Task> {
@@ -17,7 +16,7 @@ class Task extends Model<Task> {
   @Column({ type: DataType.STRING, allowNull: false })
   title!: string;
 
-  @Column({ type: DataType.TEXT, allowNull: false })
+  @Column({ type: DataType.TEXT })
   description!: string;
 
   @Column({

@@ -2,11 +2,11 @@
 import { Router } from "express";
 import userRoutes from "./user.js";
 // import projectRoutes from "./projectRoutes";
-// import taskRoutes from "./taskRoutes";
 // import messageRoutes from "./messageRoutes";
 // import postRoutes from "./postRoutes";
 // import commentRoutes from "./commentRoutes";
 // import mentorshipRoutes from "./mentorshipRoutes";
+import taskRoutes from "./task.js";
 import authRoutes from "./auth.js"; // Import authRoutes
 import projectRoutes from "./project.js";
 const routes = Router();
@@ -20,8 +20,8 @@ routes.use("/api/v1/auth", authRoutes); // Mount authRoutes
 
 routes.use("/api/v1/users", userRoutes);
 routes.use("/api/v1/projects", projectRoutes);
+routes.use("/api/v1/projects/:projectId/tasks", taskRoutes);
 
-// routes.use("/api/v1/tasks", taskRoutes);
 // routes.use("/api/v1/messages", messageRoutes);
 // routes.use("/api/v1/posts", postRoutes);
 // routes.use("/api/v1/comments", commentRoutes);
