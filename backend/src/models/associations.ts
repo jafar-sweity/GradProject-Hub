@@ -6,7 +6,7 @@ import Post from "./posts.js";
 import Message from "./messages.js";
 import Subtask from "./subTask.js";
 import Follower from "./followers.js";
-import UserProjectRoles from "./User_Project_Roles.js";
+import UserProjectRoles from "./user_project_roles.js";
 
 const defineAssociations = () => {
   User.hasMany(Task, { foreignKey: "assigned_to", onDelete: "CASCADE" });
@@ -42,6 +42,8 @@ const defineAssociations = () => {
     foreignKey: "user_id",
     onDelete: "CASCADE",
   });
+  UserProjectRoles.belongsTo(User, { foreignKey: "user_id" });
+  UserProjectRoles.belongsTo(Project, { foreignKey: "project_id" });
 
   // Mentorship and Followers
   User.hasMany(Follower, {

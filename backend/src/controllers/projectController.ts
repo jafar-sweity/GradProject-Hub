@@ -1,11 +1,63 @@
 import { Request, Response } from "express";
 import Project from "../models/project.js";
-import { User } from "../models/index.js";
+import { User, UserProjectRoles } from "../models/index.js";
 
-export const createProject = async (req: Request, res: Response) => {
+export const createProjectBySupervisor = async (
+  req: Request,
+  res: Response
+) => {
   try {
+    const { user } = req;
+
     const project = await Project.create(req.body);
+    await UserProjectRoles.create({
+      user_id: user?.id,
+      project_id: project.project_id,
+      role: "supervisor",
+    });
+
     res.status(201).json(project);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const deleteProjectBySupervisor = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const { user } = req;
+    const { projectId } = req.params;
+
+    const projectRole = await UserProjectRoles.findOne({
+      where: {
+        project_id: projectId,
+        user_id: user?.id,
+        role: "supervisor",
+      },
+    });
+
+    if (!projectRole) {
+      res
+        .status(403)
+        .json({ message: "You do not have access to this project" });
+      return;
+    }
+
+    // await UserProjectRoles.destroy({
+    //   where: {
+    //     project_id: projectId,
+    //   },
+    // });
+
+    const project = await Project.findByPk(projectId);
+    if (project) {
+      await project.destroy();
+      res.status(204).send();
+    } else {
+      res.status(404).json({ error: "Project not found" });
+    }
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
@@ -69,77 +121,109 @@ export const getProjectsBySupervisorId = async (
   res: Response
 ) => {
   try {
-    const { supervisorId } = req.params;
-    const projects = await Project.findAll({
-      where: { supervisor_id: supervisorId },
+    const supervisorId = req.params.supervisorId;
+
+    const projects = await UserProjectRoles.findAll({
+      where: {
+        user_id: supervisorId,
+        role: "supervisor",
+      },
+      include: [Project],
     });
-    if (projects.length > 0) {
-      res.status(200).json(projects);
-    } else {
+
+    res.status(200).json(projects);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const addStudentToProject = async (req: Request, res: Response) => {
+  try {
+    const { projectId, studentId } = req.params;
+    const supervisorId = req?.user?.id;
+
+    const studentRole = await User.findOne({
+      where: {
+        user_id: studentId,
+        role: "student",
+      },
+    });
+
+    if (!studentRole) {
+      res.status(400).json({ message: "User is not a student" });
+      return;
+    }
+
+    const projectRole = await UserProjectRoles.findOne({
+      where: {
+        project_id: projectId,
+        user_id: supervisorId,
+        role: "supervisor",
+      },
+    });
+
+    if (!projectRole) {
       res
-        .status(404)
-        .json({ message: "No projects found for this supervisor" });
+        .status(403)
+        .json({ message: "You do not have access to this project" });
+      return;
+    }
+
+    const student = await User.findByPk(studentId);
+    if (student) {
+      await UserProjectRoles.create({
+        user_id: studentId,
+        project_id: projectId,
+        role: "student",
+      });
+      res
+        .status(200)
+        .json({ message: "Student added to project successfully" });
+    } else {
+      res.status(404).json({ message: "Student not found" });
     }
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
 };
 
-// export const addStudentToProject = async (req: Request, res: Response) => {
-//   try {
-//     const { projectId, studentId } = req.params;
-//     const supervisorId = req?.user?.id;
+export const removeStudentFromProject = async (req: Request, res: Response) => {
+  try {
+    const { projectId, studentId } = req.params;
+    const supervisorId = req?.user?.id;
 
-//     const project = await Project.findOne({
-//       where: { project_id: projectId, supervisor_id: supervisorId },
-//     });
+    const projectRole = await UserProjectRoles.findOne({
+      where: {
+        project_id: projectId,
+        user_id: supervisorId,
+        role: "supervisor",
+      },
+    });
 
-//     if (!project) {
-//       return res
-//         .status(403)
-//         .json({ message: "You do not have access to this project" });
-//     }
+    if (!projectRole) {
+      res
+        .status(403)
+        .json({ message: "You do not have access to this project" });
+      return;
+    }
 
-//     const student = await User.findByPk(studentId);
-//     if (student) {
-//       await project.addUser(student); // Assuming you have a many-to-many relationship set up
-//       res
-//         .status(200)
-//         .json({ message: "Student added to project successfully" });
-//     } else {
-//       res.status(404).json({ message: "Student not found" });
-//     }
-//   } catch (error: any) {
-//     res.status(500).json({ error: error.message });
-//   }
-// };
+    const studentRole = await UserProjectRoles.findOne({
+      where: {
+        project_id: projectId,
+        user_id: studentId,
+        role: "student",
+      },
+    });
 
-// export const removeStudentFromProject = async (req: Request, res: Response) => {
-//   try {
-//     const { projectId, studentId } = req.params;
-//     const supervisorId = req?.user?.id; // Assuming you have middleware to set req.user
-
-//     // Verify that the supervisor has access to the project
-//     const project = await Project.findOne({
-//       where: { project_id: projectId, supervisor_id: supervisorId },
-//     });
-
-//     if (!project) {
-//       return res
-//         .status(403)
-//         .json({ message: "You do not have access to this project" });
-//     }
-
-//     const student = await User.findByPk(studentId);
-//     if (student) {
-//       await project.removeUser(student); // Assuming you have a many-to-many relationship set up
-//       res
-//         .status(200)
-//         .json({ message: "Student removed from project successfully" });
-//     } else {
-//       res.status(404).json({ message: "Student not found" });
-//     }
-//   } catch (error: any) {
-//     res.status(500).json({ error: error.message });
-//   }
-// };
+    if (studentRole) {
+      await studentRole.destroy();
+      res
+        .status(200)
+        .json({ message: "Student removed from project successfully" });
+    } else {
+      res.status(404).json({ message: "Student not found in project" });
+    }
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};

@@ -1,4 +1,11 @@
-import { Table, Column, Model, DataType } from "sequelize-typescript";
+import {
+  Table,
+  Column,
+  Model,
+  DataType,
+  BelongsToMany,
+} from "sequelize-typescript";
+import { User, UserProjectRoles } from "./index.js";
 
 @Table
 class Project extends Model<Project> {
