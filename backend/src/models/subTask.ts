@@ -20,7 +20,7 @@ class SubTask extends Model<SubTask> {
   @Column({ type: DataType.STRING, allowNull: false })
   title!: string;
 
-  @Column({ type: DataType.TEXT, allowNull: false })
+  @Column({ type: DataType.TEXT })
   description!: string;
 
   @Column({

@@ -6,7 +6,7 @@ import Post from "./posts.js";
 import Message from "./messages.js";
 import Subtask from "./subTask.js";
 import Follower from "./followers.js";
-import UserProjectRoles from "./User_Project_Roles.js";
+import UserProjectRoles from "./user_project_roles.js";
 
 const defineAssociations = () => {
   User.hasMany(Task, { foreignKey: "assigned_to", onDelete: "CASCADE" });
