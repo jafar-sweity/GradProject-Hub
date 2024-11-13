@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
-import User from "../models/user.js"; // Ensure this path is correct and User is exported properly from the model
+import User from "../models/user.js"; 
+import UserCommunity from "../MongoDB/user.js"; 
 import { Optional } from "sequelize";
 import { NullishPropertiesOf } from "sequelize/lib/utils";
 import validator from "validator";
@@ -28,12 +29,18 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
+    // need transaction here
     const newUser = await User.create({
       name,
       email,
       password: hashedPassword,
       role,
     } as Optional<User, NullishPropertiesOf<User>>);
+
+    const newUserCommunity = new UserCommunity({
+      user_id: newUser.user_id, // Reference to MySQL user_id
+    });
+    await newUserCommunity.save();
 
     const payload = {
       id: newUser.user_id,

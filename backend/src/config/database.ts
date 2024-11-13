@@ -1,15 +1,6 @@
 import { Sequelize } from "sequelize-typescript";
 import dotenv from "dotenv";
-import {
-  User,
-  Project,
-  Task,
-  Comment,
-  SubTask,
-  Follower,
-  Post,
-  Message,
-} from "../models/index.js";
+import { User, Project, Task, SubTask, Message } from "../models/index.js";
 import defineAssociations from "../models/associations.js";
 import { UserProjectRoles } from "../models/index.js";
 dotenv.config();
@@ -22,17 +13,7 @@ const sequelize = new Sequelize({
   database: process.env.DB_NAME as string,
   dialect: "mysql",
   logging: false,
-  models: [
-    User,
-    Project,
-    Task,
-    Comment,
-    SubTask,
-    Follower,
-    Post,
-    Message,
-    UserProjectRoles,
-  ],
+  models: [User, Project, Task, SubTask, Message, UserProjectRoles],
 });
 defineAssociations();
 sequelize.sync().then(() => {

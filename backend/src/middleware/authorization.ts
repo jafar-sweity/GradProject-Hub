@@ -14,6 +14,7 @@ dotenv.config();
 const SECRET_KEY = process.env.JWT_SECRET as string;
 
 interface DecodedToken {
+  user_id: number;
   role?: string;
   id: number;
   email?: string;
