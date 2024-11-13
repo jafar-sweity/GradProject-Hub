@@ -14,7 +14,9 @@ export const requestEmailVerification = async (
 
   const userExists = await User.findOne({ where: { email } });
   if (userExists) {
-    res.status(400).json({ message: "Email is already registered" });
+    res
+      .status(400)
+      .json({ message: "Email is already registered", success: false });
     return;
   }
 
@@ -70,7 +72,9 @@ export const requestEmailVerification = async (
 
   await transporter.sendMail(mailOptions);
 
-  res.status(200).json({ message: "Verification code sent to email" });
+  res
+    .status(200)
+    .json({ message: "Verification code sent to email", success: true });
 };
 
 export const verifyEmailCode = async (
@@ -84,7 +88,10 @@ export const verifyEmailCode = async (
   if (!verificationData) {
     res
       .status(400)
-      .json({ message: "No verification request found for this email" });
+      .json({
+        message: "No verification request found for this email",
+        success: false,
+      });
     return;
   }
 
@@ -92,16 +99,22 @@ export const verifyEmailCode = async (
 
   if (new Date() > expires) {
     delete verificationStore[email];
-    res.status(400).json({ message: "Verification code has expired" });
+    res
+      .status(400)
+      .json({ message: "Verification code has expired", success: false });
     return;
   }
 
   if (code !== storedCode) {
-    res.status(400).json({ message: "Invalid verification code" });
+    res
+      .status(400)
+      .json({ message: "Invalid verification code", success: false });
     return;
   }
 
   delete verificationStore[email];
 
-  res.status(200).json({ message: "Email verified successfully" });
+  res
+    .status(200)
+    .json({ message: "Email verified successfully", success: true });
 };
