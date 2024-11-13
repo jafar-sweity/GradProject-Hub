@@ -7,6 +7,6 @@ const router = express.Router();
 
 router.post("/register", requestValidator(registrationSchema), register);
 router.post("/login", requestValidator(loginSchema), login);
-router.get("/logout", logout); // You may want to add authentication middleware here
+router.get("/logout", logout);
 
 export default router;
