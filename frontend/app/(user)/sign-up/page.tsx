@@ -143,8 +143,13 @@ export default function SignUp() {
         };
 
         const signUpResponse = await signUp(payload);
-        if (signUpResponse.success) {
-          router.push("/signin");
+        if (signUpResponse.user) {
+          setOpenSnackBar(true);
+          setSeverity("success");
+          setSnackBarMessage("Sign Up Successful. Please sign in to continue.");
+          setTimeout(() => {
+            router.push("/signin");
+          }, 1000);
         } else {
           setOpenSnackBar(true);
           setSeverity("error");
