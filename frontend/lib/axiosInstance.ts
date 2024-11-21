@@ -1,7 +1,6 @@
 import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
 import Router from "next/router";
-
-const getToken = (): string | null => localStorage.getItem("token");
+import { getToken, removeToken } from "@/helpers/token";
 
 const axiosInstance: AxiosInstance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
@@ -24,8 +23,8 @@ axiosInstance.interceptors.response.use(
   (response: AxiosResponse) => response,
   (error: AxiosError) => {
     if (error.response && error.response.status === 401) {
-      localStorage.removeItem("token");
-      Router.push("/login");
+      removeToken();
+      Router.push("/signIn");
     }
     return Promise.reject(error);
   }

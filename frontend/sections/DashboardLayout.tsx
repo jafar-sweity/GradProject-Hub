@@ -17,12 +17,14 @@ import DescriptionIcon from "@mui/icons-material/Description";
 import ChatIcon from "@mui/icons-material/Chat";
 import PeopleIcon from "@mui/icons-material/People";
 import LogoutIcon from "@mui/icons-material/Logout";
+import { useAuth } from "@/hooks/useAuth";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
+  const { logout } = useAuth();
   const [expanded, setExpanded] = useState(false);
 
   const handleMouseEnter = () => {
@@ -109,7 +111,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             <Collapse in={expanded} timeout={500} unmountOnExit>
               <Box sx={{ display: "flex", alignItems: "center" }}>
                 <ListItemText primary="User Name" />
-                <IconButton sx={{ color: "var(--foreground)" }}>
+                <IconButton
+                  sx={{ color: "var(--foreground)" }}
+                  onClick={logout}
+                >
                   <LogoutIcon />
                 </IconButton>
               </Box>

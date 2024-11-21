@@ -1,6 +1,11 @@
+"use client";
 import Image from "next/image";
 import DashboardLayout from "@/sections/DashboardLayout";
+import { useAuth } from "@/hooks/useAuth";
+
 export default function Home() {
+  const { user, loading } = useAuth();
+
   return (
     <DashboardLayout>
       <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
@@ -23,6 +28,11 @@ export default function Home() {
               .
             </li>
             <li>Save and see your changes instantly.</li>
+            {loading ? (
+              <li>Loading...</li>
+            ) : (
+              <li>Hi {user ? user.name : "Guest"}</li>
+            )}
           </ol>
           <div className="w-[400px] h-[400px] bg-accent "></div>
           <div className="flex gap-4 items-center flex-col sm:flex-row">

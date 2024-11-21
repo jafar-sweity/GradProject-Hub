@@ -1,11 +1,15 @@
 "use client";
-import React from "react";
+import React, { useContext } from "react";
 import { signIn } from "@/services/authService";
 import { useRouter } from "next/navigation";
 import { AxiosError } from "axios";
 import Link from "next/link";
+import { storeToken } from "@/helpers/token";
+import { AuthContext } from "@/context/AuthContext";
 
 export default function SignIn() {
+  const authContext = useContext(AuthContext);
+  const setUser = authContext!.setUser;
   const router = useRouter();
   const [formData, setFormData] = React.useState({
     email: "",
@@ -57,6 +61,8 @@ export default function SignIn() {
       try {
         const data = await signIn(formData);
         if (data) {
+          storeToken(data.token);
+          setUser(data.user);
           router.push("/");
         }
       } catch (error) {
@@ -138,7 +144,7 @@ export default function SignIn() {
             </div>
             <p className="text-center mt-4">
               Don&apos;t have an account?{" "}
-              <Link href="/sign-up" className="text-primary">
+              <Link href="/signUp" className="text-primary">
                 Sign up
               </Link>
             </p>
