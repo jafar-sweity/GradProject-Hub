@@ -122,7 +122,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           </ListItem>
         </Box>
       </Box>
-      <main className="w-full">{children}</main>
+      <main className="w-full ">{children}</main>
     </div>
   );
 };
