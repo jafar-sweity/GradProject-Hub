@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useContext } from "react";
 import { signIn } from "@/services/authService";
 import { useRouter } from "next/navigation";
@@ -39,7 +40,7 @@ export default function SignIn() {
     e.preventDefault();
 
     let valid = true;
-    const newErrors: { email: string; password: string; general: string } = {
+    const newErrors = {
       email: "",
       password: "",
       general: "",
@@ -83,73 +84,61 @@ export default function SignIn() {
   };
 
   return (
-    <div
-      className="flex items-center justify-center min-h-screen bg-cover bg-center"
-      style={{
-        backgroundImage: "var(--backgroundImage)",
-      }}
-    >
-      <div
-        className="card w-full max-w-md shadow-lg border-[0.05px] bg-black bg-opacity-35 border-gray-800"
-        style={{
-          boxShadow: "var(--boxShadow)",
-        }}
-      >
-        <div className="card-body">
-          <h2 className="text-center text-2xl font-bold">Sign in</h2>
-          <form>
-            <div className="form-control mb-4">
-              <label className="label" htmlFor="email">
-                <span className="label-text">Email</span>
-              </label>
-              <input
-                type="email"
-                id="email"
-                placeholder="your@email.com"
-                className="input input-bordered w-full bg-background"
-                onChange={handleChange}
-              />
-              {errors.email && (
-                <p className="text-red-500 text-sm mt-1">{errors.email}</p>
-              )}
-            </div>
-            <div className="form-control mb-4">
-              <label className="label" htmlFor="password">
-                <span className="label-text">Password</span>
-              </label>
-              <input
-                type="password"
-                id="password"
-                placeholder="Password"
-                className="input input-bordered w-full bg-background"
-                onChange={handleChange}
-              />
-              {errors.password && (
-                <p className="text-red-500 text-sm mt-1">{errors.password}</p>
-              )}
-            </div>
-            {errors.general && (
-              <p className="text-red-500 text-sm text-center mb-4">
-                {errors.general}
-              </p>
+    <div className="flex items-center justify-center min-h-screen bg-background text-foreground">
+      <div className="card w-full max-w-md bg-card text-card-foreground shadow-lg border border-border rounded-lg p-6">
+        <h2 className="text-center text-2xl font-bold mb-6">Sign in</h2>
+        <form>
+          <div className="form-control mb-4">
+            <label className="label" htmlFor="email">
+              <span className="label-text text-muted-foreground">Email</span>
+            </label>
+            <input
+              type="email"
+              id="email"
+              placeholder="your@email.com"
+              className="input input-bordered w-full bg-input text-foreground focus:ring-2 focus:ring-ring"
+              onChange={handleChange}
+            />
+            {errors.email && (
+              <p className="text-destructive text-sm mt-1">{errors.email}</p>
             )}
-            <div className="form-control mb-4">
-              <button
-                type="submit"
-                className="btn text-background bg-foreground w-full hover:bg-backgroundHover"
-                onClick={handleSignIn}
-              >
-                Sign in
-              </button>
-            </div>
-            <p className="text-center mt-4">
-              Don&apos;t have an account?{" "}
-              <Link href="/signUp" className="text-primary">
-                Sign up
-              </Link>
+          </div>
+          <div className="form-control mb-4">
+            <label className="label" htmlFor="password">
+              <span className="label-text text-muted-foreground">Password</span>
+            </label>
+            <input
+              type="password"
+              id="password"
+              placeholder="Password"
+              className="input input-bordered w-full bg-input text-foreground focus:ring-2 focus:ring-ring"
+              onChange={handleChange}
+            />
+            {errors.password && (
+              <p className="text-destructive text-sm mt-1">{errors.password}</p>
+            )}
+          </div>
+          {errors.general && (
+            <p className="text-destructive text-sm text-center mb-4">
+              {errors.general}
             </p>
-          </form>
-        </div>
+          )}
+          <div className="form-control mb-4">
+            <button
+              type="submit"
+              className="btn bg-primary text-primary-foreground hover:bg-primary/90 w-full"
+              onClick={handleSignIn}
+            >
+              Sign in
+            </button>
+          </div>
+          <p className="text-center text-sm">
+            Don&apos;t have an account?{" "}
+            <Link href="/signUp" className="text-primary hover:underline">
+              Sign up
+            </Link>
+          </p>
+        </form>
       </div>
     </div>
   );

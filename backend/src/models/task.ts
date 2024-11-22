@@ -20,10 +20,16 @@ class Task extends Model<Task> {
   description!: string;
 
   @Column({
-    type: DataType.ENUM("Pending", "In Progress", "Completed"),
+    type: DataType.ENUM("Backlog", "Todo", "In Progress", "Done", "Cancelled"),
     allowNull: false,
   })
   status!: string;
+
+  @Column({
+    type: DataType.ENUM("High", "Low", "Medium"),
+    allowNull: false,
+  })
+  Priority!: string;
 
   @Column({ type: DataType.DATE, allowNull: false })
   due_date!: Date;

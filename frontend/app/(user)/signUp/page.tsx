@@ -202,82 +202,86 @@ export default function SignUp() {
 
   return (
     <div>
-      <div className="flex items-center justify-center min-h-screen bg-cover bg-center">
-        <div className="card w-full max-w-md shadow-lg border-[0.05px] bg-black bg-opacity-35 border-gray-800">
-          <div className="card-body">
-            <h2 className="text-center text-2xl font-bold">Sign up</h2>
-            <form>
-              <div className="form-control mb-4">
-                <label className="label" htmlFor="name">
-                  <span className="label-text">Full name</span>
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  placeholder="Your name"
-                  className="input input-bordered w-full bg-background"
-                  onChange={handleChange}
-                />
-                {errors.name && (
-                  <p className="text-red-500 text-sm mt-1">{errors.name}</p>
-                )}
-              </div>
-              <div className="form-control mb-4">
-                <label className="label" htmlFor="email">
-                  <span className="label-text">Email</span>
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  placeholder="your@email.com"
-                  className="input input-bordered w-full bg-background"
-                  onChange={handleChange}
-                />
-                {errors.email && (
-                  <p className="text-red-500 text-sm mt-1">{errors.email}</p>
-                )}
-              </div>
-              <div className="form-control mb-4">
-                <label className="label" htmlFor="password">
-                  <span className="label-text">Password</span>
-                </label>
-                <input
-                  type="password"
-                  id="password"
-                  placeholder="Password"
-                  className="input input-bordered w-full bg-background"
-                  onChange={handleChange}
-                />
-                {errors.password && (
-                  <p className="text-red-500 text-sm mt-1">{errors.password}</p>
-                )}
-              </div>
-              <div className="form-control mb-4">
-                <button
-                  type="submit"
-                  className="btn text-background bg-foreground w-full hover:bg-backgroundHover"
-                  onClick={handleSignUp}
-                >
-                  Sign up
-                </button>
-              </div>
-              <p className="text-center mt-4">
-                Already have an account?{" "}
-                <Link href="/signin" className="text-primary">
-                  Sign in
-                </Link>
-              </p>
-            </form>
-          </div>
+      <div className="flex items-center justify-center min-h-screen bg-background text-foreground">
+        <div className="card w-full max-w-md bg-card text-card-foreground shadow-lg border border-border rounded-lg p-6">
+          <h2 className="text-center text-2xl font-bold mb-6">Sign up</h2>
+          <form>
+            <div className="form-control mb-4">
+              <label className="label" htmlFor="name">
+                <span className="label-text text-muted-foreground">
+                  Full name
+                </span>
+              </label>
+              <input
+                type="text"
+                id="name"
+                placeholder="Your name"
+                className="input input-bordered w-full bg-input text-foreground focus:ring-2 focus:ring-ring"
+                onChange={handleChange}
+              />
+              {errors.name && (
+                <p className="text-destructive text-sm mt-1">{errors.name}</p>
+              )}
+            </div>
+            <div className="form-control mb-4">
+              <label className="label" htmlFor="email">
+                <span className="label-text text-muted-foreground">Email</span>
+              </label>
+              <input
+                type="email"
+                id="email"
+                placeholder="your@email.com"
+                className="input input-bordered w-full bg-input text-foreground focus:ring-2 focus:ring-ring"
+                onChange={handleChange}
+              />
+              {errors.email && (
+                <p className="text-destructive text-sm mt-1">{errors.email}</p>
+              )}
+            </div>
+            <div className="form-control mb-4">
+              <label className="label" htmlFor="password">
+                <span className="label-text text-muted-foreground">
+                  Password
+                </span>
+              </label>
+              <input
+                type="password"
+                id="password"
+                placeholder="Password"
+                className="input input-bordered w-full bg-input text-foreground focus:ring-2 focus:ring-ring"
+                onChange={handleChange}
+              />
+              {errors.password && (
+                <p className="text-destructive text-sm mt-1">
+                  {errors.password}
+                </p>
+              )}
+            </div>
+            <div className="form-control mb-4">
+              <button
+                type="submit"
+                className="btn bg-primary text-primary-foreground hover:bg-primary/90 w-full"
+                onClick={handleSignUp}
+              >
+                Sign up
+              </button>
+            </div>
+            <p className="text-center text-sm">
+              Already have an account?{" "}
+              <Link href="/signIn" className="text-primary hover:underline">
+                Sign in
+              </Link>
+            </p>
+          </form>
         </div>
       </div>
       <Dialog open={openModal} onClose={() => setOpenModal(false)}>
         <DialogTitle>Verify Your Account</DialogTitle>
         <DialogContent>
-          <p>We emailed you the six-digit code. Enter it below to confirm:</p>
-          <div
-            style={{ display: "flex", justifyContent: "center", gap: "8px" }}
-          >
+          <p className="text-foreground">
+            We emailed you the six-digit code. Enter it below to confirm:
+          </p>
+          <div className="flex justify-center gap-2">
             {verificationCode.map((digit, index) => (
               <input
                 key={index}
@@ -286,16 +290,7 @@ export default function SignUp() {
                 maxLength={1}
                 value={digit}
                 onChange={(e) => handleVerificationCodeChange(e, index)}
-                style={{
-                  width: "40px",
-                  height: "40px",
-                  fontSize: "24px",
-                  textAlign: "center",
-                  borderRadius: "8px",
-                  border: "1px solid #ccc",
-                  color: "#333",
-                  backgroundColor: "#f9f9f9",
-                }}
+                className="w-10 h-10 text-xl text-center bg-input text-foreground border border-border rounded"
               />
             ))}
           </div>
@@ -304,7 +299,10 @@ export default function SignUp() {
           <Button onClick={() => setOpenModal(false)} color="secondary">
             Cancel
           </Button>
-          <Button onClick={handleVerifyCode} color="primary">
+          <Button
+            onClick={handleVerifyCode}
+            className="bg-primary text-primary-foreground"
+          >
             Verify
           </Button>
         </DialogActions>
@@ -314,11 +312,10 @@ export default function SignUp() {
         autoHideDuration={6000}
         onClose={handleClose}
       >
-        <Alert severity={severity} variant="filled" sx={{ width: "100%" }}>
+        <Alert severity={severity} variant="filled" className="w-full">
           {snackBarMessage}
         </Alert>
       </Snackbar>
-      ;
     </div>
   );
 }
