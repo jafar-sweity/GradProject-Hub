@@ -1,6 +1,4 @@
 "use client";
-import Image from "next/image";
-import DashboardLayout from "@/sections/DashboardLayout";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function Home() {
@@ -11,10 +9,7 @@ export default function Home() {
     <div className="flex items-center justify-center h-screen">
       <div className="flex flex-col items-center space-y-4">
         <h1 className="text-3xl font-bold">Welcome to GradPoject-hub</h1>
-        <p className="text-lg text-center">
-          Get started by editing{" "}
-        
-        </p>
+        <p className="text-lg text-center">Get started by editing </p>
         {loading ? (
           <p>Loading...</p>
         ) : user ? (

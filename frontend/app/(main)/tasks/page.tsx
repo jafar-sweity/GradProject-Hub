@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 // Simulate a database read for tasks.
 async function getTasks() {
   const data = await fs.readFile(
-    path.join(process.cwd(), "app/tasks/data/tasks.json")
+    path.join(process.cwd(), "app/(main)/tasks/data/tasks.json")
   );
 
   const tasks = JSON.parse(data.toString());
@@ -29,7 +29,7 @@ export default async function TaskPage() {
 
   return (
     <>
-      <div className="h-full flex-1 flex-col space-y-8 p-8 md:flex">
+      <div className="h-full flex-1 flex-col space-y-8 p-8 md:flex bg-card rounded-2xl">
         <div className="flex items-center justify-between space-y-2">
           <div>
             <h2 className="text-2xl font-bold tracking-tight">Welcome back!</h2>
