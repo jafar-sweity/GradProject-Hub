@@ -21,7 +21,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   }, [user, router]);
 
   if (!isChecked) {
-    return <p>Loading...</p>;
+    return (
+      <div className="w-full flex justify-center ">
+        <span className="loading loading-dots loading-lg bg-primary"></span>
+      </div>
+    );
   }
 
   return <>{children}</>;

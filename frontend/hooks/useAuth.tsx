@@ -15,7 +15,7 @@ export const useAuth = () => {
   const logout = () => {
     removeToken();
     setUser(null);
-    router.replace("/signin");
+    router.replace("/signIn");
   };
 
   return { user, loading, logout };
