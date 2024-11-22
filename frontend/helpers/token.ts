@@ -3,7 +3,7 @@ export function storeToken(token: string) {
 }
 
 export function getToken() {
-  return localStorage.getItem("authToken");
+  return localStorage.getItem("authToken"); // null if not found in localStorage , string if found  
 }
 
 export function removeToken() {

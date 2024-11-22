@@ -148,7 +148,7 @@ export default function SignUp() {
           setSeverity("success");
           setSnackBarMessage("Sign Up Successful. Please sign in to continue.");
           setTimeout(() => {
-            router.push("/signIn");
+            router.push("/signin");
           }, 2000);
         } else {
           setOpenSnackBar(true);
@@ -263,7 +263,7 @@ export default function SignUp() {
               </div>
               <p className="text-center mt-4">
                 Already have an account?{" "}
-                <Link href="/signIn" className="text-primary">
+                <Link href="/signin" className="text-primary">
                   Sign in
                 </Link>
               </p>
