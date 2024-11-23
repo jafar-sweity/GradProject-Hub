@@ -9,6 +9,7 @@ import {
   addStudentToProject,
   removeStudentFromProject,
   deleteProjectBySupervisor,
+  getProjectsByStudentId,
 } from "../controllers/projectController.js";
 import { authorize } from "../middleware/authorization.js";
 const router = express.Router();
@@ -28,6 +29,11 @@ router.get(
   "/supervisor/:supervisorId",
   authorize(["supervisor"]),
   getProjectsBySupervisorId
+);
+router.get(
+  "/student/:studentId",
+  authorize(["student"]),
+  getProjectsByStudentId
 );
 router.post(
   "/:projectId/students/:studentId",

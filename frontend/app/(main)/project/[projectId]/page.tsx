@@ -3,10 +3,10 @@ import path from "path";
 import { Metadata } from "next";
 import { z } from "zod";
 
-import { columns } from "./components/columns";
-import { DataTable } from "./components/data-table";
-import { UserNav } from "./components/user-nav";
-import { taskSchema } from "./data/schema";
+import { columns } from "../components/columns";
+import { DataTable } from "../components/data-table";
+import { UserNav } from "../components/user-nav";
+import { taskSchema } from "../data/schema";
 
 export const metadata: Metadata = {
   title: "Tasks",
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 // Simulate a database read for tasks.
 async function getTasks() {
   const data = await fs.readFile(
-    path.join(process.cwd(), "app/(main)/tasks/data/tasks.json")
+    path.join(process.cwd(), "app/(main)/project/data/tasks.json")
   );
 
   const tasks = JSON.parse(data.toString());

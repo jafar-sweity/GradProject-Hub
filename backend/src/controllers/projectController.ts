@@ -136,6 +136,24 @@ export const getProjectsBySupervisorId = async (
     res.status(500).json({ error: error.message });
   }
 };
+export const getProjectsByStudentId = async (req: Request, res: Response) => {
+  try {
+    const studentId = req.params.studentId;
+
+    const projects = await UserProjectRoles.findAll({
+      where: {
+        user_id: studentId,
+        role: "student",
+      },
+      include: [Project],
+    });
+    console.log(projects);
+
+    res.status(200).json(projects);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
 
 export const addStudentToProject = async (req: Request, res: Response) => {
   try {

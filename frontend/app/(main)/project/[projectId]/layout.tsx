@@ -8,12 +8,12 @@ interface LayoutProps {
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const router = useRouter();
   const [isChecked, setIsChecked] = useState(false);
 
   useEffect(() => {
-    if (!user) {
+    if (!user && !loading) {
       router.push("/signIn");
     } else {
       setIsChecked(true);
