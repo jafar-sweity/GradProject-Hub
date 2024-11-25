@@ -31,7 +31,6 @@ export default function MenuBar({ className }: MenuBarProps) {
   const { data: projectData, loading } = useFetchData(getStudentProject, [
     user?.id ?? "",
   ]);
-  console.log(projectData);
 
   return (
     <div className={className}>
@@ -69,6 +68,7 @@ export default function MenuBar({ className }: MenuBarProps) {
 
         <AnimatePresence>
           {isOpen &&
+            !loading &&
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             projectData?.map((project: any) => (
               <CollapsibleContent forceMount asChild key={project.project_id}>
@@ -81,7 +81,7 @@ export default function MenuBar({ className }: MenuBarProps) {
                 >
                   <div className="border-l-2 border-muted pl-4 py-1">
                     <Link
-                      href={`/tasks/${project.Project.id}`}
+                      href={`/project/${project.project_id}`}
                       className="flex items-center gap-3 py-2 hover:text-primary transition-colors"
                     >
                       {loading ? (

@@ -39,6 +39,7 @@ export const authorize = (roles: string[]) => {
 
       if (decoded.role && roles.includes(decoded.role)) {
         req.user = decoded;
+
         next();
         return;
       } else {

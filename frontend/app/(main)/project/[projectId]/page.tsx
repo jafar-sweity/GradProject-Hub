@@ -1,31 +1,41 @@
-import { promises as fs } from "fs";
-import path from "path";
-import { Metadata } from "next";
+"use client";
 import { z } from "zod";
 
 import { columns } from "../components/columns";
 import { DataTable } from "../components/data-table";
 import { UserNav } from "../components/user-nav";
 import { taskSchema } from "../data/schema";
-
-export const metadata: Metadata = {
-  title: "Tasks",
-  description: "A task and issue tracker build using Tanstack Table.",
-};
-
+import { useEffect, useState } from "react";
+import taskData from "../data/tasks.json";
+import useFetchData from "@/hooks/useFetchData";
+import { getProjectTasks } from "@/services/tasks";
 // Simulate a database read for tasks.
 async function getTasks() {
-  const data = await fs.readFile(
-    path.join(process.cwd(), "app/(main)/project/data/tasks.json")
-  );
-
-  const tasks = JSON.parse(data.toString());
+  const tasks = taskData;
 
   return z.array(taskSchema).parse(tasks);
 }
 
-export default async function TaskPage() {
-  const tasks = await getTasks();
+export default function TaskPage({
+  params,
+}: {
+  params: { projectId: number };
+}) {
+  const [tasks, setTasks] = useState<z.infer<typeof taskSchema>[]>([]);
+
+  const { data, error, loading } = useFetchData(getProjectTasks, [
+    params.projectId,
+  ]);
+  if (!loading) {
+    console.log(data);
+  }
+  useEffect(() => {
+    async function fetchTasks() {
+      const tasks = await getTasks();
+      setTasks(tasks);
+    }
+    fetchTasks();
+  }, []);
 
   return (
     <>

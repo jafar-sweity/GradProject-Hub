@@ -147,8 +147,6 @@ export const getProjectsByStudentId = async (req: Request, res: Response) => {
       },
       include: [Project],
     });
-    console.log(projects);
-
     res.status(200).json(projects);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
