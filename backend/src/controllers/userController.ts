@@ -2,8 +2,9 @@ import { Request, Response } from "express";
 import User from "../models/user.js";
 import Project from "../models/project.js";
 import Task from "../models/task.js";
-import { Optional } from "sequelize";
+import { Op, Optional } from "sequelize";
 import { NullishPropertiesOf } from "sequelize/lib/utils";
+import UserCommunity from "../MongoDB/user.js";
 
 export const getUsers = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -17,6 +18,70 @@ export const getUsers = async (req: Request, res: Response): Promise<void> => {
       message: "Error fetching users",
       error: (error as Error).message,
     });
+  }
+};
+
+// get user that i dont follow
+export const getUsersNotFollowed = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { userId } = req.query;
+
+    if (!userId) {
+      res.status(400).json({ message: "userId is required" });
+      return;
+    }
+
+    const currentUser = await UserCommunity.findOne(
+      { user_id: userId },
+      { following: 1 }
+    );
+
+    if (!currentUser) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
+
+    const followingIds = new Set(currentUser.following.map((f) => f.user_id));
+
+    const allUsers = await UserCommunity.find(
+      { user_id: { $ne: userId } },
+      { user_id: 1, avatarurl: 1 }
+    );
+
+    const notFollowedUsers = allUsers.filter(
+      (user) => !followingIds.has(user.user_id)
+    );
+
+    const userIds = notFollowedUsers.map((user) => user.user_id);
+    const usersFromMySQL = await User.findAll({
+      where: { user_id: userIds },
+      attributes: ["user_id", "name"],
+    });
+
+    const result = notFollowedUsers.map((user) => {
+      const mysqlUser = usersFromMySQL.find(
+        (mysqlUser) => mysqlUser.user_id === user.user_id
+      );
+
+      return {
+        user_id: currentUser.id,
+        avatarurl: user.avatarurl,
+        username: mysqlUser ? mysqlUser.name : null,
+      };
+    });
+
+    res.status(200).json(result);
+  } catch (error: any) {
+    console.error(
+      "Error fetching users not followed by the current user:",
+      error
+    );
+    res
+      .status(500)
+      .json({ message: "Error fetching users", error: error.message });
   }
 };
 

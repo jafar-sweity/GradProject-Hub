@@ -1,28 +1,28 @@
 "use client";
-import Image from "next/image";
-import DashboardLayout from "@/sections/DashboardLayout";
+
+import { useEffect, useState } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import PostEditor from "@/components/posts/editor/PostEditor";
+import TrendsSidebar from "@/components/TrendsSidebar";
+import Post from "@/components/posts/Post";
+import axiosInstance from "@/lib/axiosInstance";
 import { useAuth } from "@/hooks/useAuth";
-
+import ForYouFeed from "./ForYouFeed";
+import { getallPostsCurrentUser } from "@/components/posts/editor/action";
+interface PostProps {
+  username: string;
+  content: string;
+  avatarurl: string;
+  createdAt: Date;
+}
 export default function Home() {
-  const { user, loading } = useAuth();
-
   return (
-    // dont use DashboardLayout
-    <div className="flex items-center justify-center h-screen">
-      <div className="flex flex-col items-center space-y-4">
-        <h1 className="text-3xl font-bold">Welcome to GradPoject-hub</h1>
-        <p className="text-lg text-center">
-          Get started by editing{" "}
-        
-        </p>
-        {loading ? (
-          <p>Loading...</p>
-        ) : user ? (
-          <p className="text-lg">You are logged in as {user.name}</p>
-        ) : (
-          <p className="text-lg">You are not logged in</p>
-        )}
+    <main className="flex w-full min-w-0 gap-5 flex gap-5">
+      <div className="w-full min-w-0 space-y-5">
+        <PostEditor />
+        <ForYouFeed />
       </div>
-    </div>
+      <TrendsSidebar />
+    </main>
   );
 }

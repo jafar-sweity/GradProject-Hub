@@ -6,11 +6,11 @@ import likeRoutes from "./like.js";
 
 const router = express.Router();
 
-router.use("/api/v1/posts", postRoutes);
+router.use("/posts", postRoutes);
 
-router.use("/api/v1/comments", commentRoutes);
-router.use("/api/v1/followers", followerRoutes);
-router.use("/api/v1/likes", likeRoutes);
+router.use("/comments", commentRoutes);
+router.use("/followers", followerRoutes);
+router.use("/likes", likeRoutes);
 
 // // routes.use("/api/v1/messages", messageRoutes);
 

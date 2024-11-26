@@ -1,5 +1,9 @@
 import { Request, Response } from "express";
+import UserCommunity from "../MongoDB/user.js";
+
 import Post from "../MongoDB/Post.js";
+import { where } from "sequelize";
+import mongoose from "mongoose";
 
 // Create a new post
 export const createPost = async (
@@ -13,15 +17,22 @@ export const createPost = async (
       res.status(400).json({ message: "Content and user_id are required" });
       return;
     }
+    const userCommunity = await UserCommunity.findOne({ user_id: user_id });
+    if (!userCommunity) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
 
-    // Create and save the post
     const newPost = new Post({
-      user_id,
+      user_id: userCommunity._id,
       content,
     });
 
     const savedPost = await newPost.save();
 
+    await userCommunity.updateOne({
+      $push: { posts: { post_id: savedPost._id } }, // Correctly structure the post object
+    });
     res
       .status(201)
       .json({ message: "Post created successfully", post: savedPost });
@@ -35,9 +46,46 @@ export const createPost = async (
 // Get all posts
 export const getPosts = async (req: Request, res: Response): Promise<void> => {
   try {
-    const posts = await Post.find();
+    const posts = await Post.find().sort({ createdAt: -1 });
     res.status(200).json(posts);
   } catch (error: any) {
+    res
+      .status(500)
+      .json({ message: "Error fetching posts", error: error.message });
+  }
+};
+
+export const getForYouPosts = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { userId } = req.query;
+    console.log("userId", userId);
+    console.log("helllllloo");
+
+    if (!userId) {
+      res.status(400).json({ message: "userId is required" });
+      return;
+    }
+
+    // Step 1: Find the current user's posts (stored in the UserCommunity's posts field)
+    const currentUser = await UserCommunity.findOne(
+      { user_id: userId },
+      { posts: 1 } // Fetch only the posts field
+    ).populate("posts.post_id"); // Assuming `post_id` is a reference to the Post model
+
+    if (!currentUser) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
+
+    const userPosts = currentUser.posts.map((post) => post.post_id); // Extract post data from the posts array
+
+    // Step 3: Return the posts for the current user
+    res.status(200).json(userPosts);
+  } catch (error: any) {
+    console.error("Error fetching user's posts:", error);
     res
       .status(500)
       .json({ message: "Error fetching posts", error: error.message });
