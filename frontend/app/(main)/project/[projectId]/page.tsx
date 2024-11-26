@@ -25,6 +25,7 @@ interface Task {
   priority: string;
   label: string;
   assigned_to: string;
+  assignedToName?: string;
 }
 export default function TaskPage({
   params,
@@ -50,7 +51,7 @@ export default function TaskPage({
           status: task.status,
           priority: task.priority,
           label: task.label,
-          assignTo: task.assigned_to,
+          assigned_to: String(task.assigned_to),
         }));
 
         const userPromises = projectTasks.map(
@@ -62,14 +63,15 @@ export default function TaskPage({
             status: string;
             priority: string;
             label: string;
-            assignTo: string;
+            assigned_to: string;
+            assignedToName?: string;
           }) => {
             try {
-              const user = await getUserById(task.assignTo);
-              return { ...task, assignTo: user.name };
+              const user = await getUserById(task.assigned_to);
+              return { ...task, assignedToName: user.name };
             } catch (error) {
-              console.error(`Error fetching user ${task.assignTo}:`, error);
-              return { ...task, assignedTo: "Unknown User" };
+              console.error(`Error fetching user ${task.assigned_to}:`, error);
+              return { ...task, assignedToName: "Unknown User" };
             }
           }
         );

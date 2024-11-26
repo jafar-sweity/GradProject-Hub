@@ -8,7 +8,7 @@ import { Checkbox } from "../../../../components/ui/checkbox";
 import { labels, priorities, statuses } from "../data/data";
 import { Task } from "../data/schema";
 import { DataTableColumnHeader } from "./data-table-column-header";
-// import { DataTableRowActions } from "./data-table-row-actions";
+import { DataTableRowActions } from "./data-table-row-actions";
 
 export const columns: ColumnDef<Task>[] = [
   {
@@ -117,12 +117,12 @@ export const columns: ColumnDef<Task>[] = [
     },
   },
   {
-    accessorKey: "assignTo",
+    accessorKey: "assigned_to",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Assigned To" />
     ),
     cell: ({ row }) => {
-      const assignTo: string = row.getValue("assignTo");
+      const assignTo: string = row.getValue("assigned_to");
 
       if (!assignTo) {
         return null;
@@ -142,8 +142,8 @@ export const columns: ColumnDef<Task>[] = [
     },
   },
 
-  // {
-  //   id: "actions",
-  //   cell: ({ row }) => <DataTableRowActions row={row} />,
-  // },
+  {
+    id: "actions",
+    cell: ({ row }) => <DataTableRowActions row={row} />,
+  },
 ];

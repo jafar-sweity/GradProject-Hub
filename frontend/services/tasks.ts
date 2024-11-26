@@ -8,3 +8,14 @@ export const getProjectTasks = async (projectId: number) => {
     throw error;
   }
 };
+
+export const getTaskById = async (projectId: string, taskId: string) => {
+  try {
+    const response = await axiosInstance.get(
+      `projects/${projectId}/tasks/${taskId}`
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
