@@ -9,13 +9,23 @@ import { useEffect, useState } from "react";
 import taskData from "../data/tasks.json";
 import useFetchData from "@/hooks/useFetchData";
 import { getProjectTasks } from "@/services/tasks";
+import getUserById from "@/services/userService";
 // Simulate a database read for tasks.
 async function getTasks() {
   const tasks = taskData;
 
   return z.array(taskSchema).parse(tasks);
 }
-
+interface Task {
+  task_id: string;
+  title: string;
+  description: string;
+  due_date: string;
+  status: string;
+  priority: string;
+  label: string;
+  assigned_to: string;
+}
 export default function TaskPage({
   params,
 }: {
@@ -23,19 +33,55 @@ export default function TaskPage({
 }) {
   const [tasks, setTasks] = useState<z.infer<typeof taskSchema>[]>([]);
 
-  const { data, error, loading } = useFetchData(getProjectTasks, [
-    params.projectId,
-  ]);
-  if (!loading) {
-    console.log(data);
-  }
+  const { data: tasksData, loading: tasksLoading } = useFetchData(
+    getProjectTasks,
+    [params.projectId]
+  );
+
   useEffect(() => {
     async function fetchTasks() {
-      const tasks = await getTasks();
+      let tasks = await getTasks();
+      if (!tasksLoading && tasksData) {
+        const projectTasks = tasksData.map((task: Task) => ({
+          id: String(task.task_id),
+          title: task.title,
+          description: task.description,
+          dueDate: task.due_date,
+          status: task.status,
+          priority: task.priority,
+          label: task.label,
+          assignTo: task.assigned_to,
+        }));
+
+        const userPromises = projectTasks.map(
+          async (task: {
+            id: string;
+            title: string;
+            description: string;
+            dueDate: string;
+            status: string;
+            priority: string;
+            label: string;
+            assignTo: string;
+          }) => {
+            try {
+              const user = await getUserById(task.assignTo);
+              return { ...task, assignTo: user.name };
+            } catch (error) {
+              console.error(`Error fetching user ${task.assignTo}:`, error);
+              return { ...task, assignedTo: "Unknown User" };
+            }
+          }
+        );
+
+        const tasksWithUsers = await Promise.all(userPromises);
+        console.log(tasksWithUsers);
+        tasks = [...tasksWithUsers, ...tasks];
+      }
       setTasks(tasks);
     }
     fetchTasks();
-  }, []);
+  }, [tasksData, tasksLoading]);
 
   return (
     <>
