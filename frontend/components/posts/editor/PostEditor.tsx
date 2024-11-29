@@ -6,7 +6,6 @@ import { createPost } from "./action";
 import { User } from "lucide-react";
 import UserAvatar from "../../UserAvatar";
 import { useAuth } from "@/hooks/useAuth";
-import { useDropzone } from "@uploadthing/react";
 import { Button } from "@/components/ui/button";
 import "./styles.css";
 import DOMPurify from "dompurify";

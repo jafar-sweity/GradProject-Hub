@@ -84,11 +84,3 @@ export async function getWhoToFollow(userId: string) {
   }
 }
 
-export async function deletePost(postId: string) {
-  try {
-    const response = await axiosInstance.delete(`community/posts/${postId}`);
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
-}

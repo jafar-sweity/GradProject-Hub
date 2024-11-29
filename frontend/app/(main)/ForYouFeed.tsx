@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import InfiniteScrollContainer from "@/components/InfiniteScrollContainer";
 import { getallPostsCurrentUser } from "@/components/posts/editor/action";
 import Post from "@/components/posts/Post";
@@ -10,7 +10,7 @@ import { Loader2 } from "lucide-react";
 import PostLoadingSkeleton from "@/components/posts/PostsLoadingSkeleton";
 
 interface PostProps {
-  id: string;
+  post_id: string;
   user_id: string;
   content: string;
   likes: number;
@@ -44,9 +44,10 @@ export default function ForYouFeed() {
         }
         // reverse the order of the posts
         response.data.reverse();
+
         return response.data.map((post: any) => ({
-          id: post.id,
-          user_id: post.user_id,
+          post_id: post.id,
+          user_id: user?.id,
           content: post.content,
           likes: post.likes || 0,
           username: post.username || "Unknown",

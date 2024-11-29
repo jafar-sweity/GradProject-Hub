@@ -7,7 +7,6 @@ import likeRoutes from "./like.js";
 const router = express.Router();
 
 router.use("/posts", postRoutes);
-
 router.use("/comments", commentRoutes);
 router.use("/followers", followerRoutes);
 router.use("/likes", likeRoutes);

@@ -31,3 +31,5 @@ export function useSubmitPostMutation() {
   });
   return mutation;
 }
+
+// creat muations for updating and deleting posts as well

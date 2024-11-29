@@ -62,7 +62,6 @@ export const getForYouPosts = async (
   try {
     const { userId } = req.query;
     console.log("userId", userId);
-    console.log("helllllloo");
 
     if (!userId) {
       res.status(400).json({ message: "userId is required" });
@@ -80,10 +79,18 @@ export const getForYouPosts = async (
       return;
     }
 
-    const userPosts = currentUser.posts.map((post) => post.post_id); // Extract post data from the posts array
-
-    // Step 3: Return the posts for the current user
-    res.status(200).json(userPosts);
+    const posts = await Post.find({}).select(
+      "_id user_id content likes createdAt"
+    );
+    // Transform the data for frontend compatibility
+    const transformedPosts = posts.map((post: any) => ({
+      id: post._id.toString(),
+      user_id: post.user_id?.toString(),
+      content: post.content,
+      likes: post.likes,
+      createdAt: post.createdAt,
+    }));
+    res.status(200).json(transformedPosts);
   } catch (error: any) {
     console.error("Error fetching user's posts:", error);
     res
@@ -145,20 +152,60 @@ export const deletePost = async (
   res: Response
 ): Promise<void> => {
   try {
-    const post = await Post.findById(req.params.id);
+    console.log(req.params);
+    const { id } = req.params;
+    const { userId } = req.query;
+    // Validate inputs
+    console.log(`postId: ${id}, userId: ${userId}`);
+
+    if (!id) {
+      res.status(400).json({ message: "Invalid post ID" });
+      return;
+    }
+    if (!userId) {
+      res.status(400).json({ message: "Invalid user ID" });
+      return;
+    }
+
+    // Fetch the post
+    const post = await Post.findById(id);
     if (!post) {
       res.status(404).json({ message: "Post not found" });
       return;
     }
 
+    // Find the user in the UserCommunity collection
+    const userCommunity = (await UserCommunity.findOne({
+      user_id: userId,
+    })) as { _id: mongoose.Types.ObjectId };
+    if (!userCommunity) {
+      res.status(404).json({ message: "User not found in the community" });
+      return;
+    }
+
+    // Check if the user is authorized to delete the post
+    if (post.user_id.toString() !== userCommunity._id.toString()) {
+      res
+        .status(403)
+        .json({ message: "You are not authorized to delete this post" });
+      return;
+    }
+
     // Delete the post
-    await Post.findByIdAndDelete(req.params.id);
-    res.status(200).json({ message: "Post deleted successfully" });
-    return;
+    const deletedPost = await Post.findByIdAndDelete(id);
+    if (!deletedPost) {
+      res.status(500).json({ message: "Failed to delete post" });
+      return;
+    }
+
+    res.status(200).json({
+      message: "Post deleted successfully",
+      post: deletedPost, // Optionally return the deleted post
+    });
   } catch (error: any) {
+    console.error("Error deleting post:", error.message);
     res
       .status(500)
       .json({ message: "Error deleting post", error: error.message });
-    return;
   }
 };
