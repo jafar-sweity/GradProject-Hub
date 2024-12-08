@@ -7,6 +7,7 @@ import UserAvatar from "./UserAvatar";
 import { Button } from "./ui/button";
 import { formatNumber } from "@/lib/utils";
 import { getallPosts, getWhoToFollow } from "@/components/posts/editor/action";
+import FollowButton from "./FollowButton"; // Import your FollowButton component
 
 interface User {
   id: string;
@@ -16,7 +17,7 @@ interface User {
 
 export default function TrendsSidebar() {
   return (
-    <div className="sticky top-[5.25rem] hidden md:block lg:w-80 w72 h-fit flex-none space-y-5  ">
+    <div className="sticky top-[5.25rem] hidden md:block lg:w-80 w72 h-fit flex-none space-y-5">
       <Suspense fallback={<Loader2 className="mx-auto animate-spin" />}>
         <WhoToFollow />
         <TrendingTopics />
@@ -32,7 +33,7 @@ function WhoToFollow() {
 
   useEffect(() => {
     const fetchWhoToFollow = async () => {
-      if (!user?.id) return; // Skip if user ID is not available
+      if (!user?.id) return;
 
       try {
         const users = await getWhoToFollow(user.id);
@@ -55,26 +56,34 @@ function WhoToFollow() {
     <div className="space-y-5 rounded-2xl bg-card p-5 shadow-sm">
       <div className="text-xl font-bold">Who to follow</div>
       {users.length > 0 ? (
-        users.map((user: User) => (
+        users.map((toFollow: User) => (
           <div
-            key={user.id}
+            key={toFollow.id}
             className="flex items-center justify-between gap-3"
           >
             <Link
-              href={`/users/${user.username}`}
+              href={`/users/${toFollow.username}`}
               className="flex items-center gap-3"
             >
-              <UserAvatar avatarurl={user.avatarurl} className="flex-none" />
+              <UserAvatar
+                avatarurl={toFollow.avatarurl}
+                className="flex-none"
+              />
               <div>
                 <p className="line-clamp-1 break-all font-semibold hover:underline">
-                  {user.username}
+                  {toFollow.username}
                 </p>
                 <p className="line-clamp-1 break-all text-muted-foreground">
-                  @{user.username}
+                  @{toFollow.id}
                 </p>
               </div>
             </Link>
-            <Button>Follow</Button>
+
+            {/* Integrate FollowButton here */}
+            <FollowButton
+              userId={toFollow.id}
+              initialState={{ isFollowedByUser: false, followers: 0 }}
+            />
           </div>
         ))
       ) : (

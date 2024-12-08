@@ -21,7 +21,6 @@ export const getUsers = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-// get user that i dont follow
 export const getUsersNotFollowed = async (
   req: Request,
   res: Response
@@ -34,6 +33,7 @@ export const getUsersNotFollowed = async (
       return;
     }
 
+    // Fetch the current user's following list from MongoDB
     const currentUser = await UserCommunity.findOne(
       { user_id: userId },
       { following: 1 }
@@ -46,6 +46,7 @@ export const getUsersNotFollowed = async (
 
     const followingIds = new Set(currentUser.following.map((f) => f.user_id));
 
+    // Fetch all users from MongoDB except the current user
     const allUsers = await UserCommunity.find(
       { user_id: { $ne: userId } },
       { user_id: 1, avatarurl: 1 }
@@ -56,6 +57,7 @@ export const getUsersNotFollowed = async (
     );
 
     const userIds = notFollowedUsers.map((user) => user.user_id);
+
     const usersFromMySQL = await User.findAll({
       where: { user_id: userIds },
       attributes: ["user_id", "name"],
@@ -67,7 +69,7 @@ export const getUsersNotFollowed = async (
       );
 
       return {
-        user_id: currentUser.id,
+        user_id: mysqlUser ? mysqlUser.user_id : null,
         avatarurl: user.avatarurl,
         username: mysqlUser ? mysqlUser.name : null,
       };

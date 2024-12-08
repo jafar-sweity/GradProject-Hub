@@ -31,7 +31,7 @@ export const createPost = async (
     const savedPost = await newPost.save();
 
     await userCommunity.updateOne({
-      $push: { posts: { post_id: savedPost._id } }, // Correctly structure the post object
+      $push: { posts: { post_id: savedPost._id } }, 
     });
     res
       .status(201)
@@ -68,34 +68,112 @@ export const getForYouPosts = async (
       return;
     }
 
-    // Step 1: Find the current user's posts (stored in the UserCommunity's posts field)
     const currentUser = await UserCommunity.findOne(
       { user_id: userId },
-      { posts: 1 } // Fetch only the posts field
-    ).populate("posts.post_id"); // Assuming `post_id` is a reference to the Post model
+      { posts: 1 }
+    ).populate("posts.post_id");
 
     if (!currentUser) {
       res.status(404).json({ message: "User not found" });
       return;
     }
 
-    const posts = await Post.find({}).select(
+    const posts = await Post.find({ user_id: currentUser._id }).select(
       "_id user_id content likes createdAt"
     );
-    // Transform the data for frontend compatibility
-    const transformedPosts = posts.map((post: any) => ({
-      id: post._id.toString(),
-      user_id: post.user_id?.toString(),
-      content: post.content,
-      likes: post.likes,
-      createdAt: post.createdAt,
-    }));
+    const transformedPosts = posts.map((post) => {
+      const typedPost = post as {
+        _id: mongoose.Types.ObjectId;
+        user_id: mongoose.Types.ObjectId;
+        content: string;
+        likes: number;
+        createdAt: Date;
+      };
+      return {
+        id: typedPost._id.toString(),
+        user_id: typedPost.user_id?.toString(),
+        content: typedPost.content,
+        likes: typedPost.likes,
+        createdAt: typedPost.createdAt,
+      };
+    });
     res.status(200).json(transformedPosts);
   } catch (error: any) {
     console.error("Error fetching user's posts:", error);
     res
       .status(500)
       .json({ message: "Error fetching posts", error: error.message });
+  }
+};
+export const getFollowingPosts = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { userId } = req.query;
+
+    if (!userId) {
+      res.status(400).json({ message: "userId is required" });
+      return;
+    }
+
+    const userCommunity = await UserCommunity.findOne({
+      user_id: Number(userId), 
+    });
+
+    if (!userCommunity) {
+      res.status(404).json({ message: "User not found in the community" });
+      return;
+    }
+
+    const followingUserIds = userCommunity.following.map(
+      (follow) => follow.user_id
+    );
+
+    console.log("Following numeric user IDs:", followingUserIds);
+
+    if (followingUserIds.length === 0) {
+      res.status(200).json([]);
+      return;
+    }
+
+    const followingObjectIds = await UserCommunity.find(
+      { user_id: { $in: followingUserIds } }, 
+      { _id: 1 }
+    );
+
+    // Extract the MongoDB ObjectIds
+    const followingMongoIds = followingObjectIds.map((user) => user._id);
+
+    console.log(
+      "Mapped MongoDB ObjectIds of following users:",
+      followingMongoIds
+    );
+
+    const posts = await Post.find({
+      user_id: { $in: followingMongoIds },
+    })
+      .sort({ createdAt: -1 }) 
+      .select("_id user_id content likes createdAt comments");
+
+    const transformedPosts = posts.map((post: any) => ({
+      id: post._id.toString(),
+      user_id: post.user_id?.toString(),
+      content: post.content,
+      likes: post.likes,
+      comments: post.comments?.length || 0,
+      createdAt: post.createdAt,
+    }));
+    console.log("Following posts:", transformedPosts);
+    
+    res.status(200).json(transformedPosts);
+  } catch (error: any) {
+    console.error("Error fetching posts:", error.message);
+
+    res.status(500).json({
+      message: "Error fetching posts",
+      error: error.message,
+    });
   }
 };
 
@@ -132,7 +210,6 @@ export const updatePost = async (
       return;
     }
 
-    // Update the post content
     post.content = content || post.content;
     const updatedPost = await post.save();
 
@@ -174,7 +251,6 @@ export const deletePost = async (
       return;
     }
 
-    // Find the user in the UserCommunity collection
     const userCommunity = (await UserCommunity.findOne({
       user_id: userId,
     })) as { _id: mongoose.Types.ObjectId };
@@ -183,7 +259,6 @@ export const deletePost = async (
       return;
     }
 
-    // Check if the user is authorized to delete the post
     if (post.user_id.toString() !== userCommunity._id.toString()) {
       res
         .status(403)

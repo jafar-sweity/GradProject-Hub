@@ -84,3 +84,27 @@ export async function getWhoToFollow(userId: string) {
   }
 }
 
+export async function getallFollowingPosts(userId: string) {
+  try {
+    const response = await axiosInstance.get("community/posts/following", {
+      params: { userId },
+    });
+
+    // Transform the data
+    const res = response.data.map((post: any) => ({
+      id: post.id,
+      user_id: post.user_id,
+      content: post.content,
+      likes: post.likes || 0,
+      username: post.username || "Unknown", // Fallback for username
+      avatarurl: post.avatarurl || "", // Provide a fallback for avatar
+      createdAt: new Date(post.createdAt),
+    }));
+    console.log("Transformed response:", res);
+
+    return res;
+  } catch (error: any) {
+    console.error("Error fetching posts:", error.message);
+    return [];
+  }
+}

@@ -4,25 +4,25 @@ import {
   unfollowUser,
   getFollowers,
   getFollowing,
+  getFollowerInfo,
 } from "../controllers/followController.js";
-import { authorize } from "../middleware/authorization.js"; // Assuming you have an authentication middleware
 import {
   getUsers,
   getUsersNotFollowed,
 } from "../controllers/userController.js";
 
 const router = express.Router();
-// get the users i dont follow
+
 router.get("/users/notfollow", getUsersNotFollowed);
-router.post("/follow/:id", authorize(["user"]), followUser);
 
-router.post("/unfollow/:id", authorize(["user"]), unfollowUser);
+router.post("/follow/:id", followUser);
+router.post("/unfollow/:id", unfollowUser);
 
-router.get("/:id/followers", authorize(["user"]), getFollowers);
+router.get("/:userId", getFollowerInfo); // Updated to include `userId` in the path
 
-router.get("/:id/following", authorize(["user"]), getFollowing);
+router.get("/:id/followers", getFollowers);
+router.get("/:id/following", getFollowing);
 
-// get user that i dont follow use this function getUsersNotFollowed
-router.get("/users", authorize(["user"]), getUsers);
+router.get("/users", getUsers);
 
 export default router;
