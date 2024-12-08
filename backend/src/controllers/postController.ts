@@ -1,5 +1,9 @@
 import { Request, Response } from "express";
+import UserCommunity from "../MongoDB/user.js";
+
 import Post from "../MongoDB/Post.js";
+import { where } from "sequelize";
+import mongoose from "mongoose";
 
 // Create a new post
 export const createPost = async (
@@ -13,15 +17,22 @@ export const createPost = async (
       res.status(400).json({ message: "Content and user_id are required" });
       return;
     }
+    const userCommunity = await UserCommunity.findOne({ user_id: user_id });
+    if (!userCommunity) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
 
-    // Create and save the post
     const newPost = new Post({
-      user_id,
+      user_id: userCommunity._id,
       content,
     });
 
     const savedPost = await newPost.save();
 
+    await userCommunity.updateOne({
+      $push: { posts: { post_id: savedPost._id } }, 
+    });
     res
       .status(201)
       .json({ message: "Post created successfully", post: savedPost });
@@ -35,12 +46,134 @@ export const createPost = async (
 // Get all posts
 export const getPosts = async (req: Request, res: Response): Promise<void> => {
   try {
-    const posts = await Post.find();
+    const posts = await Post.find().sort({ createdAt: -1 });
     res.status(200).json(posts);
   } catch (error: any) {
     res
       .status(500)
       .json({ message: "Error fetching posts", error: error.message });
+  }
+};
+
+export const getForYouPosts = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { userId } = req.query;
+    console.log("userId", userId);
+
+    if (!userId) {
+      res.status(400).json({ message: "userId is required" });
+      return;
+    }
+
+    const currentUser = await UserCommunity.findOne(
+      { user_id: userId },
+      { posts: 1 }
+    ).populate("posts.post_id");
+
+    if (!currentUser) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
+
+    const posts = await Post.find({ user_id: currentUser._id }).select(
+      "_id user_id content likes createdAt"
+    );
+    const transformedPosts = posts.map((post) => {
+      const typedPost = post as {
+        _id: mongoose.Types.ObjectId;
+        user_id: mongoose.Types.ObjectId;
+        content: string;
+        likes: number;
+        createdAt: Date;
+      };
+      return {
+        id: typedPost._id.toString(),
+        user_id: typedPost.user_id?.toString(),
+        content: typedPost.content,
+        likes: typedPost.likes,
+        createdAt: typedPost.createdAt,
+      };
+    });
+    res.status(200).json(transformedPosts);
+  } catch (error: any) {
+    console.error("Error fetching user's posts:", error);
+    res
+      .status(500)
+      .json({ message: "Error fetching posts", error: error.message });
+  }
+};
+export const getFollowingPosts = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { userId } = req.query;
+
+    if (!userId) {
+      res.status(400).json({ message: "userId is required" });
+      return;
+    }
+
+    const userCommunity = await UserCommunity.findOne({
+      user_id: Number(userId), 
+    });
+
+    if (!userCommunity) {
+      res.status(404).json({ message: "User not found in the community" });
+      return;
+    }
+
+    const followingUserIds = userCommunity.following.map(
+      (follow) => follow.user_id
+    );
+
+    console.log("Following numeric user IDs:", followingUserIds);
+
+    if (followingUserIds.length === 0) {
+      res.status(200).json([]);
+      return;
+    }
+
+    const followingObjectIds = await UserCommunity.find(
+      { user_id: { $in: followingUserIds } }, 
+      { _id: 1 }
+    );
+
+    // Extract the MongoDB ObjectIds
+    const followingMongoIds = followingObjectIds.map((user) => user._id);
+
+    console.log(
+      "Mapped MongoDB ObjectIds of following users:",
+      followingMongoIds
+    );
+
+    const posts = await Post.find({
+      user_id: { $in: followingMongoIds },
+    })
+      .sort({ createdAt: -1 }) 
+      .select("_id user_id content likes createdAt comments");
+
+    const transformedPosts = posts.map((post: any) => ({
+      id: post._id.toString(),
+      user_id: post.user_id?.toString(),
+      content: post.content,
+      likes: post.likes,
+      comments: post.comments?.length || 0,
+      createdAt: post.createdAt,
+    }));
+    console.log("Following posts:", transformedPosts);
+    
+    res.status(200).json(transformedPosts);
+  } catch (error: any) {
+    console.error("Error fetching posts:", error.message);
+
+    res.status(500).json({
+      message: "Error fetching posts",
+      error: error.message,
+    });
   }
 };
 
@@ -77,7 +210,6 @@ export const updatePost = async (
       return;
     }
 
-    // Update the post content
     post.content = content || post.content;
     const updatedPost = await post.save();
 
@@ -97,20 +229,58 @@ export const deletePost = async (
   res: Response
 ): Promise<void> => {
   try {
-    const post = await Post.findById(req.params.id);
+    console.log(req.params);
+    const { id } = req.params;
+    const { userId } = req.query;
+    // Validate inputs
+    console.log(`postId: ${id}, userId: ${userId}`);
+
+    if (!id) {
+      res.status(400).json({ message: "Invalid post ID" });
+      return;
+    }
+    if (!userId) {
+      res.status(400).json({ message: "Invalid user ID" });
+      return;
+    }
+
+    // Fetch the post
+    const post = await Post.findById(id);
     if (!post) {
       res.status(404).json({ message: "Post not found" });
       return;
     }
 
+    const userCommunity = (await UserCommunity.findOne({
+      user_id: userId,
+    })) as { _id: mongoose.Types.ObjectId };
+    if (!userCommunity) {
+      res.status(404).json({ message: "User not found in the community" });
+      return;
+    }
+
+    if (post.user_id.toString() !== userCommunity._id.toString()) {
+      res
+        .status(403)
+        .json({ message: "You are not authorized to delete this post" });
+      return;
+    }
+
     // Delete the post
-    await Post.findByIdAndDelete(req.params.id);
-    res.status(200).json({ message: "Post deleted successfully" });
-    return;
+    const deletedPost = await Post.findByIdAndDelete(id);
+    if (!deletedPost) {
+      res.status(500).json({ message: "Failed to delete post" });
+      return;
+    }
+
+    res.status(200).json({
+      message: "Post deleted successfully",
+      post: deletedPost, // Optionally return the deleted post
+    });
   } catch (error: any) {
+    console.error("Error deleting post:", error.message);
     res
       .status(500)
       .json({ message: "Error deleting post", error: error.message });
-    return;
   }
 };

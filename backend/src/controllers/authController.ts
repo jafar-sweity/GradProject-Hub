@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import User from "../models/user.js"; 
-import UserCommunity from "../MongoDB/user.js"; 
+import User from "../models/user.js";
+import UserCommunity from "../MongoDB/user.js";
 import { Optional } from "sequelize";
 import { NullishPropertiesOf } from "sequelize/lib/utils";
 import validator from "validator";
@@ -88,6 +88,16 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     res.status(400).json({ message: "Invalid password" });
     return;
   }
+  // get moingo user id that have the above user_id
+  const user_id = Number(user.user_id); // Ensure this is a number
+
+  const userCommunity = await UserCommunity.findOne({ user_id });
+
+  // console.log(userCommunity);
+  // if (!userCommunity) {
+  //   res.status(404).json({ message: "User not found" });
+  //   return;
+  // }
 
   const payload = {
     id: user.user_id,
