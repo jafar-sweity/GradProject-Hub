@@ -4,13 +4,14 @@ import UserCommunity from "../MongoDB/user.js";
 import Post from "../MongoDB/Post.js";
 import { where } from "sequelize";
 import mongoose from "mongoose";
+import user from "../MongoDB/user.js";
 
 // Create a new post
 export const createPost = async (
   req: Request,
   res: Response
 ): Promise<void> => {
-  const { user_id, content } = req.body;
+  const { user_id, content, username } = req.body;
 
   try {
     if (!content || !user_id) {
@@ -26,12 +27,13 @@ export const createPost = async (
     const newPost = new Post({
       user_id: userCommunity._id,
       content,
+      username,
     });
 
     const savedPost = await newPost.save();
 
     await userCommunity.updateOne({
-      $push: { posts: { post_id: savedPost._id } }, 
+      $push: { posts: { post_id: savedPost._id } },
     });
     res
       .status(201)
@@ -79,14 +81,16 @@ export const getForYouPosts = async (
     }
 
     const posts = await Post.find({ user_id: currentUser._id }).select(
-      "_id user_id content likes createdAt"
+      "_id user_id content likes createdAt comments username" 
     );
     const transformedPosts = posts.map((post) => {
-      const typedPost = post as {
+      const typedPost = post.toObject() as {
         _id: mongoose.Types.ObjectId;
         user_id: mongoose.Types.ObjectId;
         content: string;
         likes: number;
+        username?: string;
+        comments: any[];
         createdAt: Date;
       };
       return {
@@ -94,6 +98,7 @@ export const getForYouPosts = async (
         user_id: typedPost.user_id?.toString(),
         content: typedPost.content,
         likes: typedPost.likes,
+        username: typedPost.username || '',
         createdAt: typedPost.createdAt,
       };
     });
@@ -118,7 +123,7 @@ export const getFollowingPosts = async (
     }
 
     const userCommunity = await UserCommunity.findOne({
-      user_id: Number(userId), 
+      user_id: Number(userId),
     });
 
     if (!userCommunity) {
@@ -138,7 +143,7 @@ export const getFollowingPosts = async (
     }
 
     const followingObjectIds = await UserCommunity.find(
-      { user_id: { $in: followingUserIds } }, 
+      { user_id: { $in: followingUserIds } },
       { _id: 1 }
     );
 
@@ -153,19 +158,20 @@ export const getFollowingPosts = async (
     const posts = await Post.find({
       user_id: { $in: followingMongoIds },
     })
-      .sort({ createdAt: -1 }) 
-      .select("_id user_id content likes createdAt comments");
-
+      .sort({ createdAt: -1 })
+      .select("_id user_id content likes createdAt comments username");
+    
     const transformedPosts = posts.map((post: any) => ({
       id: post._id.toString(),
       user_id: post.user_id?.toString(),
       content: post.content,
       likes: post.likes,
+      username: post.username,
       comments: post.comments?.length || 0,
       createdAt: post.createdAt,
     }));
     console.log("Following posts:", transformedPosts);
-    
+
     res.status(200).json(transformedPosts);
   } catch (error: any) {
     console.error("Error fetching posts:", error.message);
