@@ -19,3 +19,14 @@ export const getTaskById = async (projectId: string, taskId: string) => {
     throw error;
   }
 };
+
+export const deleteTask = async (projectId: string, taskId: string) => {
+  try {
+    const response = await axiosInstance.delete(
+      `projects/${projectId}/tasks/${taskId}`
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};

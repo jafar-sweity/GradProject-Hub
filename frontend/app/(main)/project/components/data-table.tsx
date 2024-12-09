@@ -45,7 +45,9 @@ import { DataTablePagination } from "./data-table-pagination";
 import { DataTableToolbar } from "./data-table-toolbar";
 
 import { labels, statuses, priorities } from "../data/data";
-
+import { TrashIcon } from "lucide-react";
+import { deleteTask } from "@/services/tasks";
+import { Alert, Snackbar } from "@mui/material";
 interface DataTableProps<
   TData extends {
     id: string;
@@ -61,6 +63,8 @@ interface DataTableProps<
 > {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  setTasks: React.Dispatch<React.SetStateAction<TData[]>>;
+  projectId: string;
 }
 
 export function DataTable<
@@ -75,8 +79,10 @@ export function DataTable<
     assignedToName?: string;
   },
   TValue
->({ columns, data }: DataTableProps<TData, TValue>) {
+>({ columns, data, setTasks, projectId }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = React.useState({});
+  const [openSnackBar, setOpenSnackBar] = React.useState(false);
+  const [snackBarMessage, setSnackBarMessage] = React.useState("");
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -106,6 +112,14 @@ export function DataTable<
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
   });
+
+  function handleDeleteTask(taskId: string): void {
+    deleteTask(projectId, taskId);
+    setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
+    setEditingTask(null);
+    setSnackBarMessage("Task deleted successfully.");
+    setOpenSnackBar(true);
+  }
 
   return (
     <div className="space-y-4">
@@ -210,7 +224,7 @@ export function DataTable<
                         description: e.target.value,
                       })
                     }
-                    className="mt-1 block w-full h-24 p-2 border rounded-lg resize-none focus:ring focus:ring-primary"
+                    className="mt-1 block w-full h-24 p-2 border rounded-lg  focus:ring focus:ring-primary"
                   />
                 </div>
                 <div>
@@ -313,27 +327,40 @@ export function DataTable<
                     </Select>
                   </div>
                 </div>
-                <div className="flex justify-end space-x-2">
+                {/* Other fields (assignedTo, status, priority, label) remain unchanged */}
+                <div className="flex justify-between items-center">
+                  {/* Delete Button */}
                   <Button
                     variant="outline"
-                    onClick={() => setEditingTask(null)}
-                    className="w-full md:w-auto bg-secondary text-secondary-foreground border border-secondary hover:bg-secondary/80"
+                    onClick={() => handleDeleteTask(editingTask.id)}
+                    className="bg-red-500 text-white hover:text-white border border-red-500 hover:bg-red-600"
                   >
-                    Cancel
+                    <TrashIcon className="w-5 h-5" />
                   </Button>
-                  <Button
-                    type="submit"
-                    onClick={() => setEditingTask(null)}
-                    className="w-full md:w-auto bg-primary text-primary-foreground hover:bg-primary/80 border border-primary"
-                  >
-                    Save Changes
-                  </Button>
+                  <div className="space-x-2">
+                    <Button
+                      type="submit"
+                      onClick={() => setEditingTask(null)}
+                      className="w-full md:w-auto bg-primary text-primary-foreground hover:bg-primary/80 border border-primary"
+                    >
+                      Save Changes
+                    </Button>
+                  </div>
                 </div>
               </form>
             </div>
           </DialogContent>
         </Dialog>
       )}
+      <Snackbar
+        open={openSnackBar}
+        autoHideDuration={6000}
+        onClose={() => setOpenSnackBar(false)}
+      >
+        <Alert severity={"success"} variant="filled" className="w-full">
+          {snackBarMessage}
+        </Alert>
+      </Snackbar>
     </div>
   );
 }
