@@ -4,17 +4,25 @@ import {
   unfollowUser,
   getFollowers,
   getFollowing,
+  getFollowerInfo,
 } from "../controllers/followController.js";
-import { authorize } from "../middleware/authorization.js"; // Assuming you have an authentication middleware
+import {
+  getUsers,
+  getUsersNotFollowed,
+} from "../controllers/userController.js";
 
 const router = express.Router();
 
-router.post("/follow/:id", authorize(["user"]), followUser);
+router.get("/users/notfollow", getUsersNotFollowed);
 
-router.post("/unfollow/:id", authorize(["user"]), unfollowUser);
+router.post("/follow/:id", followUser);
+router.post("/unfollow/:id", unfollowUser);
 
-router.get("/:id/followers", authorize(["user"]), getFollowers);
+router.get("/:userId", getFollowerInfo); // Updated to include `userId` in the path
 
-router.get("/:id/following", authorize(["user"]), getFollowing);
+router.get("/:id/followers", getFollowers);
+router.get("/:id/following", getFollowing);
+
+router.get("/users", getUsers);
 
 export default router;

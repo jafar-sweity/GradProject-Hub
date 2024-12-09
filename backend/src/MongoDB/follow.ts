@@ -11,18 +11,18 @@ const FollowSchema: Schema = new Schema(
     follower_id: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
-      ref: "User",
-    }, 
+      ref: "UserCommunity",
+    },
     following_id: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
-      ref: "User",
-    }, 
+      ref: "UserCommunity",
+    },
     createdAt: { type: Date, default: Date.now },
   },
-  { timestamps: true } 
+  { timestamps: true }
 );
 
-FollowSchema.index({ follower_id: 1, following_id: 1 }, { unique: true }); 
+FollowSchema.index({ follower_id: 1, following_id: 1 }, { unique: true });
 
 export default mongoose.model<IFollow>("Follow", FollowSchema);

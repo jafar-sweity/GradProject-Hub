@@ -39,6 +39,8 @@ class User extends Model<User> {
 
   @Column({ type: DataType.DATE, allowNull: false })
   updatedAt!: Date;
+
+  
 }
 
 export default User;

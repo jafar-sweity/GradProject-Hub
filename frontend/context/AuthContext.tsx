@@ -4,6 +4,7 @@ import { getToken } from "@/helpers/token";
 
 interface User {
   id: string;
+  mongoId: string;
   name: string;
   email: string;
   role: string;
