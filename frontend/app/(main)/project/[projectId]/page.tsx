@@ -3,19 +3,13 @@ import { z } from "zod";
 
 import { columns } from "../components/columns";
 import { DataTable } from "../components/data-table";
-import { UserNav } from "../components/user-nav";
 import { taskSchema } from "../data/schema";
 import { useEffect, useState } from "react";
 import taskData from "../data/tasks.json";
 import useFetchData from "@/hooks/useFetchData";
 import { getProjectTasks } from "@/services/tasks";
-import getUserById from "@/services/userService";
-// Simulate a database read for tasks.
-async function getTasks() {
-  const tasks = taskData;
-
-  return z.array(taskSchema).parse(tasks);
-}
+import { getProjectMembers } from "@/services/project";
+import { useSearchParams } from "next/navigation";
 interface Task {
   task_id: string;
   title: string;
@@ -27,18 +21,64 @@ interface Task {
   assigned_to: string;
   assignedToName?: string;
 }
+interface User {
+  user_id: number;
+  name: string;
+  email: string;
+  password: string;
+  role: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface ProjectMember {
+  user_id: number;
+  project_id: number;
+  role: string;
+  createdAt: string;
+  updatedAt: string;
+  User: User;
+}
+
+async function getTasks() {
+  const tasks = taskData;
+
+  return z.array(taskSchema).parse(tasks);
+}
+
 export default function TaskPage({
   params,
 }: {
   params: { projectId: number };
 }) {
+  const searchParams = useSearchParams();
   const [tasks, setTasks] = useState<z.infer<typeof taskSchema>[]>([]);
 
   const { data: tasksData, loading: tasksLoading } = useFetchData(
     getProjectTasks,
     [params.projectId]
   );
+  const {
+    data: projectMembers,
+    loading: projectMembersLoading,
+  }: { data: ProjectMember[] | null; loading: boolean } = useFetchData(
+    getProjectMembers,
+    [params.projectId]
+  );
 
+  const students: Record<number, string> = {};
+  const supervisors: Record<number, string> = {};
+  if (!projectMembersLoading && projectMembers) {
+    projectMembers.forEach((member: ProjectMember) => {
+      if (member.role === "student") {
+        students[member.user_id] = member.User.name;
+      } else if (member.role === "supervisor") {
+        supervisors[member.user_id] = member.User.name;
+      }
+    });
+    console.log("Students:", students);
+    console.log("Supervisors:", supervisors);
+  }
   useEffect(() => {
     async function fetchTasks() {
       let tasks = await getTasks();
@@ -52,33 +92,10 @@ export default function TaskPage({
           priority: task.priority,
           label: task.label,
           assigned_to: String(task.assigned_to),
+          assignedToName: students[Number(task.assigned_to)],
         }));
 
-        const userPromises = projectTasks.map(
-          async (task: {
-            id: string;
-            title: string;
-            description: string;
-            dueDate: string;
-            status: string;
-            priority: string;
-            label: string;
-            assigned_to: string;
-            assignedToName?: string;
-          }) => {
-            try {
-              const user = await getUserById(task.assigned_to);
-              return { ...task, assignedToName: user.name };
-            } catch (error) {
-              console.error(`Error fetching user ${task.assigned_to}:`, error);
-              return { ...task, assignedToName: "Unknown User" };
-            }
-          }
-        );
-
-        const tasksWithUsers = await Promise.all(userPromises);
-        console.log(tasksWithUsers);
-        tasks = [...tasksWithUsers, ...tasks];
+        tasks = [...projectTasks, ...tasks];
       }
       setTasks(tasks);
     }
@@ -92,11 +109,16 @@ export default function TaskPage({
           <div>
             <h2 className="text-2xl font-bold tracking-tight">Welcome back!</h2>
             <p className="text-muted-foreground">
-              Here&apos;s a list of your tasks for this month!
+              Here&apos;s a list of {searchParams.get("projectName")} tasks!
             </p>
           </div>
-          <div className="flex items-center space-x-2">
-            <UserNav />
+          <div className="flex items-end space-x-2 flex-col ">
+            <p className="text-muted-foreground text-sm">
+              Your Supervisor(s) : {Object.values(supervisors).join(", ")}
+            </p>
+            <p className="text-muted-foreground text-sm">
+              Project Members : {Object.values(students).join(", ")}{" "}
+            </p>
           </div>
         </div>
         <DataTable data={tasks} columns={columns} />

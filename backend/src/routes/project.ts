@@ -10,6 +10,7 @@ import {
   removeStudentFromProject,
   deleteProjectBySupervisor,
   getProjectsByStudentId,
+  getMemebersByProjectId,
 } from "../controllers/projectController.js";
 import { authorize } from "../middleware/authorization.js";
 const router = express.Router();
@@ -35,6 +36,7 @@ router.get(
   authorize(["student"]),
   getProjectsByStudentId
 );
+router.get("/:projectId/members", getMemebersByProjectId);
 router.post(
   "/:projectId/students/:studentId",
   authorize(["supervisor"]),

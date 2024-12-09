@@ -31,7 +31,6 @@ export default function MenuBar({ className }: MenuBarProps) {
   const { data: projectData, loading } = useFetchData(getStudentProject, [
     user?.id ?? "",
   ]);
-
   return (
     <div className={className}>
       <Button
@@ -81,7 +80,11 @@ export default function MenuBar({ className }: MenuBarProps) {
                 >
                   <div className="border-l-2 border-muted pl-4 py-1">
                     <Link
-                      href={`/project/${project.project_id}`}
+                      href={`/project/${
+                        project.project_id
+                      }?projectName=${encodeURIComponent(
+                        project.Project.name
+                      )}`}
                       className="flex items-center gap-3 py-2 hover:text-primary transition-colors"
                     >
                       {loading ? (

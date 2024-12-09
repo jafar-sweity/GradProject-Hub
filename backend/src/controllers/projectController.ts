@@ -243,3 +243,20 @@ export const removeStudentFromProject = async (req: Request, res: Response) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+export const getMemebersByProjectId = async (req: Request, res: Response) => {
+  try {
+    const projectId = req.params.projectId;
+
+    const members = await UserProjectRoles.findAll({
+      where: {
+        project_id: projectId,
+      },
+      include: [User],
+    });
+
+    res.status(200).json(members);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};

@@ -117,14 +117,14 @@ export const columns: ColumnDef<Task>[] = [
     },
   },
   {
-    accessorKey: "assigned_to",
+    accessorKey: "assignedToName",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Assigned To" />
     ),
     cell: ({ row }) => {
-      const assignTo: string = row.getValue("assigned_to");
+      const assignedToName: string = row.getValue("assignedToName");
 
-      if (!assignTo) {
+      if (!assignedToName) {
         return null;
       }
 
@@ -133,7 +133,7 @@ export const columns: ColumnDef<Task>[] = [
           {/* {priority.icon && (
             <priority.icon className="mr-2 h-4 w-4 text-muted-foreground" />
           )} */}
-          <span>{assignTo}</span>
+          <span>{assignedToName}</span>
         </div>
       );
     },

@@ -28,7 +28,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     );
   }
 
-  return <>{children}</>;
+  return (
+    <>
+      <div className="overflow-hidden rounded-[0.5rem] border bg-background shadow">
+        {children}
+      </div>
+    </>
+  );
 };
 
 export default Layout;
