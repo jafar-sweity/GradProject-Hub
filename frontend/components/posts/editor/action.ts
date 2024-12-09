@@ -2,6 +2,7 @@ import axiosInstance from "@/lib/axiosInstance";
 interface Post {
   content: string;
   user_id: string;
+  username: string;
 }
 export async function createPost(post: Post) {
   // check the authentification

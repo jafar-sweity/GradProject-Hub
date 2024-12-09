@@ -20,6 +20,7 @@ const PostSchema: Schema = new Schema(
       required: true,
       ref: "User",
     },
+    username: { type: String, required: true },
     content: { type: String, required: true },
     likes: { type: Number, default: 0 },
     comments: [
@@ -33,9 +34,9 @@ const PostSchema: Schema = new Schema(
   },
   {
     timestamps: true,
-  createdAt: { type: Date, default: Date.now },
-},
+    createdAt: { type: Date, default: Date.now },
+  }
 );
 
-PostSchema.index({ user_id: 1 }); 
+PostSchema.index({ user_id: 1 });
 export default mongoose.model<IPost>("Post", PostSchema);
