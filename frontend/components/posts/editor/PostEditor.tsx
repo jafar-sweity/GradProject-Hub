@@ -41,7 +41,7 @@ export default function PostEditor() {
     const content = editor.getText();
     if (user?.id) {
       mutatuion.mutate(
-        { content, user_id: user.id },
+        { content, user_id: user.id, username: user.name },
         {
           onSuccess: () => {
             editor?.commands.clearContent();

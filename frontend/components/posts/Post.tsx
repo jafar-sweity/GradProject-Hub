@@ -30,7 +30,7 @@ export default function Post({ post }: PostProps) {
                 avatarurl=""
                 // avatarurl= {post.user.avatarurl}
               />
-            </Link>           
+            </Link>
           </div>
           <div>
             <Link
@@ -39,7 +39,7 @@ export default function Post({ post }: PostProps) {
               className="block font-medium hover:underline"
             >
               {/* {post.user.displayName} */}
-              {user?.name}
+              {post.username}
             </Link>
             <Link
               // href={`/posts/${post.id}`}
@@ -48,11 +48,7 @@ export default function Post({ post }: PostProps) {
               suppressHydrationWarning
             >
               {/* {formatRelativeDate(post.createdAt)} */}
-              {formatRelativeDate(post.createdAt)} 
-
-              
-              
-              
+              {formatRelativeDate(post.createdAt)}
             </Link>
           </div>
         </div>
