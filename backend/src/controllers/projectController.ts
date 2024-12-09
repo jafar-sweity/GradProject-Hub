@@ -136,6 +136,22 @@ export const getProjectsBySupervisorId = async (
     res.status(500).json({ error: error.message });
   }
 };
+export const getProjectsByStudentId = async (req: Request, res: Response) => {
+  try {
+    const studentId = req.params.studentId;
+
+    const projects = await UserProjectRoles.findAll({
+      where: {
+        user_id: studentId,
+        role: "student",
+      },
+      include: [Project],
+    });
+    res.status(200).json(projects);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
 
 export const addStudentToProject = async (req: Request, res: Response) => {
   try {
@@ -223,6 +239,23 @@ export const removeStudentFromProject = async (req: Request, res: Response) => {
     } else {
       res.status(404).json({ message: "Student not found in project" });
     }
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const getMemebersByProjectId = async (req: Request, res: Response) => {
+  try {
+    const projectId = req.params.projectId;
+
+    const members = await UserProjectRoles.findAll({
+      where: {
+        project_id: projectId,
+      },
+      include: [User],
+    });
+
+    res.status(200).json(members);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
