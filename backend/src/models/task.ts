@@ -20,7 +20,7 @@ class Task extends Model<Task> {
   description!: string;
 
   @Column({
-    type: DataType.ENUM("backlog", "todo", "in Progress", "done", "cancelled"),
+    type: DataType.ENUM("backlog", "todo", "in progress", "done", "canceled"),
     allowNull: false,
   })
   status!: string;

@@ -30,3 +30,19 @@ export const deleteTask = async (projectId: string, taskId: string) => {
     throw error;
   }
 };
+
+export const updateTask = async (
+  projectId: string,
+  taskId: string,
+  data: unknown
+) => {
+  try {
+    const response = await axiosInstance.put(
+      `projects/${projectId}/tasks/${taskId}`,
+      data
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};

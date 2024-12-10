@@ -46,7 +46,7 @@ import { DataTableToolbar } from "./data-table-toolbar";
 
 import { labels, statuses, priorities } from "../data/data";
 import { TrashIcon } from "lucide-react";
-import { deleteTask } from "@/services/tasks";
+import { deleteTask, updateTask } from "@/services/tasks";
 import { Alert, Snackbar } from "@mui/material";
 interface DataTableProps<
   TData extends {
@@ -65,6 +65,7 @@ interface DataTableProps<
   data: TData[];
   setTasks: React.Dispatch<React.SetStateAction<TData[]>>;
   projectId: string;
+  students?: { [key: string]: string };
 }
 
 export function DataTable<
@@ -79,7 +80,13 @@ export function DataTable<
     assignedToName?: string;
   },
   TValue
->({ columns, data, setTasks, projectId }: DataTableProps<TData, TValue>) {
+>({
+  columns,
+  data,
+  setTasks,
+  projectId,
+  students,
+}: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = React.useState({});
   const [openSnackBar, setOpenSnackBar] = React.useState(false);
   const [snackBarMessage, setSnackBarMessage] = React.useState("");
@@ -114,13 +121,38 @@ export function DataTable<
   });
 
   function handleDeleteTask(taskId: string): void {
-    deleteTask(projectId, taskId);
-    setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
-    setEditingTask(null);
-    setSnackBarMessage("Task deleted successfully.");
-    setOpenSnackBar(true);
+    deleteTask(projectId, taskId)
+      .then(() => {
+        setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
+        setSnackBarMessage("Task deleted successfully.");
+      })
+      .catch(() => {
+        setSnackBarMessage("Failed to delete task.");
+      })
+      .finally(() => {
+        setEditingTask(null);
+        setOpenSnackBar(true);
+      });
   }
 
+  function handleUpdateTask(taskId: string): void {
+    updateTask(projectId, taskId, editingTask)
+      .then(() => {
+        setTasks((prevTasks) =>
+          prevTasks.map((t) =>
+            t.id === taskId && editingTask ? editingTask : t
+          )
+        );
+        setSnackBarMessage("Task updated successfully.");
+      })
+      .catch(() => {
+        setSnackBarMessage("Failed to update task.");
+      })
+      .finally(() => {
+        setEditingTask(null);
+        setOpenSnackBar(true);
+      });
+  }
   return (
     <div className="space-y-4">
       <DataTableToolbar table={table} />
@@ -234,18 +266,28 @@ export function DataTable<
                   >
                     Assigned To
                   </label>
-                  <Input
-                    id="assignedTo"
-                    placeholder="Assigned To"
-                    value={editingTask.assignedToName || ""}
-                    onChange={(e) =>
+                  <Select
+                    value={editingTask.assigned_to || ""}
+                    onValueChange={(value) => {
                       setEditingTask({
                         ...editingTask,
-                        assignedTo: e.target.value,
-                      })
-                    }
-                    className="mt-1 p-2 border border-muted rounded-lg focus:ring focus:ring-primary"
-                  />
+                        assigned_to: value,
+                        assignedToName: students ? students[value] : "",
+                      });
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Assigned To" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {students &&
+                        Object.entries(students).map(([id, name]) => (
+                          <SelectItem key={id} value={id}>
+                            {name}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="grid grid-cols-3 gap-4">
                   <div>
@@ -257,9 +299,9 @@ export function DataTable<
                     </label>
                     <Select
                       value={editingTask.status}
-                      onValueChange={(value) =>
-                        setEditingTask({ ...editingTask, status: value })
-                      }
+                      onValueChange={(value) => {
+                        setEditingTask({ ...editingTask, status: value });
+                      }}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Status" />
@@ -340,7 +382,7 @@ export function DataTable<
                   <div className="space-x-2">
                     <Button
                       type="submit"
-                      onClick={() => setEditingTask(null)}
+                      onClick={() => handleUpdateTask(editingTask.id)}
                       className="w-full md:w-auto bg-primary text-primary-foreground hover:bg-primary/80 border border-primary"
                     >
                       Save Changes

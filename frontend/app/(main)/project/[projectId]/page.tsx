@@ -131,6 +131,7 @@ export default function TaskPage({
             setTasks={setTasks}
             columns={columns}
             projectId={String(params.projectId)}
+            students={students}
           />
         </div>
       )}
