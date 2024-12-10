@@ -48,6 +48,8 @@ import { labels, statuses, priorities } from "../data/data";
 import { TrashIcon } from "lucide-react";
 import { deleteTask, updateTask } from "@/services/tasks";
 import { Alert, Snackbar } from "@mui/material";
+import { useState } from "react";
+import { addTask } from "@/services/tasks";
 interface DataTableProps<
   TData extends {
     id: string;
@@ -97,7 +99,18 @@ export function DataTable<
   );
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [editingTask, setEditingTask] = React.useState<TData | null>(null);
-
+  const [newTask, setNewTask] = useState({
+    id: "",
+    title: "",
+    description: "",
+    assigned_to: "",
+    status: "",
+    priority: "",
+    label: "",
+    assignedToName: "",
+    project_id: projectId,
+  });
+  const [addTaskDialogOpen, setAddTaskDialogOpen] = useState(false);
   const table = useReactTable({
     data,
     columns,
@@ -153,9 +166,29 @@ export function DataTable<
         setOpenSnackBar(true);
       });
   }
+
+  function handleAddTask(): void {
+    addTask(projectId, newTask)
+      .then((task) => {
+        task.id = task.task_id;
+        setTasks((prevTasks) => [task, ...prevTasks]);
+        setSnackBarMessage("Task added successfully.");
+      })
+      .catch((error) => {
+        console.error("Failed to add task:", error);
+        setSnackBarMessage("Failed to add task.");
+      })
+      .finally(() => {
+        setAddTaskDialogOpen(false);
+        setOpenSnackBar(true);
+      });
+  }
   return (
     <div className="space-y-4">
-      <DataTableToolbar table={table} />
+      <DataTableToolbar
+        setAddTaskDialogOpen={setAddTaskDialogOpen}
+        table={table}
+      />
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -394,6 +427,207 @@ export function DataTable<
           </DialogContent>
         </Dialog>
       )}
+
+      {addTaskDialogOpen && (
+        <Dialog
+          open={addTaskDialogOpen}
+          onOpenChange={() => setAddTaskDialogOpen(false)}
+        >
+          <DialogContent className="max-w-lg p-6 rounded-lg shadow-xl bg-card text-card-foreground">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-bold text-primary">
+                Add New Task
+              </DialogTitle>
+              <DialogDescription className="text-sm text-muted-foreground">
+                Fill in the details of the new task.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="mt-4 space-y-6">
+              <form
+                className="space-y-4"
+                onSubmit={(e) => {
+                  e.preventDefault();
+
+                  handleAddTask();
+                  setAddTaskDialogOpen(false);
+                  setNewTask({
+                    id: "",
+                    title: "",
+                    description: "",
+                    assigned_to: "",
+                    status: "",
+                    priority: "",
+                    label: "",
+                    assignedToName: "",
+                    project_id: projectId,
+                  });
+                }}
+              >
+                <div>
+                  <label
+                    htmlFor="title"
+                    className="block text-sm font-medium text-muted-foreground"
+                  >
+                    Title
+                  </label>
+                  <Input
+                    id="title"
+                    placeholder="Title"
+                    value={newTask.title}
+                    onChange={(e) =>
+                      setNewTask({ ...newTask, title: e.target.value })
+                    }
+                    className="mt-1 p-2 border border-muted rounded-lg focus:ring focus:ring-primary"
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="description"
+                    className="block text-sm font-medium text-muted-foreground"
+                  >
+                    Description
+                  </label>
+                  <textarea
+                    id="description"
+                    placeholder="Description"
+                    value={newTask.description}
+                    onChange={(e) =>
+                      setNewTask({ ...newTask, description: e.target.value })
+                    }
+                    className="mt-1 block w-full h-24 p-2 border rounded-lg focus:ring focus:ring-primary"
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="assignedTo"
+                    className="block text-sm font-medium text-muted-foreground"
+                  >
+                    Assigned To
+                  </label>
+                  <Select
+                    value={newTask.assigned_to}
+                    onValueChange={(value) =>
+                      setNewTask({
+                        ...newTask,
+                        assigned_to: value,
+                        assignedToName: students ? students[value] : "",
+                      })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Assigned To" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {students &&
+                        Object.entries(students).map(([id, name]) => (
+                          <SelectItem key={id} value={id}>
+                            {name}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <label
+                      htmlFor="status"
+                      className="block text-sm font-medium text-muted-foreground"
+                    >
+                      Status
+                    </label>
+                    <Select
+                      value={newTask.status}
+                      onValueChange={(value) =>
+                        setNewTask({ ...newTask, status: value })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {statuses.map((status) => (
+                          <SelectItem key={status.value} value={status.value}>
+                            {status.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="priority"
+                      className="block text-sm font-medium text-muted-foreground"
+                    >
+                      Priority
+                    </label>
+                    <Select
+                      value={newTask.priority}
+                      onValueChange={(value) =>
+                        setNewTask({ ...newTask, priority: value })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Priority" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {priorities.map((priority) => (
+                          <SelectItem
+                            key={priority.value}
+                            value={priority.value}
+                          >
+                            {priority.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="label"
+                      className="block text-sm font-medium text-muted-foreground"
+                    >
+                      Label
+                    </label>
+                    <Select
+                      value={newTask.label}
+                      onValueChange={(value) =>
+                        setNewTask({ ...newTask, label: value })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Label" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {labels.map((label) => (
+                          <SelectItem key={label.value} value={label.value}>
+                            {label.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="flex justify-between items-center">
+                  <Button
+                    variant="outline"
+                    onClick={() => setAddTaskDialogOpen(false)}
+                    className="bg-secondary text-secondary-foreground border border-secondary hover:bg-secondary/80"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    className="w-full md:w-auto bg-primary text-primary-foreground hover:bg-primary/80 border border-primary"
+                  >
+                    Add Task
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
       <Snackbar
         open={openSnackBar}
         autoHideDuration={6000}

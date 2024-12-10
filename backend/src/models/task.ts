@@ -17,28 +17,25 @@ class Task extends Model<Task> {
   title!: string;
 
   @Column({ type: DataType.TEXT })
-  description!: string;
+  description: string;
 
   @Column({
     type: DataType.ENUM("backlog", "todo", "in progress", "done", "canceled"),
-    allowNull: false,
   })
-  status!: string;
+  status: string;
 
   @Column({
     type: DataType.ENUM("high", "low", "medium"),
-    allowNull: false,
   })
-  priority!: string;
+  priority: string;
 
   @Column({
     type: DataType.ENUM("bug", "feature", "documentation"),
-    allowNull: false,
   })
-  label!: string;
+  label: string;
 
-  @Column({ type: DataType.DATE, allowNull: false })
-  due_date!: Date;
+  @Column({ type: DataType.DATE })
+  due_date: Date;
 
   @ForeignKey(() => Project)
   @Column({ type: DataType.INTEGER, allowNull: false })
@@ -46,13 +43,13 @@ class Task extends Model<Task> {
 
   @ForeignKey(() => User)
   @Column({ type: DataType.INTEGER })
-  assigned_to!: number;
+  assigned_to: number;
 
   @Column({ type: DataType.DATE, allowNull: false })
   createdAt!: Date;
 
   @Column({ type: DataType.INTEGER })
-  estimated_hours!: number;
+  estimated_hours: number;
 
   @Column({ type: DataType.DATE, allowNull: false })
   updatedAt!: Date;

@@ -46,3 +46,15 @@ export const updateTask = async (
     throw error;
   }
 };
+
+export const addTask = async (projectId: string, data: unknown) => {
+  try {
+    const response = await axiosInstance.post(
+      `projects/${projectId}/tasks`,
+      data
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};

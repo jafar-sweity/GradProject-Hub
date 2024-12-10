@@ -12,10 +12,12 @@ import { DataTableFacetedFilter } from "./data-table-faceted-filter";
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>;
+  setAddTaskDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export function DataTableToolbar<TData>({
   table,
+  setAddTaskDialogOpen,
 }: DataTableToolbarProps<TData>) {
   const isFiltered = table.getState().columnFilters.length > 0;
 
@@ -55,7 +57,10 @@ export function DataTableToolbar<TData>({
           </Button>
         )}
       </div>
-      <DataTableViewOptions table={table} />
+      <DataTableViewOptions
+        setAddTaskDialogOpen={setAddTaskDialogOpen}
+        table={table}
+      />
     </div>
   );
 }
