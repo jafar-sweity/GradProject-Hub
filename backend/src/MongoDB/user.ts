@@ -1,6 +1,7 @@
+import { create } from "domain";
 import mongoose, { Schema, Document } from "mongoose";
+import { userInfo } from "os";
 
-// Define interface for UserCommunity
 interface IUserCommunity extends Document {
   user_id: number; // Reference to MySQL user_id
   followers: Array<{ user_id: number }>;
@@ -11,9 +12,9 @@ interface IUserCommunity extends Document {
   avatarurl: string;
 }
 
-// Define schema
 const UserCommunitySchema: Schema = new Schema({
   user_id: { type: Number, required: true, unique: true },
+  username: { type: String, required: true },
   followers: [{ user_id: { type: Number, ref: "User" } }],
   following: [{ user_id: { type: Number, ref: "User" } }],
   posts: [
@@ -22,9 +23,9 @@ const UserCommunitySchema: Schema = new Schema({
     },
   ],
   avatarurl: { type: String },
+  createdAt: { type: Date, default: Date.now },
 });
 
-// Export the model
 export default mongoose.model<IUserCommunity>(
   "UserCommunity",
   UserCommunitySchema

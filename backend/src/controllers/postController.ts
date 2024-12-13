@@ -63,8 +63,6 @@ export const getForYouPosts = async (
 ): Promise<void> => {
   try {
     const { userId } = req.query;
-    console.log("userId", userId);
-
     if (!userId) {
       res.status(400).json({ message: "userId is required" });
       return;
@@ -81,7 +79,7 @@ export const getForYouPosts = async (
     }
 
     const posts = await Post.find({ user_id: currentUser._id }).select(
-      "_id user_id content likes createdAt comments username" 
+      "_id user_id content likes createdAt comments username"
     );
     const transformedPosts = posts.map((post) => {
       const typedPost = post.toObject() as {
@@ -98,7 +96,7 @@ export const getForYouPosts = async (
         user_id: typedPost.user_id?.toString(),
         content: typedPost.content,
         likes: typedPost.likes,
-        username: typedPost.username || '',
+        username: typedPost.username || "",
         createdAt: typedPost.createdAt,
       };
     });
@@ -135,7 +133,6 @@ export const getFollowingPosts = async (
       (follow) => follow.user_id
     );
 
-    console.log("Following numeric user IDs:", followingUserIds);
 
     if (followingUserIds.length === 0) {
       res.status(200).json([]);
@@ -150,17 +147,15 @@ export const getFollowingPosts = async (
     // Extract the MongoDB ObjectIds
     const followingMongoIds = followingObjectIds.map((user) => user._id);
 
-    console.log(
-      "Mapped MongoDB ObjectIds of following users:",
-      followingMongoIds
-    );
+   
+
 
     const posts = await Post.find({
       user_id: { $in: followingMongoIds },
     })
       .sort({ createdAt: -1 })
       .select("_id user_id content likes createdAt comments username");
-    
+
     const transformedPosts = posts.map((post: any) => ({
       id: post._id.toString(),
       user_id: post.user_id?.toString(),
@@ -170,7 +165,6 @@ export const getFollowingPosts = async (
       comments: post.comments?.length || 0,
       createdAt: post.createdAt,
     }));
-    console.log("Following posts:", transformedPosts);
 
     res.status(200).json(transformedPosts);
   } catch (error: any) {
@@ -230,16 +224,14 @@ export const updatePost = async (
 };
 
 // Delete a post
+
 export const deletePost = async (
   req: Request,
   res: Response
 ): Promise<void> => {
   try {
-    console.log(req.params);
-    const { id } = req.params;
-    const { userId } = req.query;
-    // Validate inputs
-    console.log(`postId: ${id}, userId: ${userId}`);
+    const { id } = req.params; 
+    const { userId } = req.query; 
 
     if (!id) {
       res.status(400).json({ message: "Invalid post ID" });
@@ -250,38 +242,39 @@ export const deletePost = async (
       return;
     }
 
-    // Fetch the post
     const post = await Post.findById(id);
     if (!post) {
       res.status(404).json({ message: "Post not found" });
       return;
     }
 
-    const userCommunity = (await UserCommunity.findOne({
+    const userCommunity = await UserCommunity.findOne({
       user_id: userId,
-    })) as { _id: mongoose.Types.ObjectId };
+    });
     if (!userCommunity) {
       res.status(404).json({ message: "User not found in the community" });
       return;
     }
 
-    if (post.user_id.toString() !== userCommunity._id.toString()) {
-      res
-        .status(403)
-        .json({ message: "You are not authorized to delete this post" });
-      return;
-    }
-
-    // Delete the post
     const deletedPost = await Post.findByIdAndDelete(id);
     if (!deletedPost) {
       res.status(500).json({ message: "Failed to delete post" });
       return;
     }
 
+    const updatedUserCommunity = await UserCommunity.updateOne(
+      { user_id: userId },
+      { $pull: { posts: { post_id: new mongoose.Types.ObjectId(id) } } }
+    );
+
+    if (!updatedUserCommunity.modifiedCount) {
+      res.status(500).json({ message: "Failed to update user community" });
+      return;
+    }
+
     res.status(200).json({
       message: "Post deleted successfully",
-      post: deletedPost, // Optionally return the deleted post
+      post: deletedPost,
     });
   } catch (error: any) {
     console.error("Error deleting post:", error.message);

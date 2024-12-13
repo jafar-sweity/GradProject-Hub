@@ -8,12 +8,23 @@ import { Button } from "./ui/button";
 import { formatNumber } from "@/lib/utils";
 import { getallPosts, getWhoToFollow } from "@/components/posts/editor/action";
 import FollowButton from "./FollowButton"; // Import your FollowButton component
+import UserTooltip from "./UserTooltip";
+import { useQuery } from "@tanstack/react-query";
 
 interface User {
   id: string;
   username: string;
   avatarurl: string;
+  followersCount?: number;
+  isFollowedByUser?: boolean;
 }
+
+const fetchUser = async (username: string, currentUserId: string) => {
+  const response = await axiosInstance.get(`/community/users/${username}`, {
+    params: { currentUserId },
+  });
+  return response.data;
+};
 
 export default function TrendsSidebar() {
   return (
@@ -61,29 +72,32 @@ function WhoToFollow() {
             key={toFollow.id}
             className="flex items-center justify-between gap-3"
           >
-            <Link
-              href={`/users/${toFollow.username}`}
-              className="flex items-center gap-3"
-            >
-              <UserAvatar
-                avatarurl={toFollow.avatarurl}
-                className="flex-none"
-              />
-              <div>
-                <p className="line-clamp-1 break-all font-semibold hover:underline">
-                  {toFollow.username}
-                </p>
-                <p className="line-clamp-1 break-all text-muted-foreground">
-                  @{toFollow.id}
-                </p>
-              </div>
-            </Link>
-
+            <UserTooltip username={toFollow.username}>
+              <Link
+                href={`/users/${toFollow.username}`}
+                className="flex items-center gap-3"
+              >
+                <UserAvatar
+                  avatarurl={toFollow.avatarurl}
+                  className="flex-none"
+                />
+                <div>
+                  <p className="line-clamp-1 break-all font-semibold hover:underline">
+                    {toFollow.username}
+                  </p>
+                  <p className="line-clamp-1 break-all text-muted-foreground">
+                    @{toFollow.username}
+                  </p>
+                </div>
+              </Link>
+            </UserTooltip>
             {/* Integrate FollowButton here */}
-            <FollowButton
-              userId={toFollow.id}
-              initialState={{ isFollowedByUser: false, followers: 0 }}
-            />
+            {user?.id && (
+              <FollowButtonWrapper
+                username={toFollow.username}
+                currentUserId={user.id}
+              />
+            )}
           </div>
         ))
       ) : (
@@ -91,6 +105,35 @@ function WhoToFollow() {
       )}
     </div>
   );
+}
+
+function FollowButtonWrapper({
+  username,
+  currentUserId,
+}: {
+  username: string;
+  currentUserId: string;
+}) {
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["userProfile", username, currentUserId],
+    queryFn: () => fetchUser(username, currentUserId),
+    enabled: !!username && !!currentUserId,
+  });
+
+  if (isLoading) {
+    return <Loader2 className="mx-auto animate-spin" />;
+  }
+
+  if (isError || !data) {
+    return <p>Error loading user info.</p>;
+  }
+
+  const followerState = {
+    followers: data.followersCount || 0,
+    isFollowedByUser: data.isFollowedByUser || false,
+  };
+
+  return <FollowButton userId={data.user_id} initialState={followerState} />;
 }
 
 function TrendingTopics() {
