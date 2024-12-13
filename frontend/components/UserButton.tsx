@@ -37,7 +37,7 @@ export default function UserButton({ calssName }: UserButtonProps) {
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        <DropdownMenuLabel> logged in as @jafar</DropdownMenuLabel>
+        <DropdownMenuLabel> logged in as @{user?.name}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <Link href={`/user/${user?.name}`}>
           {/* add the path */}

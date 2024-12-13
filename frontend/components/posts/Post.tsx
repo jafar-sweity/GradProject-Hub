@@ -5,6 +5,8 @@ import { cn, formatRelativeDate } from "@/lib/utils";
 import { use } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { PostMoreButton } from "./PostMoreButton";
+import Linkify from "../Linkify";
+import UserTooltip from "../UserTooltip";
 
 interface PostProps {
   post: {
@@ -25,12 +27,14 @@ export default function Post({ post }: PostProps) {
       <div className="flex justify-between  gap-3">
         <div className="flex  gap-3">
           <div className="flex flex-wrap gap-3">
-            <Link href={"/users/${post.user.username}"}>
+            <UserTooltip username={post.username} >
+            <Link href={`/users/${post.username}`}>
               <UserAvatar
                 avatarurl=""
                 // avatarurl= {post.user.avatarurl}
               />
             </Link>
+            </UserTooltip>
           </div>
           <div>
             <Link
@@ -59,7 +63,9 @@ export default function Post({ post }: PostProps) {
           />
         )}
       </div>
+      <Linkify>
       <div className="whitespace-pre-line break-words">{post.content}</div>
+      </Linkify>
     </article>
   );
 }

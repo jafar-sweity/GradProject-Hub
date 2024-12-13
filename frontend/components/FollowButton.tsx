@@ -17,7 +17,6 @@ export default function FollowButton({
   initialState,
 }: FollowButtonProps) {
   const { user } = useAuth();
-
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -60,7 +59,7 @@ export default function FollowButton({
       });
     },
   });
-
+  
   return (
     <Button
       variant={data.isFollowedByUser ? "secondary" : "default"}

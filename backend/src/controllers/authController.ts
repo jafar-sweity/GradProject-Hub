@@ -39,6 +39,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
     const newUserCommunity = new UserCommunity({
       user_id: newUser.user_id, // Reference to MySQL user_id
+      username: newUser.name,
     });
     await newUserCommunity.save();
 
@@ -92,12 +93,6 @@ export const login = async (req: Request, res: Response): Promise<void> => {
   const user_id = Number(user.user_id); // Ensure this is a number
 
   const userCommunity = await UserCommunity.findOne({ user_id });
-
-  // console.log(userCommunity);
-  // if (!userCommunity) {
-  //   res.status(404).json({ message: "User not found" });
-  //   return;
-  // }
 
   const payload = {
     id: user.user_id,

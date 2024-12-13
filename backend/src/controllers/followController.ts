@@ -9,14 +9,12 @@ export const followUser = async (
   try {
     const { id } = req.params; // User to follow
     const { currentUserId } = req.query; // Current user's ID
-   
 
     if (!currentUserId) {
       res.status(400).json({ message: "Invalid or missing currentUserId" });
       return;
     }
-    console.log("id", id);
-    console.log("currentUserId", currentUserId);
+ 
     const currentUserCommunity = await UserCommunity.findOne({
       user_id: Number(currentUserId),
     });
@@ -37,7 +35,7 @@ export const followUser = async (
       res.status(400).json({ message: "Already following this user" });
       return;
     }
- 
+
     const newFollow = new Follow({
       follower_id: currentUserCommunity._id,
       following_id: userToFollow._id,
@@ -50,7 +48,7 @@ export const followUser = async (
 
     currentUserCommunity.following.push({ user_id: Number(id) });
     await currentUserCommunity.save();
-    
+
     res.status(200).json({
       message: `Successfully followed user ${id}`,
       followersCount: userToFollow.followers.length,
@@ -67,9 +65,10 @@ export const unfollowUser = async (
 ): Promise<void> => {
   try {
     const { id } = req.params; // User to unfollow
-    const { currentUserId } = req.params; // Current user's ID
+    
+    const { currentUserId } = req.query; // Current user's ID
 
-    if (!currentUserId || isNaN(Number(currentUserId))) {
+    if (!currentUserId) {
       res.status(400).json({ message: "Invalid or missing currentUserId" });
       return;
     }
@@ -174,8 +173,7 @@ export const getFollowerInfo = async (
   try {
     const { userId } = req.params;
     const currentUserId = req.query.currentUserId as string;
-
-    console.log("currentUserId", currentUserId + "and userId", userId);
+  
     if (!userId) {
       res.status(400).json({ message: "User ID is required" });
       return;
@@ -191,7 +189,8 @@ export const getFollowerInfo = async (
 
     // const currentUserId = req.query.currentUserId as string;
 
-    let isFollowedByUser = false;
+    let isFollowedByUser = true;
+    const usertogetinto = await UserCommunity.findOne({ _id: userId });
 
     if (currentUserId) {
       const currentUser = await UserCommunity.findOne(
@@ -201,7 +200,7 @@ export const getFollowerInfo = async (
 
       if (currentUser) {
         isFollowedByUser = currentUser.following.some(
-          (f) => f.user_id === Number(userId) // Ensure the same type for comparison
+          (f) => f.user_id === usertogetinto?.user_id // Ensure the same type for comparison
         );
       }
     }

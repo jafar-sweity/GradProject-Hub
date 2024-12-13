@@ -18,10 +18,9 @@ router.get("/users/notfollow", getUsersNotFollowed);
 router.post("/follow/:id", followUser);
 router.post("/unfollow/:id", unfollowUser);
 
-router.get("/:userId", getFollowerInfo); // Updated to include `userId` in the path
-
 router.get("/:id/followers", getFollowers);
 router.get("/:id/following", getFollowing);
+router.get("/:userId", getFollowerInfo); // Updated to include `userId` in the path
 
 router.get("/users", getUsers);
 
