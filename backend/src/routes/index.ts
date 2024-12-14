@@ -5,6 +5,7 @@ import authRoutes from "./auth.js";
 import projectRoutes from "./project.js";
 import emailRoutes from "./email.js";
 import communityRoutes from "./community.js"; // Add this line
+import uploadRoutes from "./upload.js";
 // import subTaskRoutes from "./subTask.js";
 const routes = Router();
 
@@ -17,6 +18,7 @@ routes.use("/api/v1/users", userRoutes);
 routes.use("/api/v1/projects", projectRoutes);
 routes.use("/api/v1/projects/:projectId/tasks", taskRoutes);
 routes.use("/api/v1/emails", emailRoutes);
+routes.use("/api/v1/upload", uploadRoutes);
 // routes.use("/api/v1/projects/:projectId/tasks/:taskId/subTasks", subTaskRoutes);
 
 // MogoDB based routes for the community feture

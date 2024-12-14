@@ -76,8 +76,6 @@ export default function TaskPage({
         supervisors[member.user_id] = member.User.name;
       }
     });
-    console.log("Students:", students);
-    console.log("Supervisors:", supervisors);
   }
   useEffect(() => {
     async function fetchTasks() {
@@ -104,25 +102,39 @@ export default function TaskPage({
 
   return (
     <>
-      <div className="h-full flex-1 flex-col space-y-8 p-8 md:flex bg-card rounded-2xl">
-        <div className="flex items-center justify-between space-y-2">
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight">Welcome back!</h2>
-            <p className="text-muted-foreground">
-              Here&apos;s a list of {searchParams.get("projectName")} tasks!
-            </p>
-          </div>
-          <div className="flex items-end space-x-2 flex-col ">
-            <p className="text-muted-foreground text-sm">
-              Your Supervisor(s) : {Object.values(supervisors).join(", ")}
-            </p>
-            <p className="text-muted-foreground text-sm">
-              Project Members : {Object.values(students).join(", ")}{" "}
-            </p>
-          </div>
+      {tasksLoading ? (
+        <div className="w-full flex justify-center">
+          <span className="loading loading-dots loading-xs bg-primary"></span>
         </div>
-        <DataTable data={tasks} columns={columns} />
-      </div>
+      ) : (
+        <div className="h-full flex-1 flex-col space-y-8 p-8 md:flex bg-card rounded-2xl">
+          <div className="flex items-center justify-between space-y-2">
+            <div>
+              <h2 className="text-2xl font-bold tracking-tight">
+                Welcome back!
+              </h2>
+              <p className="text-muted-foreground">
+                Here&apos;s a list of {searchParams.get("projectName")} tasks!
+              </p>
+            </div>
+            <div className="flex items-end space-x-2 flex-col ">
+              <p className="text-muted-foreground text-sm">
+                Your Supervisor(s) : {Object.values(supervisors).join(", ")}
+              </p>
+              <p className="text-muted-foreground text-sm">
+                Project Members : {Object.values(students).join(", ")}{" "}
+              </p>
+            </div>
+          </div>
+          <DataTable
+            data={tasks}
+            setTasks={setTasks}
+            columns={columns}
+            projectId={String(params.projectId)}
+            students={students}
+          />
+        </div>
+      )}
     </>
   );
 }

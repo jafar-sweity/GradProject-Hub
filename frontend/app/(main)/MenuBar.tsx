@@ -17,6 +17,8 @@ import {
   Mail,
   ListChecks,
   ChevronRight,
+  FileText,
+  Video,
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -49,7 +51,7 @@ export default function MenuBar({ className }: MenuBarProps) {
           <Button
             variant="ghost"
             className="flex items-center justify-between w-full px-4 py-2 hover:bg-accent hover:text-accent-foreground"
-            title="projects"
+            title="Projects"
             onClick={() => setIsOpen(!isOpen)}
           >
             <div className="flex items-center gap-3">
@@ -78,29 +80,63 @@ export default function MenuBar({ className }: MenuBarProps) {
                   transition={{ duration: 0.2 }}
                   className="pl-6 mt-1 overflow-hidden"
                 >
-                  <div className="border-l-2 border-muted pl-4 py-1">
+                  <div className="border-l-2 border-muted pl-4 py-1 space-y-2">
+                    {/* Project Title */}
                     <Link
                       href={`/project/${
                         project.project_id
                       }?projectName=${encodeURIComponent(
                         project.Project.name
                       )}`}
-                      className="flex items-center gap-3 py-2 hover:text-primary transition-colors"
+                      className="flex items-center gap-3 py-2 font-semibold hover:text-primary transition-colors"
                     >
                       {loading ? (
                         <div className="w-full flex justify-center">
                           <span className="loading loading-dots loading-xs bg-primary"></span>
                         </div>
                       ) : (
-                        <span className="text-sm">{project.Project.name}</span>
+                        <span className="text-base">
+                          {project.Project.name}
+                        </span>
                       )}
                     </Link>
+
+                    <div className="pl-4 text-sm space-y-1">
+                      <Link
+                        href={`/project/${project.project_id}/abstract`}
+                        className="block hover:text-primary transition-colors"
+                      >
+                        <span className="flex items-center gap-2">
+                          <FileText className="h-4 w-4" />
+                          Abstract
+                        </span>
+                      </Link>
+                      <Link
+                        href={`/project/${project.project_id}/report`}
+                        className="block hover:text-primary transition-colors"
+                      >
+                        <span className="flex items-center gap-2">
+                          <FileText className="h-4 w-4" />
+                          Report
+                        </span>
+                      </Link>
+                      <Link
+                        href={`/project/${project.project_id}/video_demo`}
+                        className="block hover:text-primary transition-colors"
+                      >
+                        <span className="flex items-center gap-2">
+                          <Video className="h-4 w-4" />
+                          Demo
+                        </span>
+                      </Link>
+                    </div>
                   </div>
                 </motion.div>
               </CollapsibleContent>
             ))}
         </AnimatePresence>
       </Collapsible>
+
       <Button
         variant="ghost"
         className="flex items-center justify-start  gap-3"

@@ -18,6 +18,18 @@ class Project extends Model<Project> {
   @Column({ type: DataType.INTEGER })
   supervisor_id: string;
 
+  @Column({ type: DataType.STRING, allowNull: true })
+  abstract_url!: string | null;
+
+  @Column({ type: DataType.STRING, allowNull: true })
+  report_url!: string | null;
+
+  @Column({ type: DataType.STRING, allowNull: true })
+  demo_url!: string | null;
+
+  @Column({ type: DataType.STRING, allowNull: true })
+  video_demo_url!: string | null;
+
   @Column({ type: DataType.DATE, allowNull: false })
   createdAt!: Date;
 

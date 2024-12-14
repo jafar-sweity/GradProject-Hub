@@ -8,3 +8,12 @@ export const getProjectMembers = async (projectId: number) => {
     throw error;
   }
 };
+
+export const getProject = async (projectId: string) => {
+  try {
+    const response = await axiosInstance.get(`projects/${projectId}`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
