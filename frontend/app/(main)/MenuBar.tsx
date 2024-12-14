@@ -121,7 +121,7 @@ export default function MenuBar({ className }: MenuBarProps) {
                         </span>
                       </Link>
                       <Link
-                        href={`/project/${project.project_id}/demo`}
+                        href={`/project/${project.project_id}/video_demo`}
                         className="block hover:text-primary transition-colors"
                       >
                         <span className="flex items-center gap-2">

@@ -3,7 +3,7 @@ import axiosInstance from "@/lib/axiosInstance";
 export const uploadUrl = async (
   projectId: string,
   url: string,
-  urlType: "abstract" | "demo" | "report"
+  urlType: "abstract" | "video_demo" | "report"
 ) => {
   try {
     const { data } = await axiosInstance.put("/upload/url", {

@@ -6,7 +6,7 @@ export const storeUrl = async (req: Request, res: Response) => {
     const { projectId, url, urlType } = req.body as {
       projectId: string;
       url: string;
-      urlType: "abstract" | "demo" | "report";
+      urlType: "abstract" | "video_demo" | "report";
     };
 
     const project = await Project.findByPk(projectId);
@@ -19,8 +19,8 @@ export const storeUrl = async (req: Request, res: Response) => {
       case "abstract":
         project.abstract_url = url;
         break;
-      case "demo":
-        project.demo_url = url;
+      case "video_demo":
+        project.video_demo_url = url;
         break;
       case "report":
         project.report_url = url;
