@@ -447,7 +447,6 @@ export function DataTable<
                 className="space-y-4"
                 onSubmit={(e) => {
                   e.preventDefault();
-
                   handleAddTask();
                   setAddTaskDialogOpen(false);
                   setNewTask({

@@ -22,7 +22,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   if (!isChecked) {
     return (
-      <div className="w-full flex justify-center ">
+      <div className="w-full flex justify-center">
         <span className="loading loading-dots loading-lg bg-primary"></span>
       </div>
     );
@@ -30,7 +30,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   return (
     <>
-      <div className="overflow-hidden rounded-[0.5rem] border bg-background shadow">
+      <div className="overflow-hidden rounded-[0.5rem] border bg-background shadow w-full">
         {children}
       </div>
     </>
