@@ -30,14 +30,16 @@ interface MenuBarProps {
 export default function MenuBar({ className }: MenuBarProps) {
   const [isOpen, setIsOpen] = useState(false);
   const { user } = useAuth();
-  const { data: projectData, loading } = useFetchData(getStudentProject, [
-    user?.id ?? "",
-  ]);
+
+  const { data: projectData, loading } = useFetchData(
+    user?.role === "student" ? getStudentProject : async () => null,
+    [user?.role === "student" ? user?.id ?? "" : ""]
+  );
   return (
     <div className={className}>
       <Button
         variant="ghost"
-        className="flex items-center justify-start  gap-3"
+        className="flex items-center justify-start gap-3"
         title="Home"
         asChild
       >
@@ -46,100 +48,115 @@ export default function MenuBar({ className }: MenuBarProps) {
           <span className="hidden lg:inline">Home</span>
         </Link>
       </Button>
-      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-        <CollapsibleTrigger asChild>
-          <Button
-            variant="ghost"
-            className="flex items-center justify-between w-full px-4 py-2 hover:bg-accent hover:text-accent-foreground"
-            title="Projects"
-            onClick={() => setIsOpen(!isOpen)}
-          >
-            <div className="flex items-center gap-3">
-              <ListChecks className="h-4 w-4" />
-              <span className="hidden lg:inline">Projects</span>
-            </div>
-            <motion.div
-              animate={{ rotate: isOpen ? 90 : 0 }}
-              transition={{ duration: 0.2 }}
+
+      {user?.role === "student" ? (
+        <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+          <CollapsibleTrigger asChild>
+            <Button
+              variant="ghost"
+              className="flex items-center justify-between w-full px-4 py-2 hover:bg-accent hover:text-accent-foreground"
+              title="Projects"
+              onClick={() => setIsOpen(!isOpen)}
             >
-              <ChevronRight className="h-4 w-4" />
-            </motion.div>
-          </Button>
-        </CollapsibleTrigger>
+              <div className="flex items-center gap-3">
+                <ListChecks className="h-4 w-4" />
+                <span className="hidden lg:inline">Projects</span>
+              </div>
+              <motion.div
+                animate={{ rotate: isOpen ? 90 : 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </motion.div>
+            </Button>
+          </CollapsibleTrigger>
 
-        <AnimatePresence>
-          {isOpen &&
-            !loading &&
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            projectData?.map((project: any) => (
-              <CollapsibleContent forceMount asChild key={project.project_id}>
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="pl-6 mt-1 overflow-hidden"
-                >
-                  <div className="border-l-2 border-muted pl-4 py-1 space-y-2">
-                    {/* Project Title */}
-                    <Link
-                      href={`/project/${
-                        project.project_id
-                      }?projectName=${encodeURIComponent(
-                        project.Project.name
-                      )}`}
-                      className="flex items-center gap-3 py-2 font-semibold hover:text-primary transition-colors"
-                    >
-                      {loading ? (
-                        <div className="w-full flex justify-center">
-                          <span className="loading loading-dots loading-xs bg-primary"></span>
-                        </div>
-                      ) : (
-                        <span className="text-base">
-                          {project.Project.name}
-                        </span>
-                      )}
-                    </Link>
+          <AnimatePresence>
+            {isOpen &&
+              !loading &&
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              projectData?.map((project: any) => (
+                <CollapsibleContent forceMount asChild key={project.project_id}>
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="pl-6 mt-1 overflow-hidden"
+                  >
+                    <div className="border-l-2 border-muted pl-4 py-1 space-y-2">
+                      {/* Project Title */}
+                      <Link
+                        href={`/projects/${
+                          project.project_id
+                        }?projectName=${encodeURIComponent(
+                          project.Project.name
+                        )}`}
+                        className="flex items-center gap-3 py-2 font-semibold hover:text-primary transition-colors"
+                      >
+                        {loading ? (
+                          <div className="w-full flex justify-center">
+                            <span className="loading loading-dots loading-xs bg-primary"></span>
+                          </div>
+                        ) : (
+                          <span className="text-base">
+                            {project.Project.name}
+                          </span>
+                        )}
+                      </Link>
 
-                    <div className="pl-4 text-sm space-y-1">
-                      <Link
-                        href={`/project/${project.project_id}/abstract`}
-                        className="block hover:text-primary transition-colors"
-                      >
-                        <span className="flex items-center gap-2">
-                          <FileText className="h-4 w-4" />
-                          Abstract
-                        </span>
-                      </Link>
-                      <Link
-                        href={`/project/${project.project_id}/report`}
-                        className="block hover:text-primary transition-colors"
-                      >
-                        <span className="flex items-center gap-2">
-                          <FileText className="h-4 w-4" />
-                          Report
-                        </span>
-                      </Link>
-                      <Link
-                        href={`/project/${project.project_id}/video_demo`}
-                        className="block hover:text-primary transition-colors"
-                      >
-                        <span className="flex items-center gap-2">
-                          <Video className="h-4 w-4" />
-                          Demo
-                        </span>
-                      </Link>
+                      <div className="pl-4 text-sm space-y-1">
+                        <Link
+                          href={`/project/${project.project_id}/abstract`}
+                          className="block hover:text-primary transition-colors"
+                        >
+                          <span className="flex items-center gap-2">
+                            <FileText className="h-4 w-4" />
+                            Abstract
+                          </span>
+                        </Link>
+                        <Link
+                          href={`/project/${project.project_id}/report`}
+                          className="block hover:text-primary transition-colors"
+                        >
+                          <span className="flex items-center gap-2">
+                            <FileText className="h-4 w-4" />
+                            Report
+                          </span>
+                        </Link>
+                        <Link
+                          href={`/project/${project.project_id}/video_demo`}
+                          className="block hover:text-primary transition-colors"
+                        >
+                          <span className="flex items-center gap-2">
+                            <Video className="h-4 w-4" />
+                            Demo
+                          </span>
+                        </Link>
+                      </div>
                     </div>
-                  </div>
-                </motion.div>
-              </CollapsibleContent>
-            ))}
-        </AnimatePresence>
-      </Collapsible>
+                  </motion.div>
+                </CollapsibleContent>
+              ))}
+          </AnimatePresence>
+        </Collapsible>
+      ) : (
+        <Button
+          variant="ghost"
+          className="flex items-center justify-start gap-3"
+          title="Projects"
+          asChild
+        >
+          <Link href="/projects">
+            <ListChecks className="h-4 w-4" />
+            <span className="hidden lg:inline">Projects</span>
+          </Link>
+        </Button>
+      )}
 
       <Button
         variant="ghost"
-        className="flex items-center justify-start  gap-3"
+        className="flex items-center justify-start gap-3"
         title="Notifications"
         asChild
       >
@@ -150,7 +167,7 @@ export default function MenuBar({ className }: MenuBarProps) {
       </Button>
       <Button
         variant="ghost"
-        className="flex items-center justify-start  gap-3"
+        className="flex items-center justify-start gap-3"
         title="Messages"
         asChild
       >
@@ -161,7 +178,7 @@ export default function MenuBar({ className }: MenuBarProps) {
       </Button>
       <Button
         variant="ghost"
-        className="flex items-center justify-start  gap-3"
+        className="flex items-center justify-start gap-3"
         title="Bookmark"
         asChild
       >

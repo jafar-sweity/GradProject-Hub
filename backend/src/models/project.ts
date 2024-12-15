@@ -15,6 +15,9 @@ class Project extends Model<Project> {
   @Column({ type: DataType.STRING, allowNull: false })
   name!: string;
 
+  @Column({ type: DataType.STRING, allowNull: true })
+  description!: string;
+
   @Column({ type: DataType.INTEGER })
   supervisor_id: string;
 
