@@ -1,11 +1,15 @@
 import axiosInstance from "@/lib/axiosInstance";
 
-export const getSupervisorProjects = async (supervisorId: string) => {
+export const getSupervisorProjects = async (
+  supervisorId: string,
+  semesterName: string
+) => {
   try {
+    console.log("semesterName", semesterName);
+
     const response = await axiosInstance.get(
-      `projects/supervisor/${supervisorId}`
+      `projects/supervisor/${supervisorId}?semesterName=${semesterName ?? ""}`
     );
-    console.log("Supervisor projects fetched successfully:", response.data);
 
     return response.data;
   } catch (error) {

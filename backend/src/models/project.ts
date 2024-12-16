@@ -1,11 +1,6 @@
-import {
-  Table,
-  Column,
-  Model,
-  DataType,
-  BelongsToMany,
-} from "sequelize-typescript";
-import { User, UserProjectRoles } from "./index.js";
+import { Table, Column, Model, DataType } from "sequelize-typescript";
+import { Semester } from "./index.js";
+import { ForeignKey, BelongsTo } from "sequelize-typescript";
 
 @Table
 class Project extends Model<Project> {
@@ -17,6 +12,10 @@ class Project extends Model<Project> {
 
   @Column({ type: DataType.STRING, allowNull: true })
   description!: string;
+
+  @ForeignKey(() => Semester)
+  @Column({ type: DataType.INTEGER, allowNull: false })
+  semester_id!: number;
 
   @Column({ type: DataType.INTEGER })
   supervisor_id: string;

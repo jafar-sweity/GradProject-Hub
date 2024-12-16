@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import Project from "../models/project.js";
-import { User, UserProjectRoles } from "../models/index.js";
+import { Semester, User, UserProjectRoles } from "../models/index.js";
 
 export const createProjectBySupervisor = async (
   req: Request,
@@ -121,21 +121,37 @@ export const getProjectsBySupervisorId = async (
   res: Response
 ) => {
   try {
-    const supervisorId = req.params.supervisorId;
+    const { supervisorId } = req.params;
+    const { semesterName } = req.query;
 
     const projects = await UserProjectRoles.findAll({
       where: {
         user_id: supervisorId,
         role: "supervisor",
       },
-      include: [Project],
+      include: [
+        {
+          model: Project,
+          include: [
+            {
+              model: Semester,
+              where: semesterName ? { name: semesterName } : {},
+              attributes: ["name", "start_date", "end_date"],
+            },
+          ],
+        },
+      ],
     });
 
-    res.status(200).json(projects);
+    const filteredProjects = projects.filter(
+      (project) => project.Project !== null
+    );
+    res.status(200).json(filteredProjects);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
 };
+
 export const getProjectsByStudentId = async (req: Request, res: Response) => {
   try {
     const studentId = req.params.studentId;

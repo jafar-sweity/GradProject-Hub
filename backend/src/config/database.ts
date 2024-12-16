@@ -2,12 +2,12 @@ import { Sequelize } from "sequelize-typescript";
 import dotenv from "dotenv";
 import {
   User,
+  Semester,
   Project,
   Task,
   SubTask,
   Message,
   UserProjectRoles,
-  Semester,
   UploadSetting,
 } from "../models/index.js";
 import defineAssociations from "../models/associations.js";
@@ -23,13 +23,13 @@ const sequelize = new Sequelize({
   logging: false,
   models: [
     User,
+    Semester,
     Project,
     Task,
     SubTask,
     Message,
     UserProjectRoles,
     UploadSetting,
-    Semester,
   ],
 });
 defineAssociations();
