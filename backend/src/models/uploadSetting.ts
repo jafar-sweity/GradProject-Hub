@@ -17,9 +17,6 @@ class UploadSetting extends Model<UploadSetting> {
   @Column({ type: DataType.INTEGER, allowNull: false })
   semester_id!: number;
 
-  @BelongsTo(() => Semester)
-  semester!: Semester;
-
   @Column({
     type: DataType.ENUM("abstract", "report", "demo"),
     allowNull: false,

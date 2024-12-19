@@ -4,6 +4,8 @@ import Task from "./task.js";
 import Message from "./messages.js";
 import Subtask from "./subTask.js";
 import UserProjectRoles from "./user_project_roles.js";
+import Semester from "./semester.js";
+import UploadSetting from "./uploadSetting.js";
 
 const defineAssociations = () => {
   User.hasMany(Task, { foreignKey: "assigned_to", onDelete: "CASCADE" });
@@ -35,6 +37,15 @@ const defineAssociations = () => {
   });
   UserProjectRoles.belongsTo(User, { foreignKey: "user_id" });
   UserProjectRoles.belongsTo(Project, { foreignKey: "project_id" });
+
+  Semester.hasMany(Project, { foreignKey: "semester_id", onDelete: "CASCADE" });
+  Project.belongsTo(Semester, { foreignKey: "semester_id" });
+
+  Semester.hasMany(UploadSetting, {
+    foreignKey: "semester_id",
+    onDelete: "CASCADE",
+  });
+  UploadSetting.belongsTo(Semester, { foreignKey: "semester_id" });
 };
 
 export default defineAssociations;

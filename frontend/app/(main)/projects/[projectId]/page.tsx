@@ -49,7 +49,7 @@ async function getTasks() {
 export default function TaskPage({
   params,
 }: {
-  params: { projectId: number };
+  params: { projectId: string };
 }) {
   const searchParams = useSearchParams();
   const [tasks, setTasks] = useState<z.infer<typeof taskSchema>[]>([]);
