@@ -17,9 +17,11 @@ import { getProjectMembers } from "@/services/project";
 import { getSupervisorProjects } from "@/services/supervisorProjects";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { UserIcon, Search } from "lucide-react";
+import { UserIcon, Search, Plus } from "lucide-react";
 import { getSemesters } from "@/services/semester";
 import { Input } from "@/components/ui/input";
+import { Snackbar, Alert, SnackbarCloseReason } from "@mui/material";
+
 import {
   Select,
   SelectContent,
@@ -27,7 +29,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
+import ProjectDialog from "@/components/projectDialog";
+import { addProject, updateProject } from "@/services/supervisorProjects";
 interface User {
   user_id: number;
   name: string;
@@ -63,13 +66,60 @@ export default function ProjectsPage() {
     [user?.id ?? "", selectedSemester ?? ""]
   );
 
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingProject, setEditingProject] = useState<any>(null);
+
+  const handleAddProject = () => {
+    setEditingProject(null);
+    setIsDialogOpen(true);
+  };
+
+  const handleEditProject = (project: any) => {
+    setIsDialogOpen(true);
+    setEditingProject({
+      project_id: project.project_id,
+      name: project.Project.name,
+      description: project.Project.description,
+      students: project.members.map((member: any) => member.User.email),
+    });
+  };
+
+  const handleDialogSubmit = async (data: {
+    project_id?: string;
+    name: string;
+    description: string;
+    students: string[];
+  }) => {
+    try {
+      if (editingProject) {
+        await updateProject(editingProject.project_id, data);
+        setSnackBarMessage("Project updated successfully!");
+        setSeverity("success");
+      } else {
+        await addProject(data);
+        setSnackBarMessage("New project added successfully!");
+        setSeverity("success");
+      }
+      setOpenSnackBar(true);
+      setIsDialogOpen(false);
+      window.location.reload();
+    } catch (error) {
+      console.log("Error adding project:", error);
+      setSnackBarMessage("An error occurred. Please try again.");
+      setSeverity("error");
+      setOpenSnackBar(true);
+    }
+  };
+
   const [projectMembersMap, setProjectMembersMap] = useState<
     Record<number, ProjectMember[]>
   >({});
   const [loadingMembers, setLoadingMembers] = useState<Record<number, boolean>>(
     {}
   );
-
+  const [openSnackBar, setOpenSnackBar] = useState(false);
+  const [snackBarMessage, setSnackBarMessage] = useState("");
+  const [severity, setSeverity] = useState<"success" | "error">("success");
   useEffect(() => {
     if (projects) {
       projects.forEach((project: any) => {
@@ -80,9 +130,12 @@ export default function ProjectsPage() {
           }));
           getProjectMembers(project.project_id)
             .then((members) => {
+              const studentMembers = members.filter(
+                (member: any) => member.role === "student"
+              );
               setProjectMembersMap((prev) => ({
                 ...prev,
-                [project.project_id]: members,
+                [project.project_id]: studentMembers,
               }));
             })
             .finally(() => {
@@ -96,7 +149,6 @@ export default function ProjectsPage() {
     }
   }, [projects, projectMembersMap]);
 
-  // Filter projects based on search query
   const filteredProjects = projects?.filter((project: any) => {
     const projectName = project.Project?.name?.toLowerCase() || "";
     const members = projectMembersMap[project.project_id] || [];
@@ -109,6 +161,17 @@ export default function ProjectsPage() {
       memberNames.includes(searchQuery.toLowerCase())
     );
   });
+
+  const handleClose = (
+    event?: React.SyntheticEvent | Event,
+    reason?: SnackbarCloseReason
+  ) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpenSnackBar(false);
+  };
 
   return (
     <div className="container mx-auto px-4 py-6">
@@ -130,7 +193,6 @@ export default function ProjectsPage() {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-
         <div className="w-[15%] max-w-xs">
           <Select
             value={selectedSemester}
@@ -154,8 +216,15 @@ export default function ProjectsPage() {
             </SelectContent>
           </Select>
         </div>
-
-        <Button className="ml-auto">Add Project</Button>
+        <Button
+          className="ml-auto"
+          onClick={() => {
+            handleAddProject();
+          }}
+        >
+          <Plus className="w-4 h-4" />
+          Add Project
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -211,14 +280,32 @@ export default function ProjectsPage() {
                 </div>
               </CardContent>
 
-              <CardFooter className="flex justify-between items-center">
-                <Link href={`/projects/${project.project_id}`}>
-                  <Button variant="link">View Details</Button>
-                </Link>
-                <span className="text-xs text-muted-foreground">
-                  Last Updated:{" "}
-                  {new Date(project.updatedAt).toLocaleDateString("en-GB")}
-                </span>
+              <CardFooter className="flex justify-between items-center p-4 rounded-b-lg bg-card shadow-md border-t">
+                <div className="flex items-center space-x-4">
+                  <Link href={`/projects/${project.project_id}`} passHref>
+                    <Button className="text-primary-foreground bg-primary hover:bg-primary/90 transition-all rounded-lg px-4 py-2 text-sm font-semibold">
+                      View Details
+                    </Button>
+                  </Link>
+                  <Button
+                    className="text-secondary-foreground bg-secondary hover:bg-secondary/90 transition-all rounded-lg px-4 py-2 text-sm font-semibold"
+                    onClick={() =>
+                      handleEditProject({
+                        ...project,
+                        members: projectMembersMap[project.project_id],
+                      })
+                    }
+                  >
+                    Edit
+                  </Button>
+                </div>
+
+                <div className="flex items-center text-muted-foreground text-xs space-x-2">
+                  <time dateTime={project.updatedAt}>
+                    Last Updated:{" "}
+                    {new Date(project.updatedAt).toLocaleDateString("en-GB")}
+                  </time>
+                </div>
               </CardFooter>
             </Card>
           ))
@@ -228,6 +315,26 @@ export default function ProjectsPage() {
           </p>
         )}
       </div>
+      <ProjectDialog
+        isOpen={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+        onSubmit={handleDialogSubmit}
+        initialValues={editingProject}
+      />
+      <Snackbar
+        open={openSnackBar}
+        autoHideDuration={6000}
+        onClose={handleClose}
+      >
+        <Alert
+          severity={severity}
+          variant="filled"
+          className="w-full"
+          onClose={handleClose}
+        >
+          {snackBarMessage}
+        </Alert>
+      </Snackbar>
     </div>
   );
 }

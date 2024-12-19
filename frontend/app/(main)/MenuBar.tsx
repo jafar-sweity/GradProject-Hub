@@ -107,7 +107,7 @@ export default function MenuBar({ className }: MenuBarProps) {
 
                       <div className="pl-4 text-sm space-y-1">
                         <Link
-                          href={`/project/${project.project_id}/abstract`}
+                          href={`/projects/${project.project_id}/abstract`}
                           className="block hover:text-primary transition-colors"
                         >
                           <span className="flex items-center gap-2">
@@ -116,7 +116,7 @@ export default function MenuBar({ className }: MenuBarProps) {
                           </span>
                         </Link>
                         <Link
-                          href={`/project/${project.project_id}/report`}
+                          href={`/projects/${project.project_id}/report`}
                           className="block hover:text-primary transition-colors"
                         >
                           <span className="flex items-center gap-2">
@@ -125,7 +125,7 @@ export default function MenuBar({ className }: MenuBarProps) {
                           </span>
                         </Link>
                         <Link
-                          href={`/project/${project.project_id}/video_demo`}
+                          href={`/projects/${project.project_id}/video_demo`}
                           className="block hover:text-primary transition-colors"
                         >
                           <span className="flex items-center gap-2">

@@ -1,6 +1,12 @@
 import { Request, Response } from "express";
 import Project from "../models/project.js";
 import { Semester, User, UserProjectRoles } from "../models/index.js";
+import { NullishPropertiesOf } from "sequelize/lib/utils";
+import { Optional } from "sequelize";
+import {
+  getCurrentSemester,
+  getCurrentSemesterMethod,
+} from "./semesterController.js";
 
 export const createProjectBySupervisor = async (
   req: Request,
@@ -8,14 +14,46 @@ export const createProjectBySupervisor = async (
 ) => {
   try {
     const { user } = req;
-
-    const project = await Project.create(req.body);
-    await UserProjectRoles.create({
+    const { name, description, students } = req.body;
+    const currentSemester = await getCurrentSemesterMethod();
+    if (!currentSemester) {
+      res.status(400).json({ message: "No current semester" });
+      return;
+    }
+    const project = await Project.create({
+      name,
+      description,
+      semester_id: currentSemester.semester_id,
+    } as Optional<Project, NullishPropertiesOf<Project>>);
+    if (!project) {
+      res.status(400).json({ message: "Project not created" });
+      return;
+    }
+    const supervisor = await UserProjectRoles.create({
       user_id: user?.id,
       project_id: project.project_id,
       role: "supervisor",
     });
-
+    if (!supervisor) {
+      res.status(400).json({ message: "Supervisor not added to project" });
+      return;
+    }
+    for (const email of students) {
+      const student = await User.findOne({
+        where: {
+          email: email,
+          role: "student",
+        },
+      });
+      if (!student) {
+        continue;
+      }
+      await UserProjectRoles.create({
+        user_id: student?.user_id,
+        project_id: project.project_id,
+        role: "student",
+      });
+    }
     res.status(201).json(project);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -87,10 +125,57 @@ export const getProjectById = async (req: Request, res: Response) => {
 
 export const updateProject = async (req: Request, res: Response) => {
   try {
-    const [updated] = await Project.update(req.body, {
-      where: { project_id: req.params.id },
-    });
+    const { name, description, students } = req.body;
+    const [updated] = await Project.update(
+      { name, description },
+      {
+        where: { project_id: req.params.id },
+      }
+    );
+
     if (updated) {
+      const existingStudentRoles = await UserProjectRoles.findAll({
+        where: {
+          project_id: req.params.id,
+          role: "student",
+        },
+      });
+
+      const existingStudentIds = existingStudentRoles.map(
+        (role) => role.user_id
+      );
+      const newStudentIds = [];
+
+      for (const email of students) {
+        const student = await User.findOne({
+          where: {
+            email: email,
+            role: "student",
+          },
+        });
+        if (student) {
+          newStudentIds.push(student.user_id);
+          if (!existingStudentIds.includes(student.user_id)) {
+            await UserProjectRoles.create({
+              user_id: student.user_id,
+              project_id: req.params.id,
+              role: "student",
+            });
+          }
+        }
+      }
+
+      for (const existingStudentId of existingStudentIds) {
+        if (!newStudentIds.includes(existingStudentId)) {
+          await UserProjectRoles.destroy({
+            where: {
+              user_id: existingStudentId,
+              project_id: req.params.id,
+              role: "student",
+            },
+          });
+        }
+      }
       const updatedProject = await Project.findByPk(req.params.id);
       res.status(200).json(updatedProject);
     } else {
