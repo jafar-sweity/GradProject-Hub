@@ -33,6 +33,7 @@ class UserProjectRoles extends Model {
     allowNull: false,
   })
   role!: "student" | "supervisor" | "admin";
+  Project: null;
 }
 
 export default UserProjectRoles;

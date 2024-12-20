@@ -148,7 +148,7 @@ export default function SignUp() {
           setSeverity("success");
           setSnackBarMessage("Sign Up Successful. Please sign in to continue.");
           setTimeout(() => {
-            router.push("/signin");
+            router.push("/signIn");
           }, 2000);
         } else {
           setOpenSnackBar(true);
