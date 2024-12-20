@@ -10,6 +10,8 @@ import { Loader2 } from "lucide-react";
 import PostLoadingSkeleton from "@/components/posts/PostsLoadingSkeleton";
 
 interface PostProps {
+  id: any;
+  bookmarks: any;
   post_id: string;
   user_id: string;
   content: string;
@@ -17,6 +19,9 @@ interface PostProps {
   username: string;
   avatarurl: string;
   createdAt: Date;
+  isLikedByUser: boolean;
+  isBookmarkedByUser: boolean;
+  comments: number;
 }
 
 export default function ForYouFeed() {
@@ -44,7 +49,6 @@ export default function ForYouFeed() {
         }
         // reverse the order of the posts
         response.data.reverse();
-
         return response.data.map((post: any) => ({
           post_id: post.id,
           user_id: user?.id,
@@ -52,6 +56,9 @@ export default function ForYouFeed() {
           likes: post.likes || 0,
           username: post.username || "Unknown",
           createdAt: new Date(post.createdAt),
+          isLikedByUser: post.isLikedByUser,
+          isBookmarkedByUser: post.isBookmarkedByUser,
+          comments: post.comments || 0,
         }));
       } catch (error: any) {
         console.error("Error fetching posts:", error.message);

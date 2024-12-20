@@ -30,6 +30,6 @@ const CommentSchema: Schema = new Schema(
   { timestamps: true } 
 );
 
-CommentSchema.index({ post_id: 1, user_id: 1 }); 
+CommentSchema.index({ post_id: 1, user_id: 1 }); // Index for post_id and user_id
 
 export default mongoose.model<IComment>("Comment", CommentSchema);

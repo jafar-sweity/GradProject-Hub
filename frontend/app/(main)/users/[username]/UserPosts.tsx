@@ -10,6 +10,8 @@ import { Loader2 } from "lucide-react";
 import PostLoadingSkeleton from "@/components/posts/PostsLoadingSkeleton";
 
 interface PostProps {
+  id: any;
+  bookmarks: any;
   post_id: string;
   user_id: string;
   content: string;
@@ -17,6 +19,9 @@ interface PostProps {
   username: string;
   avatarurl: string;
   createdAt: Date;
+  isLikedByUser: boolean;
+  isBookmarkedByUser: boolean;
+  comments: number;
 }
 
 interface UserPostProps {
@@ -26,7 +31,6 @@ interface UserPostProps {
 }
 
 export default function UserPosts({ user }: UserPostProps) {
-  console.log("user in userposts", user);
   const userPosts = user;
   const [userId, setUserId] = useState<string | null>(null);
 
@@ -59,6 +63,9 @@ export default function UserPosts({ user }: UserPostProps) {
           likes: post.likes || 0,
           username: post.username || "Unknown",
           createdAt: new Date(post.createdAt),
+          isLikedByUser: post.isLikedByUser,
+          isBookmarkedByUser: post.isBookmarkedByUser,
+          comments: post.comments || 0,
         }));
       } catch (error: any) {
         console.error("Error fetching posts:", error.message);

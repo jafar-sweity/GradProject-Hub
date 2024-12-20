@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import User from "../models/user.js";
 import Project from "../models/project.js";
 import Task from "../models/task.js";
-import { Op, Optional } from "sequelize";
+import { Op, Optional, where } from "sequelize";
 import { NullishPropertiesOf } from "sequelize/lib/utils";
 import UserCommunity from "../MongoDB/user.js";
 
@@ -152,6 +152,35 @@ export const updateUser = async (
     await user.save();
     res.status(200).json(user);
   } catch (error) {
+    res.status(500).json({ message: "Error updating user" });
+  }
+};
+
+export const updateUserCommunity = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { id } = req.params; // The `user_id` from the route parameter
+    const { avatarUrl, username, bio } = req.body;
+    console.log("req.body", req.body);
+
+    // Find the user by their unique `user_id` and update
+    const currentUser = await UserCommunity.findOneAndUpdate(
+      { user_id: id },
+      { avatarurl: avatarUrl, username, bio },
+      { new: true }
+    );
+
+    if (!currentUser) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
+
+    // Respond with the updated user data
+    res.status(200).json(currentUser);
+  } catch (error) {
+    console.error("Error updating user:", error);
     res.status(500).json({ message: "Error updating user" });
   }
 };

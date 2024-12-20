@@ -81,6 +81,13 @@ export default function UserTooltip({ children, username }: UserTooltipProps) {
                 </div>
               </Link>
             </div>
+            {userProfile.bio && (
+              <Linkify>
+                <div className="line-clamp-4 whitespace-pre-line">
+                  {userProfile.bio}
+                </div>
+              </Linkify>
+            )}
             <FollowerCount
               userId={userProfile.user_id}
               initialState={followerState}

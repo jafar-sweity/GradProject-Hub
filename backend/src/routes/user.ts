@@ -5,6 +5,7 @@ import {
   getUserById,
   updateUser,
   deleteUser,
+  updateUserCommunity,
 } from "../controllers/userController.js";
 
 import { authorize } from "../middleware/authorization.js";
@@ -16,7 +17,7 @@ router.get("/", authorize(["Admin"]), getUsers);
 router.post("/", createUser);
 
 router.get("/:id", getUserById);
-router.put("/:id", updateUser);
+router.post("/:id", updateUserCommunity);
 router.delete("/:id", deleteUser);
 
 export default router;

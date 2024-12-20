@@ -9,6 +9,7 @@ interface IUserCommunity {
   followers?: { user_id: number }[];
   following?: string[];
   posts?: string[];
+  bio?: string;
   createdAt: Date;
 }
 export async function getUserInfoByUserName(
@@ -53,6 +54,7 @@ export async function getUserInfoByUserName(
       postsCount: userCommunity.posts?.length || 0,
       createdAt: userCommunity.createdAt,
       isFollowedByUser, // Add the follow status here
+      bio: userCommunity.bio || "",
     };
 
     res.status(200).json(responseData);
