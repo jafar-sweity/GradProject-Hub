@@ -11,6 +11,8 @@ import { Button } from "@/components/ui/button";
 import FollowButton from "@/components/FollowButton";
 import { User } from "lucide-react";
 import UserPosts from "./UserPosts";
+import EditProfileButton from "./EditProfileButton";
+import Linkify from "@/components/Linkify";
 
 interface PageProps {
   params: { username: string };
@@ -32,6 +34,7 @@ interface UserProfileProps {
     postsCount: number;
     createdAt: Date;
     isFollowedByUser: boolean; // Add this here
+    bio: string;
   };
   loggedInUserId: string;
 }
@@ -79,7 +82,7 @@ function UserProfile({ userdata, loggedInUserId }: UserProfileProps) {
           </div>
         </div>
         {userdata.user_id === loggedInUserId ? (
-          <Button>Edit profile </Button>
+          <EditProfileButton user={userdata} />
         ) : (
           <FollowButton
             userId={userdata.user_id}
@@ -90,6 +93,16 @@ function UserProfile({ userdata, loggedInUserId }: UserProfileProps) {
           />
         )}
       </div>
+      {userdata.bio && (
+        <>
+          <hr />
+          <Linkify>
+            <div className="overflow-hidden whitespace-pre-line break-words">
+              {userdata.bio}
+            </div>
+          </Linkify>
+        </>
+      )}
     </div>
   );
 }
@@ -118,8 +131,8 @@ export default function Page({ params: { username } }: PageProps) {
       </p>
     );
   }
-  console.log("userProfile", userProfile);
 
+  
   return (
     <main className="flex w-full min-w-0 gap-5">
       <div className="w-full min-w-0 space-y-5">

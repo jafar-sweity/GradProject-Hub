@@ -24,6 +24,7 @@ const UserCommunitySchema: Schema = new Schema({
   ],
   avatarurl: { type: String },
   createdAt: { type: Date, default: Date.now },
+  bio: { type: String },
 });
 
 export default mongoose.model<IUserCommunity>(

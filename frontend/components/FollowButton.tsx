@@ -47,8 +47,8 @@ export default function FollowButton({
       toast({
         title: data.isFollowedByUser ? "Unfollowed" : "Followed",
         description: data.isFollowedByUser
-          ? `You have unfollowed user ${userId}`
-          : `You are now following user ${userId}`,
+          ? `You have unfollowed user successfully`
+          : `You are now following user successfully`,
       });
     },
     onError: (error) => {
@@ -59,7 +59,7 @@ export default function FollowButton({
       });
     },
   });
-  
+
   return (
     <Button
       variant={data.isFollowedByUser ? "secondary" : "default"}

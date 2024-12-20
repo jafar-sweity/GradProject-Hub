@@ -1,34 +1,64 @@
 import { Request, Response } from "express";
 import Comment from "../MongoDB/comment.js";
+import { updateUserCommunity } from "./userController.js";
+import UserCommunity from "../MongoDB/user.js";
+import Post from "../MongoDB/Post.js";
+import mongoose from "mongoose";
 
 // Create a new comment
 export const createComment = async (
   req: Request,
   res: Response
 ): Promise<void> => {
-  const { post_id, user_id, content } = req.body;
+  const { user_id, content } = req.body;
+  const { postId } = req.params;
 
   try {
     // Validate the input
-    if (!post_id || !user_id || !content) {
+    if (!postId || !user_id || !content) {
       res
         .status(400)
         .json({ message: "Post ID, user ID, and content are required" });
       return;
     }
+    let current_user;
+
+    if (user_id.length > 5) {
+      current_user = await UserCommunity.findById(user_id);
+    } else {
+      current_user = await UserCommunity.findOne({ user_id: user_id });
+    }
+    // Find the user in the UserCommunity schema
+    if (!current_user) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
+
+    // Find the post to which the comment will be added
+    const post = await Post.findById(postId);
+    if (!post) {
+      res.status(404).json({ message: "Post not found" });
+      return;
+    }
 
     // Create and save the comment
     const newComment = new Comment({
-      post_id,
-      user_id,
+      post_id: post._id,
+      user_id: current_user._id,
       content,
     });
+    console.log("savedComment", newComment);
 
-    const savedComment = await newComment.save();
+    await newComment.save();
+    // Add the comment reference to the Post's comments array
+    post.comments.push({
+      comment_id: newComment._id as mongoose.Types.ObjectId,
+    });
+    await post.save();
 
     res
       .status(201)
-      .json({ message: "Comment created successfully", comment: savedComment });
+      .json({ message: "Comment created successfully", comment: newComment });
   } catch (error: any) {
     res
       .status(500)
@@ -36,7 +66,6 @@ export const createComment = async (
   }
 };
 
-// Get all comments for a specific post
 export const getCommentsByPost = async (
   req: Request,
   res: Response
@@ -44,15 +73,37 @@ export const getCommentsByPost = async (
   const { postId } = req.params;
 
   try {
-    const comments = await Comment.find({ post_id: postId });
-
-    if (comments.length === 0) {
-      res.status(404).json({ message: "No comments found for this post" });
+    // Check if the post exists
+    const post = await Post.findById(postId);
+    if (!post) {
+      res.status(404).json({ message: "Post not found" });
       return;
     }
 
-    res.status(200).json(comments);
+    // Fetch all comments for the post
+    const comments = await Comment.find({ post_id: postId }).sort({
+      createdAt: -1, // Sort by newest first
+    });
+
+    // Map over comments and fetch user data separately
+    const commentsWithAuthors = await Promise.all(
+      comments.map(async (comment) => {
+        const user = await UserCommunity.findById(comment.user_id);
+        return {
+          id: comment._id,
+          content: comment.content,
+          author: {
+            username: (user as any)?.username || "Deleted User",
+            avatarurl: user?.avatarurl || null,
+          },
+          createdAt: comment.createdAt,
+        };
+      })
+    );
+
+    res.status(200).json({ comments: commentsWithAuthors });
   } catch (error: any) {
+    console.error(error);
     res
       .status(500)
       .json({ message: "Error fetching comments", error: error.message });
