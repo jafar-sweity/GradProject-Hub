@@ -1,6 +1,10 @@
 "use client";
 
-import { CldUploadWidget } from "next-cloudinary";
+import {
+  CldUploadWidget,
+  CldImage,
+  CloudinaryUploadWidgetInfo,
+} from "next-cloudinary";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,6 +34,9 @@ function UploadAndDisplayContent({
     "success" | "error" | "warning" | "info"
   >("success");
   const [snackBarMessage, setSnackBarMessage] = useState("");
+  const [resource, setResource] = useState<
+    string | CloudinaryUploadWidgetInfo | null
+  >(null);
 
   const handleClose = (
     event?: React.SyntheticEvent | Event,
@@ -96,6 +103,32 @@ function UploadAndDisplayContent({
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-6 w-full">
+      <CldUploadWidget
+        uploadPreset="avatars"
+        options={{ cropping: true, folder: "avatars", multiple: false }}
+        onSuccess={(result) => {
+          if (result?.info) {
+            setResource(result.info);
+          }
+        }}
+      >
+        {({ open }) => {
+          return <button onClick={() => open()}>Upload an Image</button>;
+        }}
+      </CldUploadWidget>
+      <CldImage
+        src={
+          typeof resource === "object" && resource?.secure_url
+            ? resource.secure_url
+            : ""
+        }
+        width="300"
+        height="300"
+        crop="fill"
+        alt=""
+        className="rounded-full shadow-lg mb-6"
+        sizes="100vw"
+      />
       <Card className="w-[70%]">
         <CardHeader>
           <CardTitle className="text-lg font-semibold">
@@ -109,7 +142,7 @@ function UploadAndDisplayContent({
           {!uploadedContentUrl ? (
             <CldUploadWidget
               uploadPreset={fileType}
-              options={{ clientAllowedFormats: ["pdf", "mp4"] }}
+              options={{ clientAllowedFormats: ["pdf", "mp4", "jpg"] }}
               onSuccess={handleUploadSuccess}
             >
               {({ open }) => (
