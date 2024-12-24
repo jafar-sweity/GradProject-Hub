@@ -12,6 +12,8 @@ import { useQuery } from "@tanstack/react-query";
 import PostLoadingSkeleton from "@/components/posts/PostsLoadingSkeleton";
 
 interface PostProps {
+  id: any;
+  bookmarks: any;
   post_id: string;
   user_id: string;
   content: string;
@@ -19,6 +21,9 @@ interface PostProps {
   username: string;
   avatarurl: string;
   createdAt: Date;
+  isLikedByUser: boolean;
+  isBookmarkedByUser: boolean;
+  comments: number;
 }
 
 export default function FollowingFeed() {
@@ -65,12 +70,11 @@ export default function FollowingFeed() {
       </p>
     );
   }
-  console.log("query", query);
-  
+
   if (query.data?.length === 0) {
     return <p className="text-center">No posts available</p>;
   }
-  
+  // check the firrs post
   return (
     <div className="space-y-5">
       {query.data?.map((post, index) => (

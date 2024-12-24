@@ -1,4 +1,5 @@
 import axiosInstance from "@/lib/axiosInstance";
+import { tr } from "@faker-js/faker";
 interface Post {
   content: string;
   user_id: string;
@@ -50,8 +51,12 @@ export const getallPostsCurrentUser = async (userId: string) => {
       user_id: post.user_id,
       content: post.content,
       likes: post.likes || 0,
-      username: post.username || "Unknown",
+      username: post.username || "Unknown", // Fallback for username
+      avatarurl: post.avatarurl || "", // Provide a fallback for avatar
       createdAt: new Date(post.createdAt),
+      isLikedByUser: post.isLikedByUser,
+      isBookmarkedByUser: post.isBookmarkedByUser,
+      comments: post.comments || 0,
     }));
 
     return { data: posts };
@@ -94,12 +99,16 @@ export async function getallFollowingPosts(userId: string) {
     // Transform the data
     const res = response.data.map((post: any) => ({
       id: post.id,
+
+      post_id: post.id,
       user_id: post.user_id,
       content: post.content,
       likes: post.likes || 0,
       username: post.username || "Unknown", // Fallback for username
       avatarurl: post.avatarurl || "", // Provide a fallback for avatar
       createdAt: new Date(post.createdAt),
+      comments: post.comments || 0,
+      isBookmarkedByUser: post.isBookmarkedByUser,
     }));
     console.log("Transformed response:", res);
 

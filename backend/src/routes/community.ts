@@ -11,6 +11,7 @@ router.use("/comments", commentRoutes);
 router.use("/followers", followerRoutes);
 router.use("/likes", likeRoutes);
 router.use("/users", userCommunityRoutes);
+// BookMark
 // // routes.use("/api/v1/messages", messageRoutes);
 
 export default router;
