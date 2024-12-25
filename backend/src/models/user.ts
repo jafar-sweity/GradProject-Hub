@@ -40,7 +40,8 @@ class User extends Model<User> {
   @Column({ type: DataType.DATE, allowNull: false })
   updatedAt!: Date;
 
-  
+  @Column({ type: DataType.STRING, allowNull: true })
+  avatarurl!: string;
 }
 
 export default User;
