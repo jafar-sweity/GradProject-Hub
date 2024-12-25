@@ -1,6 +1,5 @@
 import axios from "axios";
 import { baseUrl } from "../constants/configuration";
-import { router } from "expo-router";
 import { deleteTokens, getAccessToken } from "./localStorage";
 const axiosInstance = axios.create({
   baseURL: baseUrl,

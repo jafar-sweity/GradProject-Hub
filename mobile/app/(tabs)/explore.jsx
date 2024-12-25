@@ -22,8 +22,10 @@ export default function TabTwoScreen() {
         />
       }
     >
-      <View className="h-6 bg-white">
-        <Text>Open up App.js to start working on your app!</Text>
+      <View className="h-6 ">
+        <Text className="text-primary-foreground ">
+          Open up App.js to start working on your app!
+        </Text>
         {loading && <Text>Loading...</Text>}
         {!loading && <Text>{data?.name}</Text>}
       </View>
