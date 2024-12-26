@@ -9,8 +9,7 @@ function useAuthCheck() {
   useEffect(() => {
     const checkTokenAndNavigate = async () => {
       try {
-        const accessToken = await AsyncStorage.getItem("accessToken");
-        const refreshToken = await AsyncStorage.getItem("refreshToken");
+        const accessToken = await AsyncStorage.getItem("authToken");
         if (accessToken) {
           try {
             await getCurrentUser();

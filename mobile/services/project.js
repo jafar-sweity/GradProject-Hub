@@ -1,4 +1,4 @@
-import axiosInstance from "./axiosInstance";
+import axiosInstance from "../lib/axiosInstance";
 export const getProject = async (projectId) => {
   try {
     console.log("Fetching project...");

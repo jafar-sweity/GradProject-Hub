@@ -1,12 +1,12 @@
 import axios from "axios";
 import { baseUrl } from "../constants/configuration";
-import { deleteTokens, getAccessToken } from "./localStorage";
+import { getToken } from "../helpers/token";
 const axiosInstance = axios.create({
   baseURL: baseUrl,
 });
 axiosInstance.interceptors.request.use(
   async (config) => {
-    const accessToken = await getAccessToken();
+    const accessToken = await getToken();
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
     }
