@@ -6,21 +6,15 @@ import { useQuery } from "@tanstack/react-query";
 import axiosInstance from "@/lib/axiosInstance";
 import UserAvatar from "@/components/UserAvatar";
 import { formatNumber } from "@/lib/utils";
-import { formatDate } from "date-fns";
-import { Button } from "@/components/ui/button";
 import FollowButton from "@/components/FollowButton";
-import { User } from "lucide-react";
 import UserPosts from "./UserPosts";
 import EditProfileButton from "./EditProfileButton";
 import Linkify from "@/components/Linkify";
+import { CldUploadWidget } from "next-cloudinary";
+import { Camera } from "lucide-react";
 
 interface PageProps {
   params: { username: string };
-}
-
-interface FollowerInfo {
-  followers: number;
-  isFollowedByUser: boolean;
 }
 
 interface UserProfileProps {
@@ -45,7 +39,12 @@ const fetchUser = async (username: string, currentUserId: string) => {
   return response.data;
 };
 
+import { useState } from "react";
+
 function UserProfile({ userdata, loggedInUserId }: UserProfileProps) {
+  const [avatarUrl, setAvatarUrl] = useState(userdata.avatarurl);
+  const { user } = useAuth();
+
   const formattedDate = new Date(userdata.createdAt).toLocaleDateString(
     "en-US",
     {
@@ -57,11 +56,50 @@ function UserProfile({ userdata, loggedInUserId }: UserProfileProps) {
 
   return (
     <div className="h-fit w-full space-y-5 rounded-2xl bg-card p-5 shadow-sm">
-      <UserAvatar
-        avatarurl={userdata.avatarurl}
-        size={250}
-        className="mx-auto size-full max-h-60 max-w-60 rounded-full"
-      />
+      <CldUploadWidget
+        uploadPreset="avatars"
+        options={{ cropping: true, folder: "avatars", multiple: false }}
+        onSuccess={async (result) => {
+          if (result?.info) {
+            if (typeof result.info !== "string") {
+              const newAvatarUrl = result.info.secure_url;
+              setAvatarUrl(newAvatarUrl);
+
+              alert("Avatar uploaded successfully!");
+
+              try {
+                await axiosInstance.post(`/users/${user?.id}`, {
+                  avatarurl: newAvatarUrl,
+                });
+              } catch (error) {
+                console.error("Failed to update profile:", error);
+              }
+            }
+          }
+        }}
+      >
+        {({ open }) => (
+          <div
+            className="relative mx-auto w-60 h-60 rounded-full group cursor-pointer"
+            onClick={() => open()}
+          >
+            <UserAvatar
+              avatarurl={
+                avatarUrl || "https://via.placeholder.com/150?text=Avatar"
+              }
+              size={250}
+              className="w-full h-full object-cover rounded-full border border-gray-300 shadow-md"
+            />
+            <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <Camera className="text-white mr-2" size={24} />
+              <span className="text-white font-medium text-sm">
+                Change Photo
+              </span>
+            </div>
+          </div>
+        )}
+      </CldUploadWidget>
+
       <div className="flex flex-wrap gap-3 sm:flex-nowrap">
         <div className="me-auto space-y-3">
           <div>
@@ -132,7 +170,6 @@ export default function Page({ params: { username } }: PageProps) {
     );
   }
 
-  
   return (
     <main className="flex w-full min-w-0 gap-5">
       <div className="w-full min-w-0 space-y-5">

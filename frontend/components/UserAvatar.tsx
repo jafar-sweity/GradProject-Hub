@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import image from "../public/icons/image.png";
 
 interface UserAvatarProps {
-  avatarurl: string | null | undefined;
+  avatarurl: string | null;
   size?: number;
   className?: string;
 }

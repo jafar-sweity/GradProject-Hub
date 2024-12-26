@@ -162,15 +162,23 @@ export const updateUserCommunity = async (
 ): Promise<void> => {
   try {
     const { id } = req.params; // The `user_id` from the route parameter
-    const { avatarUrl, username, bio } = req.body;
-    console.log("req.body", req.body);
+    const { avatarurl, username, bio } = req.body;
 
     // Find the user by their unique `user_id` and update
     const currentUser = await UserCommunity.findOneAndUpdate(
       { user_id: id },
-      { avatarurl: avatarUrl, username, bio },
+      { avatarurl: avatarurl, username, bio },
       { new: true }
     );
+
+    const updatedUser = await User.update(
+      { avatarurl: avatarurl },
+      { where: { user_id: id } }
+    );
+    if (!updatedUser) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
 
     if (!currentUser) {
       res.status(404).json({ message: "User not found" });
