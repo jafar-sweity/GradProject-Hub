@@ -28,6 +28,7 @@ export const getallPosts = async () => {
       likes: post.likes || 0,
       username: post.username || "Unknown",
       createdAt: new Date(post.createdAt),
+      avatarurl: post.avatarurl || "",
     }));
 
     return { data: posts };

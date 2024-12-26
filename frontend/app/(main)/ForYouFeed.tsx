@@ -26,6 +26,7 @@ interface PostProps {
 
 export default function ForYouFeed() {
   const { user, loading } = useAuth();
+
   const [userId, setUserId] = useState<string | null>(null);
 
   // UseEffect to wait for `user` to load and update `userId`
@@ -49,6 +50,8 @@ export default function ForYouFeed() {
         }
         // reverse the order of the posts
         response.data.reverse();
+        console.log("the response is", response.data[0].avatarurl);
+
         return response.data.map((post: any) => ({
           post_id: post.id,
           user_id: user?.id,
@@ -59,6 +62,7 @@ export default function ForYouFeed() {
           isLikedByUser: post.isLikedByUser,
           isBookmarkedByUser: post.isBookmarkedByUser,
           comments: post.comments || 0,
+          avatarurl: post.avatarurl,
         }));
       } catch (error: any) {
         console.error("Error fetching posts:", error.message);
