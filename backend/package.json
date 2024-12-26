@@ -30,6 +30,7 @@
     "nodemailer": "^6.9.16",
     "sequelize": "^6.37.4",
     "sequelize-typescript": "^2.1.6",
+    "stream-chat-react": "^12.8.1",
     "tailwindcss": "^3.4.14"
   },
   "devDependencies": {

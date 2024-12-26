@@ -75,15 +75,25 @@ export const getForYouPosts = async (
       { posts: 1 }
     ).populate("posts.post_id");
 
+    // get the avatar url for the current user
+    const avatrurl = await UserCommunity.findOne({ user_id: userId });
+    if (!avatrurl) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
+
     if (!currentUser) {
       res.status(404).json({ message: "User not found" });
       return;
     }
-    // check if the user liked the post or not
 
     const posts = await Post.find({ user_id: currentUser._id }).select(
-      "_id user_id content likes createdAt comments username"
+      "_id user_id content likes createdAt comments username avatarurl"
     );
+
+    // log the avaatrurl
+    console.log("the avatar url is", currentUser);
+
     const bookmarkedPosts = await Bookmark.find({
       user_id: currentUser._id,
     }).select("post_id");
@@ -91,7 +101,7 @@ export const getForYouPosts = async (
       bookmark.post_id.toString()
     );
     const transformedPosts = posts.map((post) => {
-      const typedPost = post.toObject() as {
+      const typedPost = post.toObject() as unknown as {
         _id: mongoose.Types.ObjectId;
         user_id: mongoose.Types.ObjectId;
         content: string;
@@ -99,6 +109,7 @@ export const getForYouPosts = async (
         username?: string;
         comments: any[];
         createdAt: Date;
+        avatarurl: string;
       };
       return {
         id: typedPost._id.toString(),
@@ -111,6 +122,7 @@ export const getForYouPosts = async (
           typedPost._id.toString()
         ),
         comments: post.comments.length || 0,
+        avatarurl: avatrurl.avatarurl || "",
       };
     });
     res.status(200).json(transformedPosts);
@@ -164,13 +176,25 @@ export const getFollowingPosts = async (
     })
       .sort({ createdAt: -1 })
       .select("_id user_id content likes createdAt comments username");
-    // check if the use isBookmarkedByUser or not
+
     const bookmarkedPosts = await Bookmark.find({
       user_id: userCommunity._id,
     }).select("post_id");
+
     const bookmarkedPostIds = bookmarkedPosts.map((bookmark) =>
       bookmark.post_id.toString()
     );
+
+    // Fetch avatar URLs for users
+    const userAvatars = await UserCommunity.find({
+      _id: { $in: followingMongoIds },
+    }).select("_id avatarurl");
+
+    const avatarMap = userAvatars.reduce((map, user) => {
+      map[(user as any)._id.toString()] = user.avatarurl;
+      return map;
+    }, {} as Record<string, string>);
+
     const transformedPosts = posts.map((post: any) => ({
       id: post._id.toString(),
       user_id: post.user_id?.toString(),
@@ -180,6 +204,7 @@ export const getFollowingPosts = async (
       comments: post.comments.length || 0,
       createdAt: post.createdAt,
       isBookmarkedByUser: bookmarkedPostIds.includes(post._id.toString()),
+      avatarurl: avatarMap[post.user_id?.toString()] || "",
     }));
 
     res.status(200).json(transformedPosts);

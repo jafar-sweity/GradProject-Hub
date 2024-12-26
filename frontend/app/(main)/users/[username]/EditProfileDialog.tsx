@@ -113,7 +113,7 @@ export default function EditProfileDialog({
           <DialogTitle>Edit profile</DialogTitle>
         </DialogHeader>
         <div className="space-y-1.5">
-          {/* <Label>Avatar</Label>
+          <Label>Avatar</Label>
           <AvatarInput
             src={
               croppedAvatar
@@ -121,7 +121,7 @@ export default function EditProfileDialog({
                 : authUser?.avatarurl || image
             }
             onImageCropped={setCroppedAvatar}
-          /> */}
+          />
         </div>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">

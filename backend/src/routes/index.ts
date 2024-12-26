@@ -7,6 +7,8 @@ import emailRoutes from "./email.js";
 import communityRoutes from "./community.js"; // Add this line
 import uploadRoutes from "./upload.js";
 import semesterRoutes from "./semester.js";
+import chatRoutes from "./chat.js";
+
 // import subTaskRoutes from "./subTask.js";
 const routes = Router();
 
@@ -25,4 +27,8 @@ routes.use("/api/v1/upload", uploadRoutes);
 // MogoDB based routes for the community feture
 routes.use("/api/v1/community", communityRoutes);
 routes.use("/api/v1/semesters", semesterRoutes);
+
+// stream-chat routes
+routes.use("/api/v1/chat", chatRoutes);
+
 export default routes;
