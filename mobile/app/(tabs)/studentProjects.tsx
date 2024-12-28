@@ -11,6 +11,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { getStudentProject } from "@/services/studentProjects";
 import { getProjectMembers } from "@/services/project";
 import useFetchData from "@/hooks/useFetchData";
+import { router } from "expo-router";
 
 const StudentProjectsScreen = () => {
   const { user, loading: authLoading } = useAuth();
@@ -130,7 +131,7 @@ const StudentProjectsScreen = () => {
                 <View className="flex-row justify-between mt-6">
                   <TouchableOpacity
                     onPress={() => {
-                      // Handle view details
+                      router.push(`/${project.project_id}`);
                     }}
                     className="bg-primary px-4 py-2"
                     style={{ borderRadius: 8 }}
