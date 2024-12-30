@@ -57,49 +57,59 @@ function UserProfile({ userdata, loggedInUserId }: UserProfileProps) {
   const currentUser = user?.id === userdata.user_id;
   return (
     <div className="h-fit w-full space-y-5 rounded-2xl bg-card p-5 shadow-sm">
-      <CldUploadWidget
-        uploadPreset="avatars"
-        options={{ cropping: true, folder: "avatars", multiple: false }}
-        onSuccess={async (result) => {
-          if (result?.info) {
-            if (typeof result.info !== "string") {
-              const newAvatarUrl = result.info.secure_url;
-              setAvatarUrl(newAvatarUrl);
+      {currentUser ? (
+        <CldUploadWidget
+          uploadPreset="avatars"
+          options={{ cropping: true, folder: "avatars", multiple: false }}
+          onSuccess={async (result) => {
+            if (result?.info) {
+              if (typeof result.info !== "string") {
+                const newAvatarUrl = result.info.secure_url;
+                setAvatarUrl(newAvatarUrl);
 
-              alert("Avatar uploaded successfully!");
-
-              try {
-                await axiosInstance.post(`/users/${user?.id}`, {
-                  avatarurl: newAvatarUrl,
-                });
-              } catch (error) {
-                console.error("Failed to update profile:", error);
+                alert("Avatar uploaded successfully!");
+                if (user) {
+                  user.avatarurl = newAvatarUrl;
+                }
+                try {
+                  await axiosInstance.post(`/users/${user?.id}`, {
+                    avatarurl: newAvatarUrl,
+                  });
+                } catch (error) {
+                  console.error("Failed to update profile:", error);
+                }
               }
             }
-          }
-        }}
-      >
-        {({ open }) => (
-          <div
-            className="relative mx-auto w-60 h-60 rounded-full group cursor-pointer"
-            onClick={() => open()}
-          >
-            <UserAvatar
-              avatarurl={
-                avatarUrl || "https://via.placeholder.com/150?text=Avatar"
-              }
-              size={250}
-              className="w-full h-full object-cover rounded-full border border-gray-300 shadow-md"
-            />
-            <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              <Camera className="text-white mr-2" size={24} />
-              <span className="text-white font-medium text-sm">
-                Change Photo
-              </span>
+          }}
+        >
+          {({ open }) => (
+            <div
+              className="relative mx-auto w-60 h-60 rounded-full group cursor-pointer"
+              onClick={() => open()}
+            >
+              <UserAvatar
+                avatarurl={
+                  avatarUrl || "https://via.placeholder.com/150?text=Avatar"
+                }
+                size={250}
+                className="w-full h-full object-cover rounded-full border border-gray-300 shadow-md"
+              />
+              <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <Camera className="text-white mr-2" size={24} />
+                <span className="text-white font-medium text-sm">
+                  Change Photo
+                </span>
+              </div>
             </div>
-          </div>
-        )}
-      </CldUploadWidget>
+          )}
+        </CldUploadWidget>
+      ) : (
+        <UserAvatar
+          avatarurl={userdata.avatarurl}
+          size={250}
+          className="mx-auto size-full max-h-60 max-w-60 rounded-full"
+        />
+      )}
 
       <div className="flex flex-wrap gap-3 sm:flex-nowrap">
         <div className="me-auto space-y-3">

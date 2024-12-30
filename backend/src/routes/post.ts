@@ -10,6 +10,7 @@ import {
   addBookmark,
   removeBookmark,
   getBookmarkedPosts,
+  Search,
 } from "../controllers/postController.js";
 import { getFollowing } from "../controllers/followController.js";
 
@@ -18,15 +19,17 @@ const router = express.Router();
 router.post("/", createPost);
 
 router.get("/", getPosts);
+
 // for you posts api
 router.get("/forYou", getForYouPosts);
-//
-router.get("/following", getFollowingPosts);
-// bookmark
 
+router.get("/following", getFollowingPosts);
+
+// bookmark
 router.post("/:id/bookmark", addBookmark);
 router.delete("/:id/bookmark", removeBookmark);
 router.get("/:userId/bookmarked", getBookmarkedPosts);
+router.get("/search", Search);
 
 router.get("/:id", getPostById);
 

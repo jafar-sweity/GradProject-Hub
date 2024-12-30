@@ -92,7 +92,6 @@ export const getForYouPosts = async (
     );
 
     // log the avaatrurl
-    console.log("the avatar url is", currentUser);
 
     const bookmarkedPosts = await Bookmark.find({
       user_id: currentUser._id,
@@ -527,5 +526,95 @@ export const getBookmarkedPosts = async (
       message: "Error fetching bookmarked posts",
       error: error.message,
     });
+  }
+};
+
+export const Search = async (req: Request, res: Response): Promise<void> => {
+  const { q, userId } = req.query;
+
+  if (!q) {
+    res.status(400).json({ message: "Query is required" });
+    return;
+  }
+
+  if (!userId) {
+    res.status(400).json({ message: "User ID is required" });
+    return;
+  }
+
+  try {
+    // Convert userId to MongoDB ObjectId
+    const userCommunity = await UserCommunity.findOne({
+      user_id: Number(userId),
+    });
+    if (!userCommunity) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
+
+    const userObjectId = userCommunity._id;
+
+    // Aggregate pipeline for searching posts
+    const posts = await Post.aggregate([
+      {
+        $match: {
+          content: { $regex: q, $options: "i" }, // Search by content
+        },
+      },
+      {
+        $lookup: {
+          from: "bookmarks", // Reference to the Bookmark collection
+          localField: "_id",
+          foreignField: "post_id",
+          as: "bookmarks",
+        },
+      },
+      {
+        $lookup: {
+          from: "likes", // Reference to the Like collection
+          localField: "_id",
+          foreignField: "post_id",
+          as: "likes",
+        },
+      },
+      {
+        $lookup: {
+          from: "users", // Fetch user details from the User collection
+          localField: "user_id",
+          foreignField: "_id",
+          as: "user_details",
+        },
+      },
+      {
+        $project: {
+          id: "$_id",
+          content: 1,
+          username: { $arrayElemAt: ["$user_details.username", 0] }, // Get the username
+          avatarurl: { $arrayElemAt: ["$user_details.avatarurl", 0] }, // Get the avatarurl
+          createdAt: 1,
+          likes: { $size: "$likes" }, // Count the likes
+          comments: { $size: "$comments" }, // Count the comments array
+          isBookmarkedByUser: {
+            $in: [userObjectId, "$bookmarks.user_id"], // Check if bookmarked by the user
+          },
+          isLikedByUser: {
+            $in: [userObjectId, "$likes.user_id"], // Check if liked by the user
+          },
+        },
+      },
+    ]);
+    // set the post user is from cuurent user
+
+    const updatedPosts = posts.map((post: any) => ({
+      ...post,
+      username: userCommunity.username,
+    }));
+
+    res.status(200).json(updatedPosts);
+  } catch (error: any) {
+    console.error("Error fetching posts:", error.message);
+    res
+      .status(500)
+      .json({ message: "Error fetching posts", error: error.message });
   }
 };
