@@ -43,7 +43,6 @@ const fetchUser = async (username: string, currentUserId: string) => {
 
 function UserProfile({ userdata, loggedInUserId }: UserProfileProps) {
   const authContext = useContext(AuthContext);
-  const setUser = authContext?.setUser;
   const [avatarUrl, setAvatarUrl] = useState(userdata.avatarurl);
   const { user } = useAuth();
 
@@ -55,7 +54,7 @@ function UserProfile({ userdata, loggedInUserId }: UserProfileProps) {
       year: "numeric",
     }
   );
-
+  const currentUser = user?.id === userdata.user_id;
   return (
     <div className="h-fit w-full space-y-5 rounded-2xl bg-card p-5 shadow-sm">
       <CldUploadWidget
@@ -67,16 +66,12 @@ function UserProfile({ userdata, loggedInUserId }: UserProfileProps) {
               const newAvatarUrl = result.info.secure_url;
               setAvatarUrl(newAvatarUrl);
 
+              alert("Avatar uploaded successfully!");
+
               try {
                 await axiosInstance.post(`/users/${user?.id}`, {
                   avatarurl: newAvatarUrl,
                 });
-
-                setUser?.((prev) =>
-                  prev ? { ...prev, avatarurl: newAvatarUrl } : prev
-                );
-
-                alert("Avatar uploaded successfully!");
               } catch (error) {
                 console.error("Failed to update profile:", error);
               }

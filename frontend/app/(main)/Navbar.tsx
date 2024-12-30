@@ -2,6 +2,8 @@ import React from "react";
 import Link from "next/link";
 import UserButton from "../../components/UserButton";
 import SearchField from "../../components/SearchField";
+import AiChatBox from "@/components/AiChatBox";
+import AIChatButton from "@/components/AIChatButton";
 
 export default function Navbar() {
   return (
@@ -11,7 +13,7 @@ export default function Navbar() {
           GradPoject-hub
         </Link>
         <SearchField />
-
+        <AIChatButton />
         <UserButton calssName="sm:ms-auto" />
       </div>
     </header>
