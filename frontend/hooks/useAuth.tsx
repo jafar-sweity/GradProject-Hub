@@ -11,7 +11,6 @@ export const useAuth = () => {
   }
 
   const { user, setUser, loading } = authContext;
-
   const logout = () => {
     removeToken();
     setUser(null);

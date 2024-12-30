@@ -1,9 +1,8 @@
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import image from "../public/icons/image.png";
 
 interface UserAvatarProps {
-  avatarurl: string | null;
+  avatarurl: string | undefined;
   size?: number;
   className?: string;
 }
@@ -13,10 +12,9 @@ export default function UserAvatar({
   size,
   className,
 }: UserAvatarProps) {
- 
   return (
     <Image
-      src={avatarurl || image}
+      src={avatarurl || "https://via.placeholder.com/150?text=Avatar"}
       alt="avatar"
       width={size || 48}
       height={size || 48}

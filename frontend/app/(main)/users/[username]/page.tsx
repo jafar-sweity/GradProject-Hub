@@ -12,6 +12,8 @@ import EditProfileButton from "./EditProfileButton";
 import Linkify from "@/components/Linkify";
 import { CldUploadWidget } from "next-cloudinary";
 import { Camera } from "lucide-react";
+import { useContext, useState } from "react";
+import { AuthContext } from "@/context/AuthContext";
 
 interface PageProps {
   params: { username: string };
@@ -39,9 +41,9 @@ const fetchUser = async (username: string, currentUserId: string) => {
   return response.data;
 };
 
-import { useState } from "react";
-
 function UserProfile({ userdata, loggedInUserId }: UserProfileProps) {
+  const authContext = useContext(AuthContext);
+  const setUser = authContext?.setUser;
   const [avatarUrl, setAvatarUrl] = useState(userdata.avatarurl);
   const { user } = useAuth();
 
@@ -65,12 +67,16 @@ function UserProfile({ userdata, loggedInUserId }: UserProfileProps) {
               const newAvatarUrl = result.info.secure_url;
               setAvatarUrl(newAvatarUrl);
 
-              alert("Avatar uploaded successfully!");
-
               try {
                 await axiosInstance.post(`/users/${user?.id}`, {
                   avatarurl: newAvatarUrl,
                 });
+
+                setUser?.((prev) =>
+                  prev ? { ...prev, avatarurl: newAvatarUrl } : prev
+                );
+
+                alert("Avatar uploaded successfully!");
               } catch (error) {
                 console.error("Failed to update profile:", error);
               }
