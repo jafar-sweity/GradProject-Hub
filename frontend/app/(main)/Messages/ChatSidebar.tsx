@@ -1,9 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useQueryClient } from "@tanstack/react-query";
 import { MailPlus, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import {
+  Channel,
   ChannelList,
   ChannelPreviewMessenger,
   ChannelPreviewUIComponentProps,
@@ -11,6 +11,7 @@ import {
 } from "stream-chat-react";
 import { useSession } from "../SessionProvider";
 import NewChatDialog from "./NewChatDialog";
+import MyMessage from "./MyMessage";
 
 interface ChatSidebarProps {
   open: boolean;
@@ -49,7 +50,6 @@ export default function ChatSidebar({ open, onClose }: ChatSidebarProps) {
         }}
         showChannelSearch
         options={{ state: true, presence: true, limit: 8 }}
-        sort={{ last_message_at: -1 }}
         additionalChannelSearchProps={{
           searchForChannels: true,
           searchQueryParams: {
@@ -60,6 +60,7 @@ export default function ChatSidebar({ open, onClose }: ChatSidebarProps) {
         }}
         Preview={ChannelPreviewCustom}
       />
+      <Channel Message={MyMessage}></Channel>
     </div>
   );
 }
