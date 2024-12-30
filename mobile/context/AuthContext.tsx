@@ -1,4 +1,3 @@
-"use client";
 import React, { createContext, useState, useEffect, ReactNode } from "react";
 import { getToken } from "@/helpers/token";
 
@@ -29,20 +28,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
-  useEffect(() => {
-    const token = getToken();
+  const loadUserFromToken = async () => {
+    try {
+      const token = await getToken();
 
-    if (token) {
-      try {
+      if (token) {
         const decodedUser: User = JSON.parse(atob(token.split(".")[1]));
-
         setUser(decodedUser);
-      } catch (error) {
-        console.error("Failed to decode token:", error);
       }
+    } catch (error) {
+      console.error("Failed to decode token:", error);
+    } finally {
+      setLoading(false);
     }
+  };
 
-    setLoading(false);
+  useEffect(() => {
+    loadUserFromToken();
   }, []);
 
   return (

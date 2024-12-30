@@ -1,7 +1,8 @@
 import { useContext } from "react";
 import { AuthContext } from "@/context/AuthContext";
 import { removeToken } from "@/helpers/token";
-import { useRouter } from "next/navigation";
+import { useRouter } from "expo-router";
+
 export const useAuth = () => {
   const router = useRouter();
   const authContext = useContext(AuthContext);
@@ -11,11 +12,12 @@ export const useAuth = () => {
   }
 
   const { user, setUser, loading } = authContext;
-  const logout = () => {
-    removeToken();
+
+  const logout = async () => {
+    await removeToken();
     setUser(null);
     router.replace("/signIn");
   };
 
-  return { setUser,user, loading, logout };
+  return { user, loading, logout };
 };

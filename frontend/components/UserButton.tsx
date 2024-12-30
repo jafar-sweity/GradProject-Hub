@@ -16,7 +16,6 @@ import UserAvatar from "./UserAvatar";
 import { useAuth } from "@/hooks/useAuth";
 import { Check, LogOutIcon, Monitor, Moon, Sun, UserIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { redirect } from "next/navigation";
 import { useTheme } from "next-themes";
 import { useQueryClient } from "@tanstack/react-query";
 

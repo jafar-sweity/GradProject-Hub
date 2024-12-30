@@ -61,6 +61,7 @@ export default function SignIn() {
     if (valid) {
       try {
         const data = await signIn(formData);
+
         if (data) {
           storeToken(data.token);
           setUser(data.user);

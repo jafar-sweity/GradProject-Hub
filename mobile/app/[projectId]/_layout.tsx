@@ -1,6 +1,6 @@
 import { Tabs } from "expo-router";
-import React from "react";
-import { ActivityIndicator, Platform } from "react-native";
+import React, { useLayoutEffect } from "react";
+import { ActivityIndicator, Platform, Text } from "react-native";
 
 import { HapticTab } from "@/components/HapticTab";
 import { IconSymbol } from "@/components/ui/IconSymbol";
@@ -9,9 +9,27 @@ import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { useAuth } from "@/hooks/useAuth";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useLocalSearchParams } from "expo-router";
+import { useNavigation } from "@react-navigation/native";
+import { getProject } from "@/services/project";
+import useFetchData from "@/hooks/useFetchData";
+
 export default function TabLayout() {
   const colorScheme = useColorScheme();
-  const { user, loading } = useAuth();
+  const { projectId } = useLocalSearchParams();
+  const { data: project, loading } = useFetchData(getProject, [
+    projectId,
+  ]) as any;
+
+  const navigation = useNavigation();
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerTitle: `${project.name}`,
+      headerLeft: () => (
+        <IconSymbol size={28} name="arrow.left" color="#22c55e" />
+      ),
+    });
+  }, [navigation, project]);
   if (loading) {
     return (
       <SafeAreaView className="flex-1 justify-center items-center">
@@ -38,30 +56,21 @@ export default function TabLayout() {
     >
       <Tabs.Screen
         name="index"
+        initialParams={{ projectId }}
+        options={{
+          title: "Tasks",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="checklist" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="demo"
+        initialParams={{ projectId }}
         options={{
           title: "Home",
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="house.fill" color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: "Explore",
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="paperplane.fill" color={color} />
-          ),
-        }}
-      />
-
-      <Tabs.Screen
-        name="studentProjects"
-        options={{
-          href: user?.role == "student" ? "/studentProjects" : null,
-          title: "Projects",
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="paperplane.fill" color={color} />
           ),
         }}
       />

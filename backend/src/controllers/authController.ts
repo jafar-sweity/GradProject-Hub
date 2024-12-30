@@ -99,6 +99,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     email: user.email,
     role: user.role,
     name: user.name,
+    avatarurl: user.avatarurl,
   };
 
   const token = generateToken(payload); // Ensure you are using the correct user ID field
@@ -111,7 +112,12 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
   res.status(200).json({
     message: "Login successful",
-    user: { id: user.user_id, name: user.name, role: user.role },
+    user: {
+      id: user.user_id,
+      name: user.name,
+      role: user.role,
+      avatarurl: user.avatarurl,
+    },
     token,
   });
 };
