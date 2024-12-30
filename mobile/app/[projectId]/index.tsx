@@ -8,6 +8,8 @@ import {
   Modal,
   TouchableOpacity,
   FlatList,
+  Image,
+  TouchableWithoutFeedback,
 } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { Picker } from "@react-native-picker/picker";
@@ -16,6 +18,9 @@ import { getProjectMembers } from "@/services/project";
 import dayjs from "dayjs";
 import useFetchData from "@/hooks/useFetchData";
 import { Button, IconButton } from "react-native-paper";
+import TaskCard from "../../components/TaskCardComponent";
+import filter from "../../assets/images/filter.png";
+import FontAwesomeIcon from "react-native-vector-icons/FontAwesome";
 
 interface Task {
   task_id: string;
@@ -44,24 +49,9 @@ const TasksScreen = () => {
   ) as any;
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [visiblePriority, setVisiblePriority] = useState(false);
-  const [visibleStatus, setVisibleStatus] = useState(false);
+  const [filtersModalVisible, setFiltersModalVisible] = useState(false);
   const [selectedPriority, setSelectedPriority] = useState<string | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
-
-  const filteredTasks = useMemo(() => {
-    const tasksArray = Array.isArray(tasks) ? tasks : [];
-    return tasksArray.filter((task: Task) => {
-      const matchesSearch =
-        task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        task.description.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesPriority =
-        !selectedPriority || task.priority === selectedPriority;
-      const matchesStatus = !selectedStatus || task.status === selectedStatus;
-
-      return matchesSearch && matchesPriority && matchesStatus;
-    });
-  }, [tasks, searchQuery, selectedPriority, selectedStatus]);
 
   const { students, supervisors } = useMemo(() => {
     const students: Record<string, string> = {};
@@ -78,46 +68,99 @@ const TasksScreen = () => {
     return { students, supervisors };
   }, [projectMembers, projectMembersLoading]);
 
-  const formatStatus = (status: Task["status"]) => {
-    const colorMap = {
+  const filteredTasks = useMemo(() => {
+    const tasksArray = Array.isArray(tasks) ? tasks : [];
+    return tasksArray.filter((task: Task) => {
+      const assignedToName = students[task.assigned_to] || "";
+
+      const matchesSearch =
+        task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        task.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (assignedToName &&
+          assignedToName.toLowerCase().includes(searchQuery.toLowerCase()));
+      const matchesPriority =
+        !selectedPriority || task.priority === selectedPriority;
+      const matchesStatus = !selectedStatus || task.status === selectedStatus;
+
+      return matchesSearch && matchesPriority && matchesStatus;
+    });
+  }, [tasks, searchQuery, selectedPriority, selectedStatus, students]);
+
+  const formatStatus = (status: string): string => {
+    const colorMap: Record<Task["status"], string> = {
       backlog: "text-gray-500 bg-gray-100",
       todo: "text-blue-500 bg-blue-100",
       "in progress": "text-yellow-500 bg-yellow-100",
       done: "text-green-500 bg-green-100",
       canceled: "text-red-500 bg-red-100",
     };
-    return colorMap[status] || "text-gray-500 bg-gray-100";
+    return colorMap[status as Task["status"]] || "text-gray-500 bg-gray-100";
   };
 
-  const formatPriority = (priority: Task["priority"]) => {
-    const colorMap = {
+  const formatPriority = (priority: string): string => {
+    const colorMap: Record<Task["priority"], string> = {
       high: "text-red-500 bg-red-100",
       medium: "text-yellow-500 bg-yellow-100",
       low: "text-green-500 bg-green-100",
     };
-    return colorMap[priority] || "text-gray-500 bg-gray-100";
+    return (
+      colorMap[priority as Task["priority"]] || "text-gray-500 bg-gray-100"
+    );
   };
 
-  const formatLabel = (label: Task["label"]) => {
-    const colorMap = {
+  const formatLabel = (label: string) => {
+    const colorMap: Record<Task["label"], string> = {
       bug: "text-red-500 bg-red-100",
       feature: "text-blue-500 bg-blue-100",
       documentation: "text-purple-500 bg-purple-100",
     };
-    return colorMap[label] || "text-gray-500 bg-gray-100";
+    return colorMap[label as Task["label"]] || "text-gray-500 bg-gray-100";
   };
 
-  const priorities = ["High", "Medium", "Low"];
-  const statuses = ["Backlog", "Todo", "In Progress", "Done", "Canceled"];
+  const priorities = ["high", "medium", "low"];
+  const statuses = ["backlog", "todo", "in Progress", "done", "canceled"];
 
-  const handleSelectPriority = (value: string) => {
-    setSelectedPriority(value);
-    setVisiblePriority(false);
+  const renderDropdownItem = (
+    item: string,
+    isSelected: boolean,
+    toggleFunc: (item: string) => void
+  ) => {
+    return (
+      <TouchableWithoutFeedback onPress={() => toggleFunc(item)} key={item}>
+        <View
+          className={`flex-row justify-between items-center p-2 rounded-sm ${
+            isSelected ? "bg-blue-100" : "bg-white"
+          }`}
+        >
+          <Text>{item.charAt(0).toUpperCase() + item.slice(1)}</Text>
+          {isSelected && (
+            <FontAwesomeIcon name="check" size={15} color="blue" />
+          )}
+        </View>
+      </TouchableWithoutFeedback>
+    );
   };
 
-  const handleSelectStatus = (value: string) => {
-    setSelectedStatus(value);
-    setVisibleStatus(false);
+  const renderFilters = (
+    filters: string[],
+    toggleFunc: (filter: string) => void
+  ) => {
+    return filters.map((filter, index) => (
+      <View
+        key={index}
+        className="flex-row-reverse items-center mx-1 rounded-full px-3 py-1 border border-gray-50"
+      >
+        <Text className="text-gray-50">
+          {filter.charAt(0).toUpperCase() + filter.slice(1)}
+        </Text>
+        <TouchableOpacity
+          className="mr-2 mb-0.5"
+          onPress={() => toggleFunc(filter)}
+        >
+          <Text className="text-xs text-gray-50 p-0.5 pr-2 ">x</Text>
+        </TouchableOpacity>
+      </View>
+    ));
   };
 
   return (
@@ -143,179 +186,50 @@ const TasksScreen = () => {
                 Project Members: {Object.values(students).join(", ") || "None"}
               </Text>
             </View>
-            <View className="space-y-2">
+            <View className="flex-row items-center space-x-2">
+              <TouchableOpacity onPress={() => setFiltersModalVisible(true)}>
+                <Image
+                  source={filter}
+                  style={{
+                    width: 30,
+                    height: 30,
+                    tintColor: "#ddd",
+                    marginRight: 8,
+                  }}
+                />
+              </TouchableOpacity>
               <TextInput
                 style={{ borderRadius: 8 }}
-                className="p-2 border  bg-secondary text-foreground"
-                placeholder="Search tasks by name or description..."
+                className="p-2 border  bg-secondary text-foreground flex-grow"
+                placeholder="Search tasks by name, description or student name"
                 value={searchQuery}
                 onChangeText={setSearchQuery}
               />
-              <View className="flex-1 p-4 bg-gray-100">
-                {/* Selected Priority */}
-                <View className="mb-6">
-                  <Text className="text-xl font-bold mb-2">
-                    Selected Priority:
-                  </Text>
-                  <Text className="text-lg text-blue-600">
-                    {selectedPriority || "None"}
-                  </Text>
-                </View>
-
-                {/* Selected Status */}
-                <View className="mb-6">
-                  <Text className="text-xl font-bold mb-2">
-                    Selected Status:
-                  </Text>
-                  <Button
-                    mode="contained"
-                    onPress={() => console.log("Pressed")}
-                  >
-                    {selectedStatus || "None"}
-                  </Button>
-                </View>
-
-                {/* Priority Icon Button */}
-                <IconButton
-                  icon="priority-high"
-                  size={30}
-                  iconColor="#fff"
-                  onPress={() => setVisiblePriority(true)}
-                  className="absolute bottom-24 right-4 bg-blue-600 p-3 rounded-full"
-                />
-
-                {/* Status Icon Button */}
-                <IconButton
-                  icon="check-circle"
-                  size={30}
-                  iconColor="#fff"
-                  onPress={() => setVisibleStatus(true)}
-                  className="absolute bottom-14 right-4 bg-green-600 p-3 rounded-full"
-                />
-
-                {/* Priority Modal */}
-                <Modal
-                  visible={visiblePriority}
-                  animationType="fade"
-                  transparent={true}
-                  onRequestClose={() => setVisiblePriority(false)}
-                >
-                  <View className="flex-1 justify-center items-center bg-black bg-opacity-50">
-                    <View className="bg-white rounded-lg p-6 w-4/5 max-h-80 overflow-auto">
-                      <Text className="text-xl font-semibold mb-4">
-                        Select Priority
-                      </Text>
-                      <FlatList
-                        data={priorities}
-                        keyExtractor={(item) => item}
-                        renderItem={({ item }) => (
-                          <TouchableOpacity
-                            onPress={() => handleSelectPriority(item)}
-                            className="p-3 border-b border-gray-200"
-                          >
-                            <Text className="text-lg text-blue-600">
-                              {item}
-                            </Text>
-                          </TouchableOpacity>
-                        )}
-                      />
-                      <Button
-                        mode="contained"
-                        onPress={() => setVisiblePriority(false)}
-                        className="mt-4"
-                      >
-                        Close
-                      </Button>
-                    </View>
-                  </View>
-                </Modal>
-
-                {/* Status Modal */}
-                <Modal
-                  visible={visibleStatus}
-                  animationType="fade"
-                  transparent={true}
-                  onRequestClose={() => setVisibleStatus(false)}
-                >
-                  <View className="flex-1 justify-center items-center bg-black bg-opacity-50">
-                    <View className="bg-white rounded-lg p-6 w-4/5 max-h-80 overflow-auto">
-                      <Text className="text-xl font-semibold mb-4">
-                        Select Status
-                      </Text>
-                      <FlatList
-                        data={statuses}
-                        keyExtractor={(item) => item}
-                        renderItem={({ item }) => (
-                          <TouchableOpacity
-                            onPress={() => handleSelectStatus(item)}
-                            className="p-3 border-b border-gray-200"
-                          >
-                            <Text className="text-lg text-green-600">
-                              {item}
-                            </Text>
-                          </TouchableOpacity>
-                        )}
-                      />
-                      <Button
-                        mode="contained"
-                        onPress={() => setVisibleStatus(false)}
-                        className="mt-4"
-                      >
-                        Close
-                      </Button>
-                    </View>
-                  </View>
-                </Modal>
-              </View>
             </View>
+          </View>
+          <View className="flex-row flex-wrap my-2">
+            {renderFilters(
+              [selectedPriority, selectedStatus].filter(
+                (item): item is string => item !== null
+              ),
+              (filter) => {
+                if (filter === selectedPriority) setSelectedPriority(null);
+                if (filter === selectedStatus) setSelectedStatus(null);
+              }
+            )}
           </View>
 
           {filteredTasks?.length ? (
             <View className="space-y-4">
               {filteredTasks.map((task: Task) => (
-                <View
+                <TaskCard
                   key={task.task_id}
-                  style={{ borderRadius: 12 }}
-                  className="p-4 border border-muted bg-secondary shadow-md"
-                >
-                  <View className="flex flex-row justify-between items-center mb-2">
-                    <Text className="font-semibold text-lg text-primary">
-                      {task.title}
-                    </Text>
-                    <Text className="text-xs text-muted-foreground">
-                      Due: {dayjs(task.due_date).format("MMM DD, YYYY")}
-                    </Text>
-                  </View>
-                  <Text className="text-sm text-muted-foreground">
-                    {task.description || "No description available."}
-                  </Text>
-                  <View className="flex flex-row flex-wrap mt-2 space-x-2">
-                    <Text
-                      className={`text-xs px-2 py-1 rounded-full ${formatStatus(
-                        task.status
-                      )}`}
-                    >
-                      {task.status}
-                    </Text>
-                    <Text
-                      className={`text-xs px-2 py-1 rounded-full ${formatPriority(
-                        task.priority
-                      )}`}
-                    >
-                      {task.priority}
-                    </Text>
-                    <Text
-                      className={`text-xs px-2 py-1 rounded-full ${formatLabel(
-                        task.label
-                      )}`}
-                    >
-                      {task.label}
-                    </Text>
-                  </View>
-                  <Text className="text-xs mt-2 text-muted-foreground">
-                    Assigned To: {students[task.assigned_to] || "Unassigned"}
-                  </Text>
-                </View>
+                  task={task}
+                  students={students}
+                  formatStatus={formatStatus}
+                  formatPriority={formatPriority}
+                  formatLabel={formatLabel}
+                />
               ))}
             </View>
           ) : (
@@ -325,6 +239,45 @@ const TasksScreen = () => {
           )}
         </View>
       )}
+
+      <Modal visible={filtersModalVisible} animationType="slide" transparent>
+        <View
+          style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
+          className="flex-1 justify-center items-center"
+        >
+          <View className="w-4/5 bg-white  p-4" style={{ borderRadius: 12 }}>
+            <Text className="text-xl font-bold mb-4">Choose Filters</Text>
+
+            <Text className="my-2 text-lg font-bold">Priority</Text>
+            {priorities.map((priority) =>
+              renderDropdownItem(
+                priority,
+                priority === selectedPriority,
+                setSelectedPriority
+              )
+            )}
+
+            <Text className="my-2 text-lg font-bold">Status</Text>
+            {statuses.map((status) =>
+              renderDropdownItem(
+                status,
+                status === selectedStatus,
+                setSelectedStatus
+              )
+            )}
+
+            <View className="mt-3">
+              <Button
+                onPress={() => setFiltersModalVisible(false)}
+                mode="contained"
+                className="bg-primary"
+              >
+                Apply Filters
+              </Button>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 };
