@@ -10,6 +10,7 @@ interface IUserCommunity extends Document {
     post_id: mongoose.Types.ObjectId; // Reference to Post
   }>;
   avatarurl: string;
+  username: string;
 }
 
 const UserCommunitySchema: Schema = new Schema({
