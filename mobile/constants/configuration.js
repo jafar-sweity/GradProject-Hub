@@ -1,1 +1,2 @@
-export const baseUrl = "http://localhost:3000/api/v1";
+//jafar change the ip address to your local ip address
+export const baseUrl = "http://192.168.1.126:3000/api/v1/";
