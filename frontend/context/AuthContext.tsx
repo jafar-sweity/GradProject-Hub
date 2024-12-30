@@ -35,6 +35,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (token) {
       try {
         const decodedUser: User = JSON.parse(atob(token.split(".")[1]));
+
         setUser(decodedUser);
       } catch (error) {
         console.error("Failed to decode token:", error);
