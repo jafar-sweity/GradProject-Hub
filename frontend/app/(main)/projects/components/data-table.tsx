@@ -402,9 +402,7 @@ export function DataTable<
                     </Select>
                   </div>
                 </div>
-                {/* Other fields (assignedTo, status, priority, label) remain unchanged */}
                 <div className="flex justify-between items-center">
-                  {/* Delete Button */}
                   <Button
                     variant="outline"
                     onClick={() => handleDeleteTask(editingTask.id)}
