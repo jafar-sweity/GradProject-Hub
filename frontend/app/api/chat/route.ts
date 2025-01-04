@@ -1,10 +1,10 @@
 import Groq from "groq-sdk";
 
-let GROQ_API_KEY = process.env.GROQ_API_KEY; 
+let GROQ_API_KEY = process.env.GROQ_API_KEY;
 const groq = new Groq({ apiKey: GROQ_API_KEY });
 
 export async function POST(req: Request) {
-  const { message } = await req.json(); 
+  const { message } = await req.json();
 
   try {
     const chatCompletion = await getGroqChatCompletion(message);

@@ -32,7 +32,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
     <View
       key={task.task_id}
       style={{ borderRadius: 12 }}
-      className="p-4 border border-muted bg-secondary shadow-md mt-2"
+      className="p-4 border border-muted bg-card shadow-md mt-2"
     >
       <View className="flex flex-row justify-between items-center mb-2">
         <Text className="font-semibold text-lg text-primary">{task.title}</Text>
@@ -44,27 +44,33 @@ const TaskCard: React.FC<TaskCardProps> = ({
         {task.description || "No description available."}
       </Text>
       <View className="flex flex-row flex-wrap mt-2 space-x-2">
-        <Text
-          className={`text-xs px-2 py-1 rounded-full ${formatStatus(
-            task.status
-          )}`}
-        >
-          {task.status}
-        </Text>
-        <Text
-          className={`text-xs px-2 py-1 rounded-full ${formatPriority(
-            task.priority
-          )}`}
-        >
-          {task.priority}
-        </Text>
-        <Text
-          className={`text-xs px-2 py-1 rounded-full ${formatLabel(
-            task.label
-          )}`}
-        >
-          {task.label}
-        </Text>
+        {task.status && (
+          <Text
+            className={`text-xs px-2 py-1 rounded-full ${formatStatus(
+              task.status
+            )}`}
+          >
+            {task.status}
+          </Text>
+        )}
+        {task.priority && (
+          <Text
+            className={`text-xs px-2 py-1 rounded-full ${formatPriority(
+              task.priority
+            )}`}
+          >
+            {task.priority}
+          </Text>
+        )}
+        {task.label && (
+          <Text
+            className={`text-xs px-2 py-1 rounded-full ${formatLabel(
+              task.label
+            )}`}
+          >
+            {task.label}
+          </Text>
+        )}
       </View>
       <Text className="text-xs mt-2 text-muted-foreground">
         Assigned To: {students[task.assigned_to] || "Unassigned"}

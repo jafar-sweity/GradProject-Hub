@@ -1,6 +1,11 @@
 import { Tabs } from "expo-router";
 import React, { useLayoutEffect } from "react";
-import { ActivityIndicator, Platform, Text } from "react-native";
+import {
+  ActivityIndicator,
+  Platform,
+  Text,
+  TouchableOpacity,
+} from "react-native";
 
 import { HapticTab } from "@/components/HapticTab";
 import { IconSymbol } from "@/components/ui/IconSymbol";
@@ -26,7 +31,9 @@ export default function TabLayout() {
     navigation.setOptions({
       headerTitle: `${project.name}`,
       headerLeft: () => (
-        <IconSymbol size={28} name="arrow.left" color="#22c55e" />
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <IconSymbol size={28} name="arrow.left" color="#22c55e" />
+        </TouchableOpacity>
       ),
     });
   }, [navigation, project]);
@@ -66,11 +73,31 @@ export default function TabLayout() {
       />
       <Tabs.Screen
         name="demo"
-        initialParams={{ projectId }}
+        initialParams={{ projectId, video_demo_url: project.video_demo_url }}
         options={{
-          title: "Home",
+          title: "Demo",
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="house.fill" color={color} />
+            <IconSymbol size={28} name="video.badge.plus" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="abstract"
+        initialParams={{ projectId, abstract_url: project.abstract_url }}
+        options={{
+          title: "Abstract",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="doc.append" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="report"
+        initialParams={{ projectId, report_url: project.report_url }}
+        options={{
+          title: "Report",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="doc.append" color={color} />
           ),
         }}
       />
