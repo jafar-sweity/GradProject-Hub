@@ -500,20 +500,26 @@ export const getBookmarkedPosts = async (
       return;
     }
 
-    // Prepare the response data
-    const posts = bookmarks.map((bookmark) => {
-      const post = bookmark.post_id as unknown as PostData;
-      return {
-        post_id: post._id,
-        content: post.content,
-        createdAt: post.createdAt ? post.createdAt.toISOString() : "", // Ensure a valid date format
-        username: post.username,
-        avatarurl: post.avatarurl,
-        isBookmarkedByUser: true,
-      };
-    });
+    // Prepare the response data with type assertion
+    const posts = bookmarks
+      .map((bookmark) => {
+        const post = bookmark.post_id as unknown as PostData; // Type assertion
 
-    // Determine the next cursor for pagination
+        if (post) {
+          return {
+            post_id: post._id,
+            content: post.content,
+            createdAt: post.createdAt ? post.createdAt.toISOString() : "", // Ensure a valid date format
+            username: post.username,
+            avatarurl: post.avatarurl,
+            isBookmarkedByUser: true,
+          };
+        } else {
+          return null;
+        }
+      })
+      .filter(Boolean); // Remove null entries
+
     const nextCursor =
       bookmarks.length === Number(limit)
         ? bookmarks[bookmarks.length - 1]._id

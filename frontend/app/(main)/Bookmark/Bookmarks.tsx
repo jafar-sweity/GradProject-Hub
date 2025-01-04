@@ -20,6 +20,7 @@ interface Post {
   createdAt: Date;
   isLikedByUser: boolean;
   isBookmarkedByUser: boolean;
+  comments: number;
 }
 
 interface PostsPage {
