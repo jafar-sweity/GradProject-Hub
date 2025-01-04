@@ -13,18 +13,15 @@ import {
   Alert,
 } from "react-native";
 import { useLocalSearchParams } from "expo-router";
-import { Picker } from "@react-native-picker/picker";
 import { getProjectTasks } from "@/services/tasks";
 import { getProjectMembers } from "@/services/project";
-import dayjs from "dayjs";
 import useFetchData from "@/hooks/useFetchData";
-import { Button, IconButton } from "react-native-paper";
+import { Button } from "react-native-paper";
 import TaskCard from "../../components/TaskCardComponent";
 import filter from "@/assets/images/filter.png";
 import FontAwesomeIcon from "react-native-vector-icons/FontAwesome";
 import TaskFormModal from "../../components/TaskFormModal";
 import { deleteTask, updateTask, addTask } from "@/services/tasks";
-import { faTimesCircle } from "@fortawesome/free-solid-svg-icons";
 
 interface Task {
   task_id: string;
@@ -234,7 +231,7 @@ const TasksScreen = () => {
 
   return (
     <View style={{ flex: 1, backgroundColor: "#f0f0f0", position: "relative" }}>
-      <ScrollView className="flex-1 p-4 bg-card">
+      <ScrollView className="flex-1 p-4 bg-background">
         {tasksLoading ? (
           <View className="flex-1 justify-center items-center">
             <ActivityIndicator size="large" color="hsl(142.1 70.6% 45.3%)" />
@@ -272,7 +269,7 @@ const TasksScreen = () => {
                 </TouchableOpacity>
                 <TextInput
                   style={{ borderRadius: 8 }}
-                  className="p-2 border  bg-secondary text-foreground flex-grow"
+                  className="p-2 border  bg-card text-foreground flex-grow"
                   placeholder="Search tasks by name, description or student name"
                   value={searchQuery}
                   onChangeText={setSearchQuery}
@@ -375,7 +372,7 @@ const TasksScreen = () => {
         onPress={handleAddTask}
         className="bg-primary bottom-24 right-5 rounded-full flex-row absolute items-center justify-center px-5 py-4"
       >
-        <FontAwesomeIcon name="plus" size={25} color="white" />
+        <FontAwesomeIcon name="plus" size={20} color="white" />
       </TouchableOpacity>
     </View>
   );

@@ -32,7 +32,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
     <View
       key={task.task_id}
       style={{ borderRadius: 12 }}
-      className="p-4 border border-muted bg-secondary shadow-md mt-2"
+      className="p-4 border border-muted bg-card shadow-md mt-2"
     >
       <View className="flex flex-row justify-between items-center mb-2">
         <Text className="font-semibold text-lg text-primary">{task.title}</Text>
