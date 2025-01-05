@@ -1,17 +1,10 @@
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  ActivityIndicator,
-  ScrollView,
-  TouchableOpacity,
-} from "react-native";
+import { View, Text, ActivityIndicator, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "@/hooks/useAuth";
 import { getStudentProject } from "@/services/studentProjects";
 import { getProjectMembers } from "@/services/project";
 import useFetchData from "@/hooks/useFetchData";
-import { router } from "expo-router";
 import ProjectCard from "@/components/ProjectCard";
 
 const StudentProjectsScreen = () => {

@@ -21,8 +21,8 @@ type Project = {
 type ProjectCardProps = {
   project: Project;
   members: Member[];
-  supervisor: Member | undefined;
-  loading: boolean;
+  supervisor?: Member | undefined;
+  loading?: boolean;
 };
 
 const ProjectCard: React.FC<ProjectCardProps> = ({
@@ -35,7 +35,8 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
 
   return (
     <View
-      className="mb-6 p-4 bg-card shadow-md border border-card-border"
+      key={project.project_id}
+      className="mb-6 p-4 bg-card shadow-md border border-card-border -z-10"
       style={{ borderRadius: 12 }}
     >
       <Text className="text-xl font-semibold text-card-foreground">
@@ -59,7 +60,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
           <ActivityIndicator size="small" color="#999" />
         ) : (
           <View className="flex-row flex-wrap gap-2">
-            {members.length ? (
+            {members && members.length ? (
               members.map((member) => (
                 <Text
                   key={member.user_id}

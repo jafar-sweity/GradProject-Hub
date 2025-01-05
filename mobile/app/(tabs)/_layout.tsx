@@ -56,6 +56,16 @@ export default function TabLayout() {
       />
 
       <Tabs.Screen
+        name="supervisorProjects"
+        options={{
+          href: user?.role == "supervisor" ? "/supervisorProjects" : null,
+          title: "Projects",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="paperplane.fill" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="studentProjects"
         options={{
           href: user?.role == "student" ? "/studentProjects" : null,
