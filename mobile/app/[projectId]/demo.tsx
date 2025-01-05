@@ -23,7 +23,6 @@ const DemoVideoScreen: React.FC = () => {
 
   const handleUpload = async () => {
     try {
-      // Request media library permissions
       const { status } =
         await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== "granted") {
@@ -31,7 +30,6 @@ const DemoVideoScreen: React.FC = () => {
         return;
       }
 
-      // Allow user to pick a video
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Videos,
         allowsEditing: false,
@@ -48,8 +46,8 @@ const DemoVideoScreen: React.FC = () => {
       const formData = new FormData();
       formData.append("file", {
         uri,
-        name: fileName || "video.mp4", // Default name if fileName is unavailable
-        type: "video/mp4", // Assuming MP4 format
+        name: fileName || "video.mp4",
+        type: "video/mp4",
       } as any);
 
       formData.append("upload_preset", "video_demo");
