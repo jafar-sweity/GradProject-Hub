@@ -51,7 +51,7 @@ export const deleteUrl = async (req: Request, res: Response) => {
   try {
     const { projectId, urlType } = req.query as {
       projectId: string;
-      urlType: string;
+      urlType: "abstract" | "video_demo" | "report";
     };
 
     const project = await Project.findByPk(projectId);
@@ -64,7 +64,7 @@ export const deleteUrl = async (req: Request, res: Response) => {
       case "abstract":
         project.abstract_url = null;
         break;
-      case "demo":
+      case "video_demo":
         project.demo_url = null;
         break;
       case "report":
