@@ -13,10 +13,15 @@ import ProjectCard from "@/components/ProjectCard";
 import { useAuth } from "@/hooks/useAuth";
 import useFetchData from "@/hooks/useFetchData";
 import { getProjectMembers } from "@/services/project";
-import { getSupervisorProjects } from "@/services/supervisorProjects";
+import {
+  addProject,
+  getSupervisorProjects,
+  updateProject,
+} from "@/services/supervisorProjects";
 import { getSemesters } from "@/services/semester";
 import DropDownPicker from "react-native-dropdown-picker";
-
+import FontAwesomeIcon from "react-native-vector-icons/FontAwesome";
+import ProjectDialog from "@/components/ProjectDialog";
 interface User {
   user_id: number;
   name: string;
@@ -48,10 +53,14 @@ export default function SupervisorProjectsPage() {
   );
   const [searchQuery, setSearchQuery] = useState<string>("");
 
-  const { data: projectsData, loading: projectsLoading } = useFetchData(
-    getSupervisorProjects,
-    [user?.id ?? "", selectedSemester ?? ""]
-  );
+  const {
+    data: projectsData,
+    loading: projectsLoading,
+    refetch,
+  } = useFetchData(getSupervisorProjects, [
+    user?.id ?? "",
+    selectedSemester ?? "",
+  ]);
 
   const projects = Array.isArray(projectsData) ? projectsData : [];
 
@@ -62,7 +71,8 @@ export default function SupervisorProjectsPage() {
     {}
   );
   const [isOpen, setIsOpen] = useState(false);
-
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingProject, setEditingProject] = useState<any>(null);
   useEffect(() => {
     if (projects) {
       projects.forEach((project: any) => {
@@ -90,32 +100,25 @@ export default function SupervisorProjectsPage() {
         }
       });
     }
-  }, [projects, projectMembersMap]);
+  }, [projects, projectMembersMap, isDialogOpen]);
 
-  const filteredProjects = projects?.filter((project: any) => {
-    const projectName = project.Project?.name?.toLowerCase() || "";
-    const members = projectMembersMap[project.project_id] || [];
-    const memberNames = members
-      .map((member) => member.User?.name?.toLowerCase())
-      .join(" ");
+  const [filteredProjects, setFilteredProjects] = useState<any[]>([]);
 
-    return (
-      projectName.includes(searchQuery.toLowerCase()) ||
-      memberNames.includes(searchQuery.toLowerCase())
-    );
-  });
+  useEffect(() => {
+    const filtered = projects?.filter((project: any) => {
+      const projectName = project.Project?.name?.toLowerCase() || "";
+      const members = projectMembersMap[project.project_id] || [];
+      const memberNames = members
+        ?.map((member) => member.User?.name?.toLowerCase())
+        .join(" ");
 
-  const handleAddProject = () => {
-    // Add project logic
-  };
-
-  const handleEditProject = (project: any) => {
-    // Edit project logic
-  };
-
-  const showAlert = (message: string, type: "success" | "error") => {
-    Alert.alert(type === "success" ? "Success" : "Error", message);
-  };
+      return (
+        projectName.includes(searchQuery.toLowerCase()) ||
+        memberNames.includes(searchQuery.toLowerCase())
+      );
+    });
+    setFilteredProjects(filtered);
+  }, [projects, projectMembersMap, searchQuery]);
 
   if (semesterLoading || projectsLoading) {
     return (
@@ -125,79 +128,136 @@ export default function SupervisorProjectsPage() {
     );
   }
 
+  const handleAddProject = () => {
+    setEditingProject(null);
+    setIsDialogOpen(true);
+  };
+
+  const handleEditProject = (project: any) => {
+    const members = projectMembersMap[project.project_id] || [];
+    const memberNames = members?.map((member) => member.User?.email);
+
+    setIsDialogOpen(true);
+    setEditingProject({
+      project_id: project.project_id,
+      name: project.Project.name,
+      description: project.Project.description,
+      students: memberNames,
+    });
+  };
+
+  const handleDialogSubmit = async (data: {
+    project_id?: string;
+    name: string;
+    description: string;
+    students: string[];
+  }) => {
+    try {
+      if (editingProject) {
+        await updateProject(editingProject.project_id, data);
+        Alert.alert("Project updated successfully!");
+      } else {
+        await addProject(data);
+        Alert.alert("New project added successfully!");
+      }
+      refetch();
+      setIsDialogOpen(false);
+    } catch (error) {
+      console.log("Error adding project:", error);
+      Alert.alert("An error occurred while updating the projects.");
+    }
+  };
+
   DropDownPicker.setTheme("DARK");
 
   return (
     <SafeAreaView>
-      <FlatList
-        className="min-h-full"
-        ListHeaderComponent={
-          <>
-            <View className="py-2">
-              <Text className="text-3xl font-bold text-white">
-                Supervised Projects
-              </Text>
-              <Text className="text-muted-foreground">
-                A list of all the projects you are supervising.
-              </Text>
+      <View>
+        <FlatList
+          className="min-h-full"
+          ListHeaderComponent={
+            <>
+              <View className="py-2">
+                <Text className="text-3xl font-bold text-white">
+                  Supervised Projects
+                </Text>
+                <Text className="text-muted-foreground">
+                  A list of all the projects you are supervising.
+                </Text>
 
-              <View className="flex-row items-center w-full justify-between mt-4">
-                <TextInput
-                  style={{ borderRadius: 8 }}
-                  placeholder="Search projects or members..."
-                  className="bg-card w-4/6 px-4 py-2 text-white"
-                  value={searchQuery}
-                  onChangeText={setSearchQuery}
-                />
-
-                <View style={{ width: "30%" }}>
-                  <DropDownPicker
-                    textStyle={{
-                      fontSize: 12,
-                      color: "white",
-                    }}
-                    open={isOpen}
-                    value={selectedSemester || semesters[0]?.name}
-                    items={semesters?.map((semester: { name: string }) => ({
-                      label: semester.name,
-                      value: semester.name,
-                    }))}
-                    setOpen={setIsOpen}
-                    setValue={setSelectedSemester}
-                    setItems={() => {}}
-                    placeholder="Select Semester"
-                    style={{
-                      backgroundColor: "hsl(24 9.8% 10%)",
-                      borderRadius: 8,
-                    }}
-                    dropDownContainerStyle={{
-                      backgroundColor: "hsl(24 9.8% 10%)",
-                      borderRadius: 8,
-                    }}
+                <View className="flex-row items-center w-full justify-between mt-4">
+                  <TextInput
+                    style={{ borderRadius: 8 }}
+                    placeholder="Search projects or members..."
+                    className="bg-card w-4/6 px-4 py-2 text-white"
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
                   />
+
+                  <View style={{ width: "30%" }}>
+                    <DropDownPicker
+                      textStyle={{
+                        fontSize: 12,
+                        color: "white",
+                      }}
+                      open={isOpen}
+                      value={selectedSemester || semesters[0]?.name}
+                      items={semesters?.map((semester: { name: string }) => ({
+                        label: semester.name,
+                        value: semester.name,
+                      }))}
+                      setOpen={setIsOpen}
+                      setValue={setSelectedSemester}
+                      setItems={() => {}}
+                      placeholder="Select Semester"
+                      style={{
+                        backgroundColor: "hsl(24 9.8% 10%)",
+                        borderRadius: 8,
+                      }}
+                      dropDownContainerStyle={{
+                        backgroundColor: "hsl(24 9.8% 10%)",
+                        borderRadius: 8,
+                      }}
+                    />
+                  </View>
                 </View>
               </View>
-              <TouchableOpacity onPress={handleAddProject}>
-                <Text className="text-white">Add Project</Text>
-              </TouchableOpacity>
-            </View>
-          </>
-        }
-        data={filteredProjects}
-        keyExtractor={(item: any) => item.project_id.toString()}
-        renderItem={({ item }) => (
-          <ProjectCard
-            key={item.project_id}
-            project={item}
-            members={projectMembersMap[item.project_id]}
-            // onEdit={handleEditProject}
-          />
-        )}
-        ListEmptyComponent={
-          <Text className="text-white">No projects found.</Text>
-        }
-        ListFooterComponent={<View className="pb-8" />}
-      />
+            </>
+          }
+          data={filteredProjects}
+          keyExtractor={(item: any) => item.project_id.toString()}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              className="-z-10"
+              onPress={() => handleEditProject(item)}
+            >
+              <ProjectCard
+                key={item.project_id}
+                project={item}
+                members={projectMembersMap[item.project_id]}
+              />
+            </TouchableOpacity>
+          )}
+          ListEmptyComponent={
+            <Text className="text-white">No projects found.</Text>
+          }
+          ListFooterComponent={<View className="pb-8" />}
+        />
+        <TouchableOpacity
+          onPress={handleAddProject}
+          className="bg-primary bottom-16 right-5 rounded-full flex-row absolute items-center justify-center px-5 py-4"
+        >
+          <FontAwesomeIcon name="plus" size={20} color="white" />
+        </TouchableOpacity>
+        <ProjectDialog
+          isOpen={isDialogOpen}
+          onClose={() => {
+            setIsDialogOpen(false);
+          }}
+          onSubmit={handleDialogSubmit}
+          initialValues={editingProject}
+        />
+      </View>
     </SafeAreaView>
   );
 }

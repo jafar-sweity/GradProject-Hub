@@ -47,7 +47,9 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
       </Text>
 
       <View className="mt-4">
-        <Text className="text-foreground font-medium mb-2">Supervisor:</Text>
+        {supervisor && (
+          <Text className="text-foreground font-medium mb-2">Supervisor:</Text>
+        )}
         <View className="flex-row flex-wrap gap-2">
           {supervisor && (
             <Text className="mb-2 px-3 py-1 rounded-full bg-green-100 text-green-800">
