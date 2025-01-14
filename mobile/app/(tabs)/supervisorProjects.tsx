@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   SafeAreaView,
   FlatList,
+  Button,
 } from "react-native";
 import ProjectCard from "@/components/ProjectCard";
 import { useAuth } from "@/hooks/useAuth";
@@ -22,6 +23,7 @@ import { getSemesters } from "@/services/semester";
 import DropDownPicker from "react-native-dropdown-picker";
 import FontAwesomeIcon from "react-native-vector-icons/FontAwesome";
 import ProjectDialog from "@/components/ProjectDialog";
+import axiosInstance from "@/lib/axiosInstance";
 interface User {
   user_id: number;
   name: string;
@@ -173,6 +175,23 @@ export default function SupervisorProjectsPage() {
   return (
     <SafeAreaView>
       <View>
+        <Button
+          title="send notification"
+          onPress={async () => {
+            axiosInstance
+              .post("notification/send-notification", {
+                userId: 15,
+                body: "you have a new project",
+                title: "Supervisor Notification",
+              })
+              .then((res) => {
+                console.log("fasdfad", res.data);
+              })
+              .catch((err) => {
+                console.log(err);
+              });
+          }}
+        />
         <FlatList
           className="min-h-full"
           ListHeaderComponent={
