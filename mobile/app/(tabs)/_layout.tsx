@@ -72,7 +72,7 @@ export default function TabLayout() {
 
       const notificationListener =
         Notifications.addNotificationReceivedListener((notification) => {
-          console.log("Notification received:", notification);
+          // console.log("Notification received:", notification.request.content);
         });
       return () => {
         Notifications.removeNotificationSubscription(notificationListener);

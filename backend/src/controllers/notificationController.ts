@@ -18,24 +18,15 @@ export const registerNotification = async (req: Request, res: Response) => {
   }
 };
 
-export const sendNotification = async (req: Request, res: Response) => {
-  const { title, body, userId } = req.body;
-  const user = await User.findByPk(userId);
-  if (!user) {
-    res.status(404).json({ message: "User not found" });
-    return;
-  }
-  if (!user.notificationToken) {
-    res
-      .status(400)
-      .json({ message: "User has not registered for notifications" });
-    return;
-  }
-
+export const sendPushNotification = async (
+  notificationToken: string,
+  title: string,
+  body: string
+): Promise<void> => {
   const expo = new Expo();
   const messages = [
     {
-      to: user.notificationToken,
+      to: notificationToken,
       sound: "default",
       title,
       body,
@@ -43,17 +34,32 @@ export const sendNotification = async (req: Request, res: Response) => {
   ];
   const chunks = expo.chunkPushNotifications(messages);
 
-  setTimeout(async () => {
-    for (const chunk of chunks) {
-      try {
-        await expo.sendPushNotificationsAsync(chunk);
-        console.log("Notification sent successfully");
+  for (const chunk of chunks) {
+    await expo.sendPushNotificationsAsync(chunk);
+  }
+};
 
-        res.status(200).send({ message: "Notification sent successfully" });
-      } catch (error) {
-        console.error(error);
-        res.status(500).send({ message: "Error sending notification to user" });
-      }
+export const sendNotification = async (req: Request, res: Response) => {
+  const { title, body, userId } = req.body;
+  try {
+    const user = await User.findByPk(userId);
+    if (!user) {
+      res.status(404).json({ message: "User not found" });
+      return;
     }
-  }, 15000);
+
+    if (!user.notificationToken) {
+      res
+        .status(400)
+        .json({ message: "User has not registered for notifications" });
+      return;
+    }
+
+    await sendPushNotification(user.notificationToken, title, body);
+    console.log("Notification sent successfully");
+    res.status(200).send({ message: "Notification sent successfully" });
+  } catch (error) {
+    console.error("Error sending notification:", error);
+    res.status(500).send({ message: "Error sending notification to user" });
+  }
 };

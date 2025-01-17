@@ -20,10 +20,10 @@ import {
   updateProject,
 } from "@/services/supervisorProjects";
 import { getSemesters } from "@/services/semester";
+import { sendNotification } from "@/services/notification";
 import DropDownPicker from "react-native-dropdown-picker";
 import FontAwesomeIcon from "react-native-vector-icons/FontAwesome";
 import ProjectDialog from "@/components/ProjectDialog";
-import axiosInstance from "@/lib/axiosInstance";
 interface User {
   user_id: number;
   name: string;
@@ -75,34 +75,35 @@ export default function SupervisorProjectsPage() {
   const [isOpen, setIsOpen] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<any>(null);
+  const [refetchProjectMembers, setRefetchProjectMembers] = useState(false);
   useEffect(() => {
-    if (projects) {
-      projects.forEach((project: any) => {
-        if (!projectMembersMap[project.project_id]) {
+    projects.forEach((project: any) => {
+      setLoadingMembers((prev) => ({
+        ...prev,
+        [project.project_id]: true,
+      }));
+      getProjectMembers(project.project_id)
+        .then((members) => {
+          const studentMembers = members.filter(
+            (member: any) => member.role === "student"
+          );
+
+          setProjectMembersMap((prev) => ({
+            ...prev,
+            [project.project_id]: studentMembers,
+          }));
+        })
+        .catch((error) => {
+          console.log("Error getting project members:", error);
+        })
+        .finally(() => {
           setLoadingMembers((prev) => ({
             ...prev,
-            [project.project_id]: true,
+            [project.project_id]: false,
           }));
-          getProjectMembers(project.project_id)
-            .then((members) => {
-              const studentMembers = members.filter(
-                (member: any) => member.role === "student"
-              );
-              setProjectMembersMap((prev) => ({
-                ...prev,
-                [project.project_id]: studentMembers,
-              }));
-            })
-            .finally(() => {
-              setLoadingMembers((prev) => ({
-                ...prev,
-                [project.project_id]: false,
-              }));
-            });
-        }
-      });
-    }
-  }, [projects, projectMembersMap, isDialogOpen]);
+        });
+    });
+  }, [refetchProjectMembers, projects, isDialogOpen]);
 
   const [filteredProjects, setFilteredProjects] = useState<any[]>([]);
 
@@ -157,6 +158,20 @@ export default function SupervisorProjectsPage() {
     try {
       if (editingProject) {
         await updateProject(editingProject.project_id, data);
+        setRefetchProjectMembers((prev) => !prev);
+        // console.log(data.students);
+
+        // setProjectMembersMap((prev) => {
+        //   const updatedMembers = prev[editingProject.project_id].filter(
+        //     (member) => {
+        //       return data.students.includes(member.User.email);
+        //     }
+        //   );
+        //   return {
+        //     ...prev,
+        //     [editingProject.project_id]: updatedMembers,
+        //   };
+        // });
         Alert.alert("Project updated successfully!");
       } else {
         await addProject(data);
@@ -175,23 +190,6 @@ export default function SupervisorProjectsPage() {
   return (
     <SafeAreaView>
       <View>
-        <Button
-          title="send notification"
-          onPress={async () => {
-            axiosInstance
-              .post("notification/send-notification", {
-                userId: 15,
-                body: "you have a new project",
-                title: "Supervisor Notification",
-              })
-              .then((res) => {
-                console.log("fasdfad", res.data);
-              })
-              .catch((err) => {
-                console.log(err);
-              });
-          }}
-        />
         <FlatList
           className="min-h-full"
           ListHeaderComponent={

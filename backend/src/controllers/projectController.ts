@@ -7,6 +7,7 @@ import {
   getCurrentSemester,
   getCurrentSemesterMethod,
 } from "./semesterController.js";
+import { sendPushNotification } from "./notificationController.js";
 
 export const createProjectBySupervisor = async (
   req: Request,
@@ -53,6 +54,11 @@ export const createProjectBySupervisor = async (
         project_id: project.project_id,
         role: "student",
       });
+      await sendPushNotification(
+        student.notificationToken,
+        "Project Added",
+        `You have been added to the project ${project.name} by the supervisor ${user?.name}`
+      );
     }
     res.status(201).json(project);
   } catch (error: any) {
@@ -132,55 +138,71 @@ export const updateProject = async (req: Request, res: Response) => {
         where: { project_id: req.params.id },
       }
     );
+    if (!updated) {
+      res.status(404).json({ error: "Project not found" });
+      return;
+    }
+    const existingStudentRoles = await UserProjectRoles.findAll({
+      where: {
+        project_id: req.params.id,
+        role: "student",
+      },
+    });
 
-    if (updated) {
-      const existingStudentRoles = await UserProjectRoles.findAll({
+    const existingStudentIds = existingStudentRoles.map((role) => role.user_id);
+    const newStudentIds = [];
+
+    for (const email of students) {
+      const student = await User.findOne({
         where: {
-          project_id: req.params.id,
+          email: email,
           role: "student",
         },
       });
+      if (!student) continue;
 
-      const existingStudentIds = existingStudentRoles.map(
-        (role) => role.user_id
-      );
-      const newStudentIds = [];
+      newStudentIds.push(student.user_id);
 
-      for (const email of students) {
-        const student = await User.findOne({
+      if (!existingStudentIds.includes(student.user_id)) {
+        await UserProjectRoles.create({
+          user_id: student.user_id,
+          project_id: req.params.id,
+          role: "student",
+        });
+
+        if (student.notificationToken) {
+          await sendPushNotification(
+            student.notificationToken,
+            "Project Updated",
+            `You have been added to the project "${name}".`
+          );
+        }
+      }
+    }
+
+    for (const existingStudentId of existingStudentIds) {
+      if (!newStudentIds.includes(existingStudentId)) {
+        await UserProjectRoles.destroy({
           where: {
-            email: email,
+            user_id: existingStudentId,
+            project_id: req.params.id,
             role: "student",
           },
         });
-        if (student) {
-          newStudentIds.push(student.user_id);
-          if (!existingStudentIds.includes(student.user_id)) {
-            await UserProjectRoles.create({
-              user_id: student.user_id,
-              project_id: req.params.id,
-              role: "student",
-            });
-          }
-        }
-      }
 
-      for (const existingStudentId of existingStudentIds) {
-        if (!newStudentIds.includes(existingStudentId)) {
-          await UserProjectRoles.destroy({
-            where: {
-              user_id: existingStudentId,
-              project_id: req.params.id,
-              role: "student",
-            },
-          });
+        const removedStudent = await User.findByPk(existingStudentId);
+
+        if (removedStudent?.notificationToken) {
+          await sendPushNotification(
+            removedStudent.notificationToken,
+            "Project Updated",
+            `You have been removed from the project "${name}".`
+          );
         }
       }
-      const updatedProject = await Project.findByPk(req.params.id);
-      res.status(200).json(updatedProject);
-    } else {
-      res.status(404).json({ error: "Project not found" });
     }
+    const updatedProject = await Project.findByPk(req.params.id);
+    res.status(200).json(updatedProject);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
