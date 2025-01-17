@@ -8,6 +8,7 @@ import {
   FlatList,
   Alert,
   TextInput,
+  ActivityIndicator,
 } from "react-native";
 import { useAuth } from "@/hooks/useAuth";
 import { formatRelative } from "date-fns";
@@ -108,90 +109,104 @@ interface Comment {
 }
 
 const CommentsList: React.FC<{ comments: string }> = ({ comments }) => {
+  const { user } = useAuth();
   const [realComments, setRealComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
   const [isAddingComment, setIsAddingComment] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // Loading state for comments
+
+  const fetchComments = async () => {
+    setIsLoading(true);
+    try {
+      const response = await axiosInstance.get(
+        `/community/comments/post/${comments}`
+      );
+      setRealComments(response.data.comments);
+    } catch (error) {
+      console.error("Failed to fetch comments", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    async function fetchComments() {
-      try {
-        const response = await axiosInstance.get(
-          `/community/comments/post/${comments}`
-        );
-        const data = response.data;
-        setRealComments(data.comments);
-      } catch (error) {
-        console.error("Failed to fetch comments", error);
-      }
-    }
     fetchComments();
   }, [comments]);
 
   const handleAddComment = async () => {
     if (!newComment.trim()) return;
 
+    setIsAddingComment(true); // Show loading indicator
     try {
       const response = await axiosInstance.post(
-        `/community/comments/post/${comments}`,
+        `community/comments/post/${comments}`,
         {
           content: newComment,
+          user_id: user?.id,
         }
       );
 
-      // Assuming the API returns the newly added comment
-      const addedComment = response.data.comment;
-      setRealComments((prev) => [...prev, addedComment]);
-      setNewComment("");
-      setIsAddingComment(false);
+      // Refetch comments to ensure the list is updated
+      fetchComments();
+      setNewComment(""); // Clear the input field
     } catch (error) {
       console.error("Failed to add comment", error);
+    } finally {
+      setIsAddingComment(false); // Hide loading indicator
     }
   };
 
   return (
     <>
-      {/* Comments List */}
-      <FlatList
-        data={realComments}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
-          <View style={styles.commentContainer}>
-            <Image
-              source={{ uri: item.author.avatarurl }}
-              style={styles.avatar}
-            />
-            <View style={styles.commentDetails}>
-              <Text style={styles.commentUsername}>{item.author.username}</Text>
-              <Text style={styles.commentContent}>{item.content}</Text>
-            </View>
-          </View>
-        )}
-      />
-
-      {/* Show/Hide Add Comment Input */}
-      {isAddingComment ? (
-        <View style={styles.addCommentContainer}>
-          <TextInput
-            style={styles.commentInput}
-            placeholder="Write a comment..."
-            value={newComment}
-            onChangeText={setNewComment}
-          />
-          <TouchableOpacity
-            onPress={handleAddComment}
-            style={styles.addCommentButton}
-          >
-            <Text style={styles.addCommentButtonText}>Submit</Text>
-          </TouchableOpacity>
-        </View>
+      {/* Loading Indicator */}
+      {isLoading ? (
+        <ActivityIndicator size="large" color="#4CAF50" />
       ) : (
-        <TouchableOpacity
-          onPress={() => setIsAddingComment(true)}
-          style={styles.showAddCommentButton}
-        >
-          <Text style={styles.showAddCommentButtonText}>Add a Comment</Text>
-        </TouchableOpacity>
+        <FlatList
+          data={realComments}
+          keyExtractor={(item, index) =>
+            item.id ? item.id.toString() : index.toString()
+          }
+          renderItem={({ item }) => {
+            const avatar =
+              item.author?.avatarurl ||
+              "https://example.com/default-avatar.png";
+            const username = item.author?.username;
+
+            return (
+              <View style={styles.commentContainer}>
+                <Image source={{ uri: avatar }} style={styles.avatar} />
+                <View style={styles.commentDetails}>
+                  <Text style={styles.commentUsername}>{username}</Text>
+                  <Text style={styles.commentContent}>{item.content}</Text>
+                </View>
+              </View>
+            );
+          }}
+        />
       )}
+
+      {/* Add Comment Section */}
+      <View style={styles.addCommentContainer}>
+        <TextInput
+          style={styles.commentInput}
+          placeholder="Write a comment..."
+          value={newComment}
+          onChangeText={setNewComment}
+          editable={!isAddingComment} // Disable input while loading
+        />
+        <TouchableOpacity
+          onPress={handleAddComment}
+          style={styles.addCommentButton}
+          disabled={isAddingComment} // Disable button while loading
+        >
+          {isAddingComment ? (
+            <ActivityIndicator size="small" color="#fff" />
+          ) : (
+            <Text style={styles.addCommentButtonText}>Submit</Text>
+          )}
+        </TouchableOpacity>
+      </View>
     </>
   );
 };

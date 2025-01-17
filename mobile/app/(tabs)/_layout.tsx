@@ -66,6 +66,19 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="Social"
+        options={{
+          title: "Social",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol
+              size={28}
+              name="bubble.left.and.bubble.right.fill"
+              color={color}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="Profile"
         options={{
           title: "Profile",
