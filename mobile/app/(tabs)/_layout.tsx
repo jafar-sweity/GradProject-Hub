@@ -65,7 +65,7 @@ export default function TabLayout() {
           ),
         }}
       />
-      <Tabs.Screen
+      {/* <Tabs.Screen
         name="Social"
         options={{
           title: "Social",
@@ -77,13 +77,23 @@ export default function TabLayout() {
             />
           ),
         }}
-      />
+      /> */}
+
       <Tabs.Screen
         name="Profile"
         options={{
           title: "Profile",
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="person.crop.circle" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="Recommendation"
+        options={{
+          title: "Recommendation",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="star.fill" color={color} />
           ),
         }}
       />
