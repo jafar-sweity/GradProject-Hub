@@ -38,12 +38,12 @@ export const getallPosts = async () => {
   }
 };
 export const getallPostsCurrentUser = async (userId: string) => {
-  console.log("the user id is", userId);
+
 
   try {
     const response = await axiosInstance.get("community/posts/forYou", {
       params: {
-        userId, // Pass user_id as a query parameter
+        userId,
       },
     });
 
@@ -52,8 +52,8 @@ export const getallPostsCurrentUser = async (userId: string) => {
       user_id: post.user_id,
       content: post.content,
       likes: post.likes || 0,
-      username: post.username || "Unknown", // Fallback for username
-      avatarurl: post.avatarurl || "", // Provide a fallback for avatar
+      username: post.username || "Unknown",
+      avatarurl: post.avatarurl || "", 
       createdAt: new Date(post.createdAt),
       isLikedByUser: post.isLikedByUser,
       isBookmarkedByUser: post.isBookmarkedByUser,

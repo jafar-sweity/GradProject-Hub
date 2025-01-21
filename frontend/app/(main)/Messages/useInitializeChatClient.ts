@@ -2,11 +2,12 @@ import { useEffect, useState } from "react";
 import { StreamChat } from "stream-chat";
 import { useSession } from "../SessionProvider";
 import axiosInstance from "@/lib/axiosInstance";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function useInitializeChatClient() {
   const { user } = useSession();
   const [chatClient, setChatClient] = useState<StreamChat | null>(null);
-
+  const { user: togetavatar } = useAuth();
   useEffect(() => {
     const client = StreamChat.getInstance(process.env.NEXT_PUBLIC_STREAM_KEY!);
 
@@ -17,10 +18,10 @@ export default function useInitializeChatClient() {
     client
       .connectUser(
         {
-          id: String(user.id), 
+          id: String(user.id),
           username: user.name,
           name: user.name,
-          image: user.avatarurl,
+          image: togetavatar?.avatarurl,
         },
         async () => {
           try {

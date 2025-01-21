@@ -143,6 +143,38 @@ export default function TabLayout() {
           ),
         }}
       />
+      {/* <Tabs.Screen
+        name="Social"
+        options={{
+          title: "Social",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol
+              size={28}
+              name="bubble.left.and.bubble.right.fill"
+              color={color}
+            />
+          ),
+        }}
+      /> */}
+
+      <Tabs.Screen
+        name="Profile"
+        options={{
+          title: "Profile",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="person.crop.circle" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="Recommendation"
+        options={{
+          title: "Recommendation",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="star.fill" color={color} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }
