@@ -63,6 +63,10 @@ const AbstractScreen: React.FC = () => {
 
   const handleDelete = async () => {
     try {
+      if (!uploadedUrl) {
+        Alert.alert("No file uploaded", "No file uploaded to delete.");
+        return;
+      }
       await deleteUrl(projectId, "abstract");
       setUploadedUrl(null);
       Alert.alert("Success", "File deleted successfully!");
@@ -93,7 +97,7 @@ const AbstractScreen: React.FC = () => {
       <View className="flex flex-row gap-4 justify-center mb-24">
         <TouchableOpacity
           onPress={handleUpload}
-          className="bg-green-500 p-4 items-center w-1/2"
+          className="bg-primary p-4 items-center w-1/2"
           disabled={uploading}
           style={{ borderRadius: 8 }}
         >

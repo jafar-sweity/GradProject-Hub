@@ -14,11 +14,14 @@ export const uploadUrl = async (
     return data;
   } catch (error) {
     console.error("Error storing URL:", error);
-    return error;
+    throw error;
   }
 };
 
-export const deleteUrl = async (projectId: string, urlType: string) => {
+export const deleteUrl = async (
+  projectId: string,
+  urlType: "abstract" | "video_demo" | "report"
+) => {
   try {
     const { data } = await axiosInstance.delete("/upload/url", {
       params: {
@@ -26,9 +29,11 @@ export const deleteUrl = async (projectId: string, urlType: string) => {
         urlType,
       },
     });
+    console.log("Deleted URL:", data);
+
     return data;
   } catch (error) {
     console.error("Error deleting URL:", error);
-    return error;
+    throw error;
   }
 };
