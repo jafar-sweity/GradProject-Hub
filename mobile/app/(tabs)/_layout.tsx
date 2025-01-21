@@ -23,7 +23,7 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
+        tabBarActiveTintColor: Colors[colorScheme ?? "light"].primary,
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,
@@ -45,15 +45,6 @@ export default function TabLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: "Explore",
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="paperplane.fill" color={color} />
-          ),
-        }}
-      />
 
       <Tabs.Screen
         name="studentProjects"
@@ -65,19 +56,15 @@ export default function TabLayout() {
           ),
         }}
       />
-      {/* <Tabs.Screen
-        name="Social"
+      <Tabs.Screen
+        name="Recommendations"
         options={{
-          title: "Social",
+          title: "Recommendations",
           tabBarIcon: ({ color }) => (
-            <IconSymbol
-              size={28}
-              name="bubble.left.and.bubble.right.fill"
-              color={color}
-            />
+            <IconSymbol size={28} name="star.fill" color={color} />
           ),
         }}
-      /> */}
+      />
 
       <Tabs.Screen
         name="Profile"
@@ -85,15 +72,6 @@ export default function TabLayout() {
           title: "Profile",
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="person.crop.circle" color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="Recommendation"
-        options={{
-          title: "Recommendation",
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="star.fill" color={color} />
           ),
         }}
       />

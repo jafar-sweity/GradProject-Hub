@@ -214,7 +214,7 @@ const CommentsList: React.FC<{ comments: string }> = ({ comments }) => {
 const styles = StyleSheet.create({
   // Post Container
   postContainer: {
-    backgroundColor: "#fff",
+    backgroundColor: "#1e1e1e",
     borderRadius: 8,
     padding: 16,
     marginBottom: 16,
@@ -242,7 +242,7 @@ const styles = StyleSheet.create({
   username: {
     fontWeight: "bold",
     fontSize: 16,
-    color: "#333", // Neutral color for username
+    color: "#fff", // Neutral color for username
   },
   timestamp: {
     fontSize: 12,
@@ -259,7 +259,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
     marginBottom: 12,
-    color: "#333", // Neutral content color
+    color: "#fff", // Neutral content color
   },
   actions: {
     flexDirection: "row",
@@ -286,7 +286,7 @@ const styles = StyleSheet.create({
   commentContainer: {
     paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: "#eee",
+    borderBottomColor: "#333",
     flexDirection: "row",
     alignItems: "center",
   },
@@ -296,11 +296,11 @@ const styles = StyleSheet.create({
   commentUsername: {
     fontWeight: "bold",
     marginBottom: 4,
-    color: "#333", // Neutral color for comment author username
+    color: "#fff", // Neutral color for comment author username
   },
   commentContent: {
     fontSize: 14,
-    color: "#333", // Neutral content color
+    color: "#fff", // Neutral content color
   },
 
   // Add Comment Section
@@ -308,28 +308,27 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: "#eee",
+    borderTopColor: "#333",
     paddingTop: 8,
   },
   commentInput: {
     flex: 1,
     height: 40,
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: "#333",
     borderRadius: 4,
     paddingHorizontal: 8,
-    backgroundColor: "#f9f9f9",
+    backgroundColor: "#333",
   },
   addCommentButton: {
     marginLeft: 8,
-    backgroundColor: "#4CAF50", // Green button for submit
+    backgroundColor: "#4CAF59", // Green button for submit
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 4,
   },
   addCommentButtonText: {
-    color: "#fff",
+    color: "#222",
     fontWeight: "bold",
   },
   showAddCommentButton: {
