@@ -9,7 +9,7 @@ import recommendationRoutes from "./recommendation.js"; // Add this line
 import uploadRoutes from "./upload.js";
 import semesterRoutes from "./semester.js";
 import chatRoutes from "./chat.js";
-
+import notificationRoutes from "./notification.js";
 // import subTaskRoutes from "./subTask.js";
 const routes = Router();
 
@@ -31,6 +31,7 @@ routes.use("/api/v1/semesters", semesterRoutes);
 
 // stream-chat routes
 routes.use("/api/v1/chat", chatRoutes);
+routes.use("/api/v1/notification", notificationRoutes);
 
 // recommendation routes
 routes.use("/api/v1/recommendations", recommendationRoutes);

@@ -42,6 +42,9 @@ class User extends Model<User> {
 
   @Column({ type: DataType.STRING, allowNull: true })
   avatarurl!: string;
+
+  @Column({ type: DataType.STRING, allowNull: true })
+  notificationToken!: string;
 }
 
 export default User;
