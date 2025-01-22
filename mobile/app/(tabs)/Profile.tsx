@@ -11,13 +11,13 @@ import {
   RefreshControl,
   Modal,
   TextInput,
-  Button,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { useAuth } from "@/hooks/useAuth";
 import axiosInstance from "@/lib/axiosInstance";
 import Post from "@/components/Post";
 import { getallPostsCurrentUser } from "@/services/PostData";
+import { Ionicons } from "@expo/vector-icons"; // For the logout icon
 
 const fetchUser = async (username: string, currentUserId: string) => {
   const response = await axiosInstance.get(`/community/users/${username}`, {
@@ -30,18 +30,16 @@ const UserProfile = () => {
   const [avatarUrl, setAvatarUrl] = useState(
     "https://via.placeholder.com/150?text=Avatar"
   );
-
   const [previousAvatarUrl, setPreviousAvatarUrl] = useState(avatarUrl);
-
   interface UserData {
     username: string;
-    bio: string;
-    avatarurl: string;
+    bio?: string;
+    avatarurl?: string;
     followersCount: number;
     followingCount: number;
     postsCount: number;
   }
-
+  
   const [userdata, setUserdata] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const [posts, setPosts] = useState<any>([]);
@@ -50,7 +48,7 @@ const UserProfile = () => {
   const [editedName, setEditedName] = useState("");
   const [editedBio, setEditedBio] = useState("");
 
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   useEffect(() => {
     loadUserProfile();
@@ -120,6 +118,18 @@ const UserProfile = () => {
     }
   };
 
+  const handleLogout = async () => {
+    Alert.alert(
+      "Logout",
+      "Are you sure you want to log out?",
+      [
+        { text: "Cancel", style: "cancel" },
+        { text: "Logout", onPress: () => logout() },
+      ],
+      { cancelable: true }
+    );
+  };
+
   const data = [
     { type: "profile", userdata },
     ...posts.map((post: any) => ({ type: "post", ...post })),
@@ -129,6 +139,12 @@ const UserProfile = () => {
     if (item.type === "profile") {
       return (
         <View style={styles.infoContainer}>
+          {/* Logout Button */}
+          <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
+            <Ionicons name="log-out-outline" size={24} color="#fff" />
+          </TouchableOpacity>
+
+          {/* Avatar and Edit Profile Button */}
           <View style={styles.avatarContainer}>
             <Image source={{ uri: avatarUrl }} style={styles.avatar} />
             <View style={styles.buttonRow}>
@@ -141,9 +157,11 @@ const UserProfile = () => {
             </View>
           </View>
 
+          {/* Username and Bio */}
           <Text style={styles.username}>{item.userdata.username}</Text>
           <Text style={styles.textMuted}>@{item.userdata.username}</Text>
 
+          {/* Stats */}
           <View style={styles.statsContainer}>
             <Text style={styles.statText}>
               {item.userdata.followersCount} Followers
@@ -156,6 +174,7 @@ const UserProfile = () => {
             </Text>
           </View>
 
+          {/* Bio */}
           {item.userdata.bio && (
             <Text style={styles.bio}>{item.userdata.bio}</Text>
           )}
@@ -235,11 +254,18 @@ const UserProfile = () => {
 
             {/* Modal Buttons */}
             <View style={styles.modalButtons}>
-              <Button title="Save" onPress={handleSaveProfile} />
-              <Button
-                title="Cancel"
+              <TouchableOpacity
+                style={styles.saveButton}
+                onPress={handleSaveProfile}
+              >
+                <Text style={styles.saveButtonText}>Save</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.cancelButton}
                 onPress={() => setEditModalVisible(false)}
-              />
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </View>
@@ -253,6 +279,14 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     padding: 20,
     backgroundColor: "#121212",
+  },
+  logoutButton: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    padding: 10,
+    backgroundColor: "#333",
+    borderRadius: 20,
   },
   avatarContainer: {
     alignSelf: "center",
@@ -372,6 +406,30 @@ const styles = StyleSheet.create({
   modalButtons: {
     flexDirection: "row",
     justifyContent: "space-between",
+  },
+  saveButton: {
+    backgroundColor: "#4CAF50",
+    padding: 10,
+    borderRadius: 5,
+    flex: 1,
+    marginRight: 5,
+    alignItems: "center",
+  },
+  saveButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
+  cancelButton: {
+    backgroundColor: "#f44336",
+    padding: 10,
+    borderRadius: 5,
+    flex: 1,
+    marginLeft: 5,
+    alignItems: "center",
+  },
+  cancelButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
   },
 });
 

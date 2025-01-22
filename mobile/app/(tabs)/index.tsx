@@ -123,7 +123,6 @@ const HomeScreen = () => {
 
   const sections = [
     { title: "Trending Projects", data: projects, type: "projects" },
-    { title: "Skill Matches for You", data: skillMatches, type: "skills" },
     { title: "Community Updates", data: communityUpdates, type: "updates" },
   ];
 
@@ -171,8 +170,7 @@ const HomeScreen = () => {
                       </Text>
                     </TouchableOpacity>
                   );
-                } 
-                 else if (item.type === "updates") {
+                } else if (item.type === "updates") {
                   return (
                     <Post
                       key={subItem.id}

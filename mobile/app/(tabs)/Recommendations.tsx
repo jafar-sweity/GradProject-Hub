@@ -3,7 +3,6 @@ import {
   View,
   Text,
   TextInput,
-  Button,
   ActivityIndicator,
   ScrollView,
   Image,
@@ -12,6 +11,7 @@ import {
 import { Colors } from "@/constants/Colors"; // Adjust with your color scheme
 import { useAuth } from "@/hooks/useAuth";
 import axiosInstance from "@/lib/axiosInstance";
+
 const imageMap: Record<string, any> = {
   "Imad Natsheh": require("../../assets/images/supervisor/imad_natsheh.png"),
   "Manar Qamhieh": require("../../assets/images/supervisor/manar_qamhieh.png"),
@@ -41,9 +41,11 @@ const SupervisorCard = ({
   <View
     style={{
       padding: 15,
-      backgroundColor: Colors.light.background,
+      backgroundColor: Colors.dark.cardBackground,
       borderRadius: 10,
       marginBottom: 15,
+      borderWidth: 1,
+      borderColor: Colors.dark.border,
     }}
   >
     <View style={{ flexDirection: "row", alignItems: "center" }}>
@@ -51,10 +53,24 @@ const SupervisorCard = ({
         source={imageMap[name] || imageMap.default}
         style={{ width: 50, height: 50, borderRadius: 25 }}
       />
-
-      <Text style={{ fontSize: 18, fontWeight: "bold" }}>{name}</Text>
+      <Text
+        style={{
+          fontSize: 18,
+          fontWeight: "bold",
+          color: Colors.dark.text,
+          marginLeft: 10,
+        }}
+      >
+        {name}
+      </Text>
     </View>
-    <Text style={{ fontSize: 14, color: "gray", marginVertical: 10 }}>
+    <Text
+      style={{
+        fontSize: 14,
+        color: Colors.dark.secondaryText,
+        marginVertical: 10,
+      }}
+    >
       {bio}
     </Text>
     <Text style={{ fontSize: 14, color: Colors.primary }}>
@@ -133,15 +149,23 @@ export default function RecommendationPage() {
   };
 
   return (
-    <ScrollView contentContainerStyle={{ padding: 20 }}>
+    <ScrollView
+      contentContainerStyle={{
+        padding: 20,
+        backgroundColor: Colors.dark.background,
+        flexGrow: 1,
+      }}
+    >
       {selectedSupervisor ? (
         <View>
           <View
             style={{
               padding: 20,
-              backgroundColor: "#f9f9f9",
+              backgroundColor: Colors.dark.cardBackground,
               borderRadius: 10,
               marginVertical: 10,
+              borderWidth: 1,
+              borderColor: Colors.dark.border,
             }}
           >
             <Text
@@ -165,7 +189,9 @@ export default function RecommendationPage() {
               >
                 Position:
               </Text>
-              <Text style={{ fontSize: 16, color: "gray", marginTop: 5 }}>
+              <Text
+                style={{ fontSize: 16, color: Colors.dark.text, marginTop: 5 }}
+              >
                 {selectedSupervisor.position}
               </Text>
             </View>
@@ -180,7 +206,9 @@ export default function RecommendationPage() {
               >
                 Email:
               </Text>
-              <Text style={{ fontSize: 16, color: "gray", marginTop: 5 }}>
+              <Text
+                style={{ fontSize: 16, color: Colors.dark.text, marginTop: 5 }}
+              >
                 {selectedSupervisor.email}
               </Text>
             </View>
@@ -189,8 +217,10 @@ export default function RecommendationPage() {
               style={{
                 marginBottom: 10,
                 padding: 10,
-                backgroundColor: "#ffffff",
+                backgroundColor: Colors.dark.cardBackground,
                 borderRadius: 8,
+                borderWidth: 1,
+                borderColor: Colors.dark.border,
               }}
             >
               <Text
@@ -205,7 +235,7 @@ export default function RecommendationPage() {
               <Text
                 style={{
                   fontSize: 14,
-                  color: "gray",
+                  color: Colors.dark.text,
                   marginTop: 5,
                   lineHeight: 20,
                   fontStyle: "italic",
@@ -225,7 +255,9 @@ export default function RecommendationPage() {
               >
                 Similarity Score:
               </Text>
-              <Text style={{ fontSize: 16, color: "gray", marginTop: 5 }}>
+              <Text
+                style={{ fontSize: 16, color: Colors.dark.text, marginTop: 5 }}
+              >
                 {selectedSupervisor.similarityScore} / 100
               </Text>
             </View>
@@ -255,7 +287,7 @@ export default function RecommendationPage() {
               fontSize: 24,
               fontWeight: "bold",
               marginBottom: 15,
-              color: "#fff",
+              color: Colors.dark.text,
               textAlign: "center",
             }}
           >
@@ -264,19 +296,19 @@ export default function RecommendationPage() {
           <TextInput
             style={{
               height: 100,
-              borderColor: Colors.light.border,
+              borderColor: Colors.dark.border,
               borderWidth: 1,
               borderRadius: 10,
               padding: 15,
               fontSize: 16,
-              color: Colors.light.text,
+              color: Colors.dark.text,
               marginBottom: 15,
-              backgroundColor: Colors.light.cardBackground,
+              backgroundColor: Colors.dark.cardBackground,
             }}
             multiline
             numberOfLines={4}
             placeholder="Describe your project briefly..."
-            placeholderTextColor={Colors.light.text}
+            placeholderTextColor={Colors.dark.secondaryText}
             value={projectDescription}
             onChangeText={setProjectDescription}
           />
@@ -328,7 +360,9 @@ export default function RecommendationPage() {
                   ))}
                 </View>
               ) : (
-                <Text>No supervisors available. Please try again later.</Text>
+                <Text style={{ color: Colors.dark.text }}>
+                  No supervisors available. Please try again later.
+                </Text>
               )}
             </View>
           )}

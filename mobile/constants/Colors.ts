@@ -20,6 +20,7 @@ export const Colors = {
     border: "#333", // Darker border for dark mode
     primary: "#4CAF50", // Same primary color (or you can change it)
     cardBackground: "#1e1e1e", // Darker background color for cards
+    secondaryText: "#A9A9A9", // Added secondaryText property
   },
   primary: "#4CAF50", // Primary color (used across both light/dark modes)
 };
