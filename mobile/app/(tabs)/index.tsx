@@ -8,10 +8,28 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Image,
+  TextInput,
+  Button,
   RefreshControl,
 } from "react-native";
-import { getFollowedPosts } from "@/services/PostData";
+import { getallPosts, getFollowedPosts } from "@/services/PostData";
 import { useAuth } from "@/hooks/useAuth";
+import axiosInstance from "@/lib/axiosInstance";
+import Post from "@/components/Post";
+
+interface PostC {
+  content: string;
+  user_id: string;
+  username: string;
+}
+async function createPost(post: PostC) {
+  try {
+    const response = await axiosInstance.post("community/posts", post);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+}
 
 const HomeScreen = () => {
   const { user } = useAuth();
@@ -35,7 +53,7 @@ const HomeScreen = () => {
     likes: number;
     username: string;
     avatarurl: string;
-    createdAt: string; // Use a string for easier rendering
+    createdAt: string;
     isLikedByUser: boolean;
     isBookmarkedByUser: boolean;
     comments: number;
@@ -44,6 +62,7 @@ const HomeScreen = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [skillMatches, setSkillMatches] = useState<SkillMatch[]>([]);
   const [communityUpdates, setCommunityUpdates] = useState<Post[]>([]);
+  const [newPostContent, setNewPostContent] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -51,15 +70,14 @@ const HomeScreen = () => {
     try {
       const dummyProjects = await getProjects();
       const dummySkillMatches = await getSkillMatches();
-      const response = await getFollowedPosts(user?.id || "");
+      const response = await getallPosts(user?.id || "");
+
       let posts = response.data.map((post: Post) => ({
         ...post,
-        createdAt: new Date(post.createdAt).toLocaleString(), // Format date
+        createdAt: new Date(post.createdAt).toLocaleString(),
       }));
 
-      // just need 5 posts
-      posts = posts.slice(0, 5);
-
+      posts = posts.slice(0, 5); // Limit to 5 posts
       setProjects(dummyProjects);
       setSkillMatches(dummySkillMatches);
       setCommunityUpdates(posts);
@@ -76,6 +94,21 @@ const HomeScreen = () => {
     setIsRefreshing(false);
   };
 
+  const handleAddPost = () => {
+    if (newPostContent.trim()) {
+      const newPost: PostC = {
+        content: newPostContent,
+        username: user?.name || "Anonymous",
+
+        user_id: user?.id || "",
+      };
+      createPost(newPost);
+      setNewPostContent("");
+    } else {
+      alert("Please enter some content for the post.");
+    }
+  };
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -90,7 +123,6 @@ const HomeScreen = () => {
 
   const sections = [
     { title: "Trending Projects", data: projects, type: "projects" },
-    { title: "Skill Matches for You", data: skillMatches, type: "skills" },
     { title: "Community Updates", data: communityUpdates, type: "updates" },
   ];
 
@@ -102,6 +134,22 @@ const HomeScreen = () => {
         renderItem={({ item }) => (
           <View style={styles.sectionContainer}>
             <Text style={styles.sectionTitle}>{item.title}</Text>
+
+            {/* New Post Input under Community Updates */}
+            {item.type === "updates" && (
+              <View style={styles.newPostContainer}>
+                <Text style={styles.newPostLabel}>Create a New Post</Text>
+                <TextInput
+                  style={styles.newPostInput}
+                  placeholder="What's on your mind?"
+                  placeholderTextColor="#aaaaaa"
+                  value={newPostContent}
+                  onChangeText={setNewPostContent}
+                />
+                <Button title="Post" onPress={handleAddPost} color="#4CAF50" />
+              </View>
+            )}
+
             <FlatList
               data={item.data as any[]}
               keyExtractor={(subItem) => subItem.id.toString()}
@@ -122,33 +170,26 @@ const HomeScreen = () => {
                       </Text>
                     </TouchableOpacity>
                   );
-                } else if (item.type === "skills") {
-                  return (
-                    <TouchableOpacity style={styles.skillCard}>
-                      <Text style={styles.cardTitle}>{subItem.skill}</Text>
-                      <Text style={styles.cardSubtitle}>
-                        {subItem.projectTitle}
-                      </Text>
-                    </TouchableOpacity>
-                  );
                 } else if (item.type === "updates") {
                   return (
-                    <View style={styles.updateCard}>
-                      <Image
-                        source={{
-                          uri:
-                            subItem.avatarurl ||
-                            "https://via.placeholder.com/150",
-                        }}
-                        style={styles.avatarSmall}
-                      />
-                      <View>
-                        <Text style={styles.updateText}>{subItem.content}</Text>
-                        <Text style={styles.updateTime}>
-                          {subItem.createdAt}
-                        </Text>
-                      </View>
-                    </View>
+                    <Post
+                      key={subItem.id}
+                      post={{
+                        id: subItem.id,
+                        post_id: subItem.post_id,
+                        user_id: subItem.user_id,
+                        username: subItem.username,
+                        avatarurl: subItem.avatarurl,
+                        createdAt: isNaN(new Date(subItem.createdAt).getTime())
+                          ? new Date().toISOString() // Use current date if invalid
+                          : new Date(subItem.createdAt).toISOString(),
+                        content: subItem.content,
+                        likes: subItem.likes,
+                        isLikedByUser: subItem.isLikedByUser,
+                        isBookmarkedByUser: subItem.isBookmarkedByUser,
+                        comments: subItem.comments,
+                      }}
+                    />
                   );
                 }
                 return null;
@@ -218,6 +259,20 @@ const styles = StyleSheet.create({
     marginRight: 10,
     width: 200,
   },
+  newPostContainer: {
+    backgroundColor: "#1e1e1e",
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 20,
+  },
+  newPostLabel: { fontSize: 18, color: "#ffffff", marginBottom: 10 },
+  newPostInput: {
+    backgroundColor: "#2e2e2e",
+    color: "#ffffff",
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 10,
+  },
   updateCard: {
     flexDirection: "row",
     backgroundColor: "#2e2e2e",
@@ -232,6 +287,21 @@ const styles = StyleSheet.create({
   cardSubtitle: { fontSize: 14, color: "#aaaaaa", marginTop: 5 },
   updateText: { fontSize: 16, color: "#ffffff" },
   updateTime: { fontSize: 12, color: "#888888", marginTop: 5 },
+  actionsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 10,
+  },
+  actionButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginRight: 15,
+  },
+  actionText: {
+    fontSize: 14,
+    color: "#ffffff",
+    marginLeft: 5,
+  },
 });
 
 export default HomeScreen;

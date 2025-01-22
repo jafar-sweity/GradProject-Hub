@@ -8,19 +8,19 @@ const tintColorDark = "#fff";
 
 export const Colors = {
   light: {
-    text: "#11181C",
-    background: "#fff",
-    tint: tintColorLight,
-    icon: "#687076",
-    tabIconDefault: "#687076",
-    tabIconSelected: tintColorLight,
+    background: "#ffffff", // White background for light mode
+    text: "#000000", // Black text for light mode
+    border: "#ddd", // Border color for light mode
+    primary: "#4CAF50", // Primary color for buttons and accents
+    cardBackground: "#f9f9f9", // Background color for cards
   },
   dark: {
-    text: "#ECEDEE",
-    background: "#151718",
-    tint: tintColorDark,
-    icon: "#9BA1A6",
-    tabIconDefault: "#9BA1A6",
-    tabIconSelected: tintColorDark,
+    background: "#121212", // Dark background for dark mode
+    text: "#ffffff", // White text for dark mode
+    border: "#333", // Darker border for dark mode
+    primary: "#4CAF50", // Same primary color (or you can change it)
+    cardBackground: "#1e1e1e", // Darker background color for cards
+    secondaryText: "#A9A9A9", // Added secondaryText property
   },
+  primary: "#4CAF50", // Primary color (used across both light/dark modes)
 };
