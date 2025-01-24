@@ -11,6 +11,7 @@ interface IPost extends Document {
   comments: IComment[]; // Changed to use a defined interface
   createdAt: Date;
   updatedAt: Date;
+  photoUrls?: string[]; // Array of image URLs
 }
 
 const PostSchema: Schema = new Schema(
@@ -31,11 +32,13 @@ const PostSchema: Schema = new Schema(
         },
       },
     ],
+    photoUrls: { type: [String], default: [] }, // Added photoUrls to the schema
   },
   {
     timestamps: true,
     createdAt: { type: Date, default: Date.now },
   }
+  // photoUrls: [String], not required
 );
 
 PostSchema.index({ user_id: 1 });

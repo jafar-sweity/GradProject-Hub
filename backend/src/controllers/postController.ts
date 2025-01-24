@@ -13,7 +13,7 @@ export const createPost = async (
   req: Request,
   res: Response
 ): Promise<void> => {
-  const { user_id, content, username } = req.body;
+  const { user_id, content, username, photoUrls } = req.body;
 
   try {
     if (!content || !user_id) {
@@ -30,6 +30,7 @@ export const createPost = async (
       user_id: userCommunity._id,
       content,
       username,
+      photoUrls: photoUrls,
     });
 
     const savedPost = await newPost.save();
@@ -88,7 +89,7 @@ export const getForYouPosts = async (
     }
 
     const posts = await Post.find({ user_id: currentUser._id }).select(
-      "_id user_id content likes createdAt comments username avatarurl"
+      "_id user_id content likes createdAt comments username avatarurl photoUrls"
     );
 
     // log the avaatrurl
@@ -109,6 +110,7 @@ export const getForYouPosts = async (
         comments: any[];
         createdAt: Date;
         avatarurl: string;
+        photoUrls: string[];
       };
       return {
         id: typedPost._id.toString(),
@@ -122,6 +124,7 @@ export const getForYouPosts = async (
         ),
         comments: post.comments.length || 0,
         avatarurl: avatrurl.avatarurl || "",
+        photoUrls: typedPost.photoUrls,
       };
     });
     res.status(200).json(transformedPosts);

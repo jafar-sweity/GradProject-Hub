@@ -16,12 +16,17 @@ import { getallPosts, getFollowedPosts } from "@/services/PostData";
 import { useAuth } from "@/hooks/useAuth";
 import axiosInstance from "@/lib/axiosInstance";
 import Post from "@/components/Post";
+import { router } from "expo-router";
+import { Ionicons } from "@expo/vector-icons"; // For icons
+import * as ImagePicker from "expo-image-picker"; // For image upload
 
 interface PostC {
   content: string;
   user_id: string;
   username: string;
+  photoUrls?: string[]; // Add photo URLs to the post
 }
+
 async function createPost(post: PostC) {
   try {
     const response = await axiosInstance.post("community/posts", post);
@@ -34,16 +39,15 @@ async function createPost(post: PostC) {
 const HomeScreen = () => {
   const { user } = useAuth();
 
+  // Redirect to login if user is null
+  if (!user) {
+    router.replace("/login");
+  }
+
   interface Project {
     id: number;
     title: string;
     description: string;
-  }
-
-  interface SkillMatch {
-    id: number;
-    skill: string;
-    projectTitle: string;
   }
 
   interface Post {
@@ -57,19 +61,19 @@ const HomeScreen = () => {
     isLikedByUser: boolean;
     isBookmarkedByUser: boolean;
     comments: number;
+    photoUrls?: string[]; // Add photo URLs to the Post interface
   }
 
   const [projects, setProjects] = useState<Project[]>([]);
-  const [skillMatches, setSkillMatches] = useState<SkillMatch[]>([]);
   const [communityUpdates, setCommunityUpdates] = useState<Post[]>([]);
   const [newPostContent, setNewPostContent] = useState("");
+  const [selectedImages, setSelectedImages] = useState<string[]>([]); // Store selected image URIs
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const fetchData = async () => {
     try {
       const dummyProjects = await getProjects();
-      const dummySkillMatches = await getSkillMatches();
       const response = await getallPosts(user?.id || "");
 
       let posts = response.data.map((post: Post) => ({
@@ -79,7 +83,6 @@ const HomeScreen = () => {
 
       posts = posts.slice(0, 5); // Limit to 5 posts
       setProjects(dummyProjects);
-      setSkillMatches(dummySkillMatches);
       setCommunityUpdates(posts);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -94,20 +97,62 @@ const HomeScreen = () => {
     setIsRefreshing(false);
   };
 
-  const handleAddPost = () => {
-    if (newPostContent.trim()) {
-      const newPost: PostC = {
-        content: newPostContent,
-        username: user?.name || "Anonymous",
+  // Handle image selection
+  const handleImageUpload = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      alert("Sorry, we need camera roll permissions to make this work!");
+      return;
+    }
 
-        user_id: user?.id || "",
-      };
-      createPost(newPost);
-      setNewPostContent("");
-    } else {
-      alert("Please enter some content for the post.");
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsMultipleSelection: true, // Allow multiple image selection
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      const newImages = result.assets.map((asset) => asset.uri);
+      setSelectedImages((prev) => [...prev, ...newImages]);
     }
   };
+
+  // Handle post creation
+  const handleAddPost = () => {
+    if (!newPostContent.trim() && selectedImages.length === 0) {
+      alert("Please add some content or an image to your post.");
+      return;
+    }
+    // dont forget the selectedImages and upload them to the server
+    
+
+    // Create a new post object
+    const newPost: PostC = {
+      content: newPostContent,
+      username: user?.name || "Anonymous",
+      user_id: user?.id || "",
+      photoUrls: [
+        "https://picsum.photos/id/237/3000",
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Big_Buck_Bunny_thumbnail_vlc.png/1200px-Big_Buck_Bunny_thumbnail_vlc.png",
+      ], // Add selected images to the post
+    };
+
+    // Add the new post to your data source (e.g., state or API call)
+    createPost(newPost)
+      .then(() => {
+        // Refresh the posts after adding a new one
+        fetchData();
+      })
+      .catch((error) => {
+        console.error("Error creating post:", error);
+      });
+
+    // Clear the input and selected images
+    setNewPostContent("");
+    setSelectedImages([]);
+  };
+
+ 
 
   useEffect(() => {
     fetchData();
@@ -145,7 +190,30 @@ const HomeScreen = () => {
                   placeholderTextColor="#aaaaaa"
                   value={newPostContent}
                   onChangeText={setNewPostContent}
+                  multiline
                 />
+                {/* Photo Upload Icon */}
+                <TouchableOpacity
+                  onPress={handleImageUpload}
+                  style={styles.uploadButton}
+                >
+                  <Ionicons name="camera" size={24} color="#4CAF50" />
+                  <Text style={styles.uploadButtonText}>Add Photos</Text>
+                </TouchableOpacity>
+                {/* Display Selected Images */}
+                {selectedImages.length > 0 && (
+                  <FlatList
+                    data={selectedImages}
+                    horizontal
+                    keyExtractor={(item, index) => index.toString()}
+                    renderItem={({ item }) => (
+                      <Image
+                        source={{ uri: item }}
+                        style={styles.selectedImage}
+                      />
+                    )}
+                  />
+                )}
                 <Button title="Post" onPress={handleAddPost} color="#4CAF50" />
               </View>
             )}
@@ -171,6 +239,8 @@ const HomeScreen = () => {
                     </TouchableOpacity>
                   );
                 } else if (item.type === "updates") {
+                  // Add image to one of the posts
+                  
                   return (
                     <Post
                       key={subItem.id}
@@ -188,6 +258,7 @@ const HomeScreen = () => {
                         isLikedByUser: subItem.isLikedByUser,
                         isBookmarkedByUser: subItem.isBookmarkedByUser,
                         comments: subItem.comments,
+                        photoUrls: subItem.photoUrls, // Add photo URLs to the post
                       }}
                     />
                   );
@@ -224,12 +295,6 @@ const getProjects = async () => [
   },
 ];
 
-const getSkillMatches = async () => [
-  { id: 1, skill: "React", projectTitle: "Web Dashboard" },
-  { id: 2, skill: "Node.js", projectTitle: "API Development" },
-  { id: 3, skill: "UI/UX", projectTitle: "Mobile App Design" },
-];
-
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#121212", padding: 10 },
   centeredContainer: {
@@ -252,13 +317,6 @@ const styles = StyleSheet.create({
     marginRight: 10,
     width: 200,
   },
-  skillCard: {
-    backgroundColor: "#2e2e2e",
-    padding: 15,
-    borderRadius: 10,
-    marginRight: 10,
-    width: 200,
-  },
   newPostContainer: {
     backgroundColor: "#1e1e1e",
     padding: 15,
@@ -272,36 +330,26 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 5,
     marginBottom: 10,
+    minHeight: 100,
   },
-  updateCard: {
+  uploadButton: {
     flexDirection: "row",
-    backgroundColor: "#2e2e2e",
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 10,
     alignItems: "center",
+    marginBottom: 12,
+  },
+  uploadButtonText: {
+    color: "#4CAF50",
+    marginLeft: 8,
+  },
+  selectedImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 8,
+    marginRight: 8,
   },
   avatar: { width: 50, height: 50, borderRadius: 25, marginBottom: 10 },
-  avatarSmall: { width: 40, height: 40, borderRadius: 20, marginRight: 10 },
   cardTitle: { fontSize: 16, fontWeight: "bold", color: "#ffffff" },
   cardSubtitle: { fontSize: 14, color: "#aaaaaa", marginTop: 5 },
-  updateText: { fontSize: 16, color: "#ffffff" },
-  updateTime: { fontSize: 12, color: "#888888", marginTop: 5 },
-  actionsContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 10,
-  },
-  actionButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginRight: 15,
-  },
-  actionText: {
-    fontSize: 14,
-    color: "#ffffff",
-    marginLeft: 5,
-  },
 });
 
 export default HomeScreen;

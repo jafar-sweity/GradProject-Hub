@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   View,
   Text,
@@ -7,14 +7,16 @@ import {
   StyleSheet,
   FlatList,
   Alert,
-  TextInput,
+  Dimensions,
   ActivityIndicator,
+  TextInput,
 } from "react-native";
 import { useAuth } from "@/hooks/useAuth";
 import { formatRelative } from "date-fns";
 import { MessageSquare } from "react-native-feather";
 import LikeButton from "./LikeButton";
 import BookmarkButton from "./BookmarkButton";
+import ImageView from "react-native-image-viewing"; // For lightbox effect
 import axiosInstance from "@/lib/axiosInstance";
 
 interface PostProps {
@@ -30,6 +32,7 @@ interface PostProps {
     isLikedByUser: boolean;
     isBookmarkedByUser: boolean;
     comments: number;
+    photoUrls?: string[]; // Array of photo URLs
   };
 }
 
@@ -37,6 +40,41 @@ const Post: React.FC<PostProps> = ({ post }) => {
   const { user } = useAuth();
   const createdAtDate = new Date(post.createdAt);
   const [showComments, setShowComments] = useState(false);
+  const [visible, setVisible] = useState(false); // For lightbox
+  const [imageIndex, setImageIndex] = useState(0); // For lightbox and carousel
+  const flatListRef = useRef<FlatList>(null); // Ref for FlatList
+
+  // Open lightbox with the selected image index
+  const openLightbox = (index: number) => {
+    setImageIndex(index);
+    setVisible(true);
+  };
+
+  // Handle scroll event to update the active dot
+  const handleScroll = (event: any) => {
+    const { contentOffset, layoutMeasurement } = event.nativeEvent;
+    const index = Math.floor(contentOffset.x / layoutMeasurement.width);
+    setImageIndex(index);
+  };
+
+  // Render navigation dots for multiple photos
+  const renderDots = () => {
+    if (!post.photoUrls || post.photoUrls.length <= 1) return null;
+
+    return (
+      <View style={styles.dotsContainer}>
+        {post.photoUrls.map((_, index) => (
+          <View
+            key={index}
+            style={[
+              styles.dot,
+              index === imageIndex ? styles.activeDot : styles.inactiveDot,
+            ]}
+          />
+        ))}
+      </View>
+    );
+  };
 
   return (
     <View style={styles.postContainer}>
@@ -64,6 +102,55 @@ const Post: React.FC<PostProps> = ({ post }) => {
       {/* Post Content */}
       <Text style={styles.content}>{post.content}</Text>
 
+      {/* Post Photos (Conditional Rendering) */}
+      {/* Post Photos (Conditional Rendering) */}
+      {post.photoUrls && post.photoUrls.length > 0 && (
+        <View style={styles.photosContainer}>
+          {post.photoUrls.length === 1 ? (
+            // Single Photo
+            <TouchableOpacity onPress={() => openLightbox(0)}>
+              <Image
+                source={{ uri: post.photoUrls[0] }}
+                style={styles.singlePhoto}
+              />
+            </TouchableOpacity>
+          ) : (
+            // Multiple Photos
+            <>
+              <FlatList
+                ref={flatListRef}
+                data={post.photoUrls}
+                horizontal
+                pagingEnabled
+                showsHorizontalScrollIndicator={false}
+                keyExtractor={(item, index) => index.toString()}
+                renderItem={({ item, index }) => (
+                  <TouchableOpacity onPress={() => openLightbox(index)}>
+                    <Image
+                      source={{ uri: item }}
+                      style={styles.carouselPhoto}
+                    />
+                  </TouchableOpacity>
+                )}
+                onScroll={handleScroll}
+                scrollEventThrottle={16}
+              />
+              {renderDots()}
+            </>
+          )}
+        </View>
+      )}
+
+      {/* Lightbox for Full-Screen Photos */}
+      <ImageView
+        images={
+          post.photoUrls ? post.photoUrls.map((url) => ({ uri: url })) : []
+        }
+        imageIndex={imageIndex}
+        visible={visible}
+        onRequestClose={() => setVisible(false)}
+      />
+
       {/* Actions */}
       <View style={styles.actions}>
         <View style={styles.actionGroup}>
@@ -86,7 +173,6 @@ const Post: React.FC<PostProps> = ({ post }) => {
     </View>
   );
 };
-
 interface CommentButtonProps {
   post: PostProps["post"];
   onPress: () => void;
@@ -211,8 +297,9 @@ const CommentsList: React.FC<{ comments: string }> = ({ comments }) => {
   );
 };
 
+const { width } = Dimensions.get("window");
+
 const styles = StyleSheet.create({
-  // Post Container
   postContainer: {
     backgroundColor: "#1e1e1e",
     borderRadius: 8,
@@ -242,7 +329,7 @@ const styles = StyleSheet.create({
   username: {
     fontWeight: "bold",
     fontSize: 16,
-    color: "#fff", // Neutral color for username
+    color: "#fff",
   },
   timestamp: {
     fontSize: 12,
@@ -259,7 +346,39 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
     marginBottom: 12,
-    color: "#fff", // Neutral content color
+    color: "#fff",
+  },
+  photosContainer: {
+    marginBottom: 12,
+  },
+  singlePhoto: {
+    width: "100%",
+    height: width, // Square aspect ratio
+    borderRadius: 8,
+  },
+  carouselPhoto: {
+    width: width - 32, // Full width minus padding
+    height: width, // Square aspect ratio
+    borderRadius: 8,
+    marginRight: 16, // Add spacing between photos
+  },
+  dotsContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 8,
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginHorizontal: 4,
+  },
+  activeDot: {
+    backgroundColor: "#4CAF50", // Active dot color
+  },
+  inactiveDot: {
+    backgroundColor: "#ccc", // Inactive dot color
   },
   actions: {
     flexDirection: "row",
@@ -279,9 +398,8 @@ const styles = StyleSheet.create({
   commentText: {
     fontSize: 14,
     marginLeft: 8,
-    color: "gray", // Subtle gray for the comment count
+    color: "gray",
   },
-
   // Comments Section
   commentContainer: {
     paddingVertical: 8,
