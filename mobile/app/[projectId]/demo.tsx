@@ -5,9 +5,11 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
+  StyleSheet,
+  Button,
 } from "react-native";
-
-import { Video, ResizeMode } from "expo-av";
+import { useEvent } from "expo";
+import { useVideoPlayer, VideoView } from "expo-video";
 import { useLocalSearchParams } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import axios from "axios";
@@ -84,6 +86,14 @@ const DemoVideoScreen: React.FC = () => {
     }
   };
 
+  const player = useVideoPlayer(uploadedUrl, (player) => {
+    player.loop = true;
+    player.play();
+  });
+
+  const { isPlaying } = useEvent(player, "playingChange", {
+    isPlaying: player.playing,
+  });
   return (
     <View className="flex-1 p-4 justify-between">
       {uploadedUrl && uploadedUrl.includes("cloudinary") ? (
@@ -91,12 +101,24 @@ const DemoVideoScreen: React.FC = () => {
           className="h-3/5 mb-4 border border-gray-900"
           style={{ borderRadius: 8 }}
         >
-          <Video
-            source={{ uri: uploadedUrl }}
-            useNativeControls
-            resizeMode={ResizeMode.CONTAIN}
-            style={{ flex: 1, borderRadius: 8 }}
+          <VideoView
+            style={styles.video}
+            player={player}
+            allowsFullscreen
+            allowsPictureInPicture
           />
+          <View style={styles.controlsContainer}>
+            <Button
+              title={isPlaying ? "Pause" : "Play"}
+              onPress={() => {
+                if (isPlaying) {
+                  player.pause();
+                } else {
+                  player.play();
+                }
+              }}
+            />
+          </View>
         </View>
       ) : (
         <View
@@ -138,3 +160,20 @@ const DemoVideoScreen: React.FC = () => {
 };
 
 export default DemoVideoScreen;
+
+const styles = StyleSheet.create({
+  contentContainer: {
+    flex: 1,
+    padding: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 50,
+  },
+  video: {
+    width: "100%",
+    height: "100%",
+  },
+  controlsContainer: {
+    padding: 10,
+  },
+});

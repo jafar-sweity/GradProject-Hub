@@ -63,14 +63,14 @@ const SignIn = () => {
 
   return (
     <View className="flex-1 items-center justify-center bg-background px-6">
-      <View className="w-full max-w-md bg-card text-card-foreground shadow-lg border border-border rounded-lg p-6">
+      <View className="w-full max-w-md bg-card text-card-foreground shadow-lg border border-border  p-6">
         <Text className="text-center text-2xl font-bold mb-6 text-foreground">
           Sign in
         </Text>
         <View className="mb-4">
           <Text className="text-muted-foreground mb-2">Email</Text>
           <TextInput
-            className="bg-input text-foreground p-3 rounded-lg border border-border focus:border-ring"
+            className="bg-input text-foreground p-3  border border-border focus:border-ring"
             placeholder="your@email.com"
             placeholderTextColor="hsl(240 5% 40%)"
             value={formData.email}
@@ -85,7 +85,7 @@ const SignIn = () => {
         <View className="mb-4">
           <Text className="text-muted-foreground mb-2">Password</Text>
           <TextInput
-            className="bg-input text-foreground p-3 rounded-lg border border-border focus:border-ring"
+            className="bg-input text-foreground p-3  border border-border focus:border-ring"
             placeholder="Password"
             placeholderTextColor="hsl(240 5% 40%)"
             secureTextEntry
@@ -104,7 +104,7 @@ const SignIn = () => {
           </Text>
         )}
         <TouchableOpacity
-          className="bg-primary text-primary-foreground py-3 rounded-lg text-center mb-4"
+          className="bg-primary text-primary-foreground py-3  text-center mb-4"
           onPress={handleSignIn}
         >
           <Text className="text-center font-bold text-primary-foreground">

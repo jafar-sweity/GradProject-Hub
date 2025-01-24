@@ -9,12 +9,14 @@ import {
   TouchableOpacity,
   Image,
   RefreshControl,
+  Button,
 } from "react-native";
 import { getFollowedPosts } from "@/services/PostData";
 import { useAuth } from "@/hooks/useAuth";
+import { router } from "expo-router";
 
 const HomeScreen = () => {
-  const { user } = useAuth();
+  const { user, logout, loading } = useAuth();
 
   interface Project {
     id: number;
@@ -47,6 +49,11 @@ const HomeScreen = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
+  useEffect(() => {
+    if (!loading && !user) {
+      router.replace("/signIn");
+    }
+  }, [loading, user]);
   const fetchData = async () => {
     try {
       const dummyProjects = await getProjects();
@@ -80,7 +87,7 @@ const HomeScreen = () => {
     fetchData();
   }, []);
 
-  if (isLoading) {
+  if (isLoading || loading) {
     return (
       <SafeAreaView style={styles.centeredContainer}>
         <ActivityIndicator size="large" color="#4CAF50" />
@@ -96,6 +103,8 @@ const HomeScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <Button onPress={() => logout()} title="Logout" />
+
       <FlatList
         data={sections}
         keyExtractor={(item, index) => `${item.type}-${index}`}
