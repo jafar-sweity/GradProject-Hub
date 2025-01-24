@@ -20,6 +20,7 @@ export const getallPostsCurrentUser = async (userId: string) => {
       isLikedByUser: post.isLikedByUser,
       isBookmarkedByUser: post.isBookmarkedByUser,
       comments: post.comments || 0,
+      photoUrls: post.photoUrls || [],
     }));
 
     return { data: posts };

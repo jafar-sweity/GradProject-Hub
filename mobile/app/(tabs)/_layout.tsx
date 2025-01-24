@@ -22,8 +22,9 @@ Notifications.setNotificationHandler({
 });
 export default function TabLayout() {
   const colorScheme = useColorScheme();
-  const { user, loading } = useAuth();
-  
+  const { user, loading, logout } = useAuth();
+
+ 
 
   async function registerForPushNotificationsAsync() {
     let token;
@@ -111,15 +112,6 @@ export default function TabLayout() {
           title: "Home",
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="house.fill" color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: "Explore",
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="paperplane.fill" color={color} />
           ),
         }}
       />
