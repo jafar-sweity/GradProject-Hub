@@ -1,6 +1,11 @@
-import { Tabs } from "expo-router";
-import React, { useEffect } from "react";
-import { ActivityIndicator, Platform } from "react-native";
+import { router, Tabs } from "expo-router";
+import React, { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Platform,
+  TouchableOpacity,
+  Text,
+} from "react-native";
 
 import { HapticTab } from "@/components/HapticTab";
 import { IconSymbol } from "@/components/ui/IconSymbol";
@@ -12,6 +17,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import axiosInstance from "@/lib/axiosInstance";
 import * as Notifications from "expo-notifications";
 import Constants from "expo-constants";
+import { set } from "date-fns";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -173,6 +179,30 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="star.fill" color={color} />
           ),
+        }}
+      />
+      <Tabs.Screen
+        name="meeting"
+        options={{
+          title: "Meeting",
+          tabBarButton: ({}) => {
+            return (
+              <TouchableOpacity
+                style={{
+                  flex: 1,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+                onPress={() => {
+                  router.push("/meetings");
+                }}
+              >
+                <IconSymbol size={28} name="video.fill" color={"#7C7C7D"} />
+
+                <Text style={{ color: "#7C7C7D" }}>Meeting</Text>
+              </TouchableOpacity>
+            );
+          },
         }}
       />
     </Tabs>
