@@ -112,6 +112,7 @@ export const getForYouPosts = async (
         avatarurl: string;
         photoUrls: string[];
       };
+
       return {
         id: typedPost._id.toString(),
         user_id: typedPost.user_id?.toString(),
@@ -494,7 +495,12 @@ export const getBookmarkedPosts = async (
       .populate({
         path: "post_id",
         model: "Post", // Reference to the Post model
-        select: "_id content createdAt username avatarurl", // Include relevant fields
+        select: "_id content createdAt username user_id", // Include relevant fields
+        populate: {
+          path: "user_id", // Populate the user_id field in the Post model
+          model: "UserCommunity", // Reference to the UserCommunity model
+          select: "avatarurl", // Include the avatarurl field
+        },
       });
 
     // Check if there are any bookmarks
@@ -514,7 +520,7 @@ export const getBookmarkedPosts = async (
             content: post.content,
             createdAt: post.createdAt ? post.createdAt.toISOString() : "", // Ensure a valid date format
             username: post.username,
-            avatarurl: post.avatarurl,
+            avatarurl: (post.user_id as any)?.avatarurl || "", // Access avatarurl from the populated user_id
             isBookmarkedByUser: true,
           };
         } else {
