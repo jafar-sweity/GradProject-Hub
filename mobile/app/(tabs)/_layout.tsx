@@ -18,6 +18,8 @@ import axiosInstance from "@/lib/axiosInstance";
 import * as Notifications from "expo-notifications";
 import Constants from "expo-constants";
 import { set } from "date-fns";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { faVideo, faUser } from "@fortawesome/free-solid-svg-icons";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -168,7 +170,8 @@ export default function TabLayout() {
         options={{
           title: "Profile",
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="person.crop.circle" color={color} />
+            // <IconSymbol size={28} name="person.crop.circle" color={color} />
+            <FontAwesomeIcon icon={faUser} color={"#7C7C7D"} />
           ),
         }}
       />
@@ -197,7 +200,8 @@ export default function TabLayout() {
                   router.push("/meetings");
                 }}
               >
-                <IconSymbol size={28} name="video.fill" color={"#7C7C7D"} />
+                {/* <IconSymbol size={28} name="video.fill" color={"#7C7C7D"} /> */}
+                <FontAwesomeIcon icon={faVideo} color={"#7C7C7D"} />
 
                 <Text style={{ color: "#7C7C7D" }}>Meeting</Text>
               </TouchableOpacity>

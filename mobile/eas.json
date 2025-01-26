@@ -11,6 +11,10 @@
       },
       "ios": {
         "buildConfiguration": "Debug"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "http://localhost:3000",
+        "EXPO_PUBLIC_GET_STREAM_API_KEY": "b73xa34gxm4v"
       }
     },
     "development-simulator": {

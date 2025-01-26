@@ -61,7 +61,12 @@
           "supportsPictureInPicture": true
         }
       ],
-      "@stream-io/video-react-native-sdk",
+      [
+        "@stream-io/video-react-native-sdk",
+        {
+          "enableScreenshare": true
+        }
+      ],
       [
         "react-native-permissions",
         {

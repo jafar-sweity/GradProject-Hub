@@ -18,12 +18,20 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { SafeAreaView } from "react-native-safe-area-context";
 import axiosInstance from "@/lib/axiosInstance";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import {
+  faVideo,
+  faPhone,
+  faRightToBracket,
+  faCalendarDays,
+} from "@fortawesome/free-solid-svg-icons";
 
 const apiKey = process.env.EXPO_PUBLIC_GET_STREAM_API_KEY;
 
 if (!apiKey) {
   throw new Error("Missing API Key");
 }
+
 const MeetingLayout = () => {
   const colorScheme = useColorScheme();
   const { user: currentUser } = useAuth();
@@ -35,28 +43,55 @@ const MeetingLayout = () => {
     );
   }
   const user: User = {
-    id: currentUser.id,
+    id: currentUser.id.toString(),
     name: currentUser.name,
     image: currentUser.avatarurl,
   };
 
   const tokenProvider = async () => {
-    const response = await axiosInstance.post("/stream/generateUserToken", {
-      id: currentUser.id,
-      name: currentUser.name,
-      avatarurl: currentUser.avatarurl,
-      email: currentUser.email,
-    });
+    try {
+      const response = await axiosInstance.post("/meeting/generateUserToken", {
+        userId: currentUser.id,
+        name: currentUser.name,
+        image: currentUser.avatarurl,
+        email: currentUser.email,
+      });
+
+      return response.data.token;
+    } catch (error: any) {
+      console.error(
+        "Error generating user token:",
+        error.response.data.message
+      );
+      throw error;
+    }
   };
 
-  const client = StreamVideoClient.getOrCreateInstance({
-    apiKey,
-    user,
-    tokenProvider,
-    options: {
-      logger: (logLevel: LogLevel, message: String, ...args: unknown[]) => {},
-    },
-  });
+  let client;
+  try {
+    client = StreamVideoClient.getOrCreateInstance({
+      apiKey,
+      user,
+      tokenProvider,
+      // options: {
+      //   logLevel: "debug",
+      //   logger: (logLevel, message, ...args) => {
+      //     console.log("--------------------");
+      //     console.log(`[StreamVideo] ${logLevel}: ${message}`, ...args);
+      //   },
+      // },
+    });
+  } catch (error) {
+    console.error("Error creating StreamVideoClient instance:", error);
+    throw error;
+  }
+
+  // const user: User = {
+  //   id: "15",
+  // };
+  // const token =
+  //   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiMTUifQ.h2XqsvG2btBFtvf5WAUB4qby7FvlAd-pItCaCRykUhs";
+  // const client = StreamVideoClient.getOrCreateInstance({ apiKey, token, user });
 
   return (
     <StreamVideo client={client}>
@@ -74,9 +109,9 @@ const MeetingLayout = () => {
         <Tabs.Screen
           name="index"
           options={{
-            title: "All Calls",
+            title: "Schedule Meeting",
             tabBarIcon: ({ color }) => (
-              <IconSymbol size={28} name="house.fill" color={color} />
+              <FontAwesomeIcon icon={faCalendarDays} color={color} />
             ),
           }}
         />
@@ -84,18 +119,18 @@ const MeetingLayout = () => {
         <Tabs.Screen
           name="[id]"
           options={{
-            title: "Call Screen",
+            title: "Meeting Screen",
             tabBarIcon: ({ color }) => (
-              <IconSymbol size={28} name="person.crop.circle" color={color} />
+              <FontAwesomeIcon icon={faVideo} color={color} />
             ),
           }}
         />
         <Tabs.Screen
           name="joinCall"
           options={{
-            title: "Join Call",
+            title: "Join Meeting",
             tabBarIcon: ({ color }) => (
-              <IconSymbol size={28} name="star.fill" color={color} />
+              <FontAwesomeIcon icon={faRightToBracket} color={color} />
             ),
           }}
         />

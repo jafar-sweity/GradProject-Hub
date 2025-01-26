@@ -103,8 +103,6 @@ const HomeScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Button onPress={() => logout()} title="Logout" />
-
       <FlatList
         data={sections}
         keyExtractor={(item, index) => `${item.type}-${index}`}
