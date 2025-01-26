@@ -124,7 +124,6 @@ const HomeScreen = () => {
       return;
     }
     // dont forget the selectedImages and upload them to the server
-    
 
     // Create a new post object
     const newPost: PostC = {
@@ -134,25 +133,21 @@ const HomeScreen = () => {
       photoUrls: [
         "https://picsum.photos/id/237/3000",
         "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Big_Buck_Bunny_thumbnail_vlc.png/1200px-Big_Buck_Bunny_thumbnail_vlc.png",
-      ], // Add selected images to the post
+        "https://i.ibb.co/ys312N8/2024-10-24-153923.jpg",
+      ], 
     };
 
-    // Add the new post to your data source (e.g., state or API call)
     createPost(newPost)
       .then(() => {
-        // Refresh the posts after adding a new one
         fetchData();
       })
       .catch((error) => {
         console.error("Error creating post:", error);
       });
 
-    // Clear the input and selected images
     setNewPostContent("");
     setSelectedImages([]);
   };
-
- 
 
   useEffect(() => {
     fetchData();
@@ -240,7 +235,7 @@ const HomeScreen = () => {
                   );
                 } else if (item.type === "updates") {
                   // Add image to one of the posts
-                  
+
                   return (
                     <Post
                       key={subItem.id}

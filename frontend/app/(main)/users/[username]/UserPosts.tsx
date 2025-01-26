@@ -67,6 +67,7 @@ export default function UserPosts({ user }: UserPostProps) {
           isBookmarkedByUser: post.isBookmarkedByUser,
           comments: post.comments || 0,
           avatarurl: post.avatarurl || "",
+          photoUrls: post.photoUrls
         }));
       } catch (error: any) {
         console.error("Error fetching posts:", error.message);

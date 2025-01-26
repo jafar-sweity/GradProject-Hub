@@ -38,8 +38,6 @@ export const getallPosts = async () => {
   }
 };
 export const getallPostsCurrentUser = async (userId: string) => {
-
-
   try {
     const response = await axiosInstance.get("community/posts/forYou", {
       params: {
@@ -53,11 +51,12 @@ export const getallPostsCurrentUser = async (userId: string) => {
       content: post.content,
       likes: post.likes || 0,
       username: post.username || "Unknown",
-      avatarurl: post.avatarurl || "", 
+      avatarurl: post.avatarurl || "",
       createdAt: new Date(post.createdAt),
       isLikedByUser: post.isLikedByUser,
       isBookmarkedByUser: post.isBookmarkedByUser,
       comments: post.comments || 0,
+      photoUrls: post.photoUrls,
     }));
 
     return { data: posts };
@@ -110,6 +109,7 @@ export async function getallFollowingPosts(userId: string) {
       createdAt: new Date(post.createdAt),
       comments: post.comments || 0,
       isBookmarkedByUser: post.isBookmarkedByUser,
+      photoUrls: post.photoUrls,
     }));
     console.log("Transformed response:", res);
 

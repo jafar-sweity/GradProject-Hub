@@ -178,7 +178,9 @@ export const getFollowingPosts = async (
       user_id: { $in: followingMongoIds },
     })
       .sort({ createdAt: -1 })
-      .select("_id user_id content likes createdAt comments username");
+      .select(
+        "_id user_id content likes createdAt comments username photoUrls"
+      );
 
     const bookmarkedPosts = await Bookmark.find({
       user_id: userCommunity._id,
@@ -208,6 +210,7 @@ export const getFollowingPosts = async (
       createdAt: post.createdAt,
       isBookmarkedByUser: bookmarkedPostIds.includes(post._id.toString()),
       avatarurl: avatarMap[post.user_id?.toString()] || "",
+      photoUrls: post.photoUrls,
     }));
 
     res.status(200).json(transformedPosts);
