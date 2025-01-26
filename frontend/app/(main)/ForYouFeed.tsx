@@ -22,6 +22,7 @@ interface PostProps {
   isLikedByUser: boolean;
   isBookmarkedByUser: boolean;
   comments: number;
+  photoUrls?: string[];
 }
 
 export default function ForYouFeed() {
@@ -63,6 +64,7 @@ export default function ForYouFeed() {
           isBookmarkedByUser: post.isBookmarkedByUser,
           comments: post.comments || 0,
           avatarurl: post.avatarurl,
+          photoUrls: post.photoUrls,
         }));
       } catch (error: any) {
         console.error("Error fetching posts:", error.message);

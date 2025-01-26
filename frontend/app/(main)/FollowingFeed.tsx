@@ -24,6 +24,7 @@ interface PostProps {
   isLikedByUser: boolean;
   isBookmarkedByUser: boolean;
   comments: number;
+  photoUrls?: string[];
 }
 
 export default function FollowingFeed() {
