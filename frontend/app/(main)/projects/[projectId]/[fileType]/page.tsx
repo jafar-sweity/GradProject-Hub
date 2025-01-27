@@ -2,8 +2,8 @@
 
 import {
   CldUploadWidget,
-  CldImage,
-  CloudinaryUploadWidgetInfo,
+  // CldImage,
+  // CloudinaryUploadWidgetInfo,
 } from "next-cloudinary";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -34,9 +34,9 @@ function UploadAndDisplayContent({
     "success" | "error" | "warning" | "info"
   >("success");
   const [snackBarMessage, setSnackBarMessage] = useState("");
-  const [resource, setResource] = useState<
-    string | CloudinaryUploadWidgetInfo | null
-  >(null);
+  // const [resource, setResource] = useState<
+  //   string | CloudinaryUploadWidgetInfo | null
+  // >(null);
 
   const handleClose = (
     event?: React.SyntheticEvent | Event,
@@ -103,7 +103,7 @@ function UploadAndDisplayContent({
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-6 w-full">
-      <CldUploadWidget
+      {/* <CldUploadWidget
         uploadPreset="avatars"
         options={{ cropping: true, folder: "avatars", multiple: false }}
         onSuccess={(result) => {
@@ -128,7 +128,7 @@ function UploadAndDisplayContent({
         alt=""
         className="rounded-full shadow-lg mb-6"
         sizes="100vw"
-      />
+      /> */}
       <Card className="w-[70%]">
         <CardHeader>
           <CardTitle className="text-lg font-semibold">

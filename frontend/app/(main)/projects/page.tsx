@@ -17,7 +17,7 @@ import { getProjectMembers } from "@/services/project";
 import { getSupervisorProjects } from "@/services/supervisorProjects";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { UserIcon, Search, Plus } from "lucide-react";
+import { UserIcon, Search, Plus, Video, FileText } from "lucide-react";
 import { getSemesters } from "@/services/semester";
 import { Input } from "@/components/ui/input";
 import { Snackbar, Alert, SnackbarCloseReason } from "@mui/material";
@@ -277,6 +277,29 @@ export default function ProjectsPage() {
                       )}
                     </div>
                   )}
+                </div>
+                <div className="flex justify-between w-full mt-6 text-xs ">
+                  <Link
+                    href={`/projects/${project.project_id}/abstract`}
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg border border-blue-50 transition-colors"
+                  >
+                    <FileText className="h-4 w-4" />
+                    Abstract
+                  </Link>
+                  <Link
+                    href={`/projects/${project.project_id}/report`}
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg border border-blue-50 transition-colors"
+                  >
+                    <FileText className="h-4 w-4" />
+                    Report
+                  </Link>
+                  <Link
+                    href={`/projects/${project.project_id}/video_demo`}
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg border border-blue-50 transition-colors"
+                  >
+                    <Video className="h-4 w-4" />
+                    Demo
+                  </Link>
                 </div>
               </CardContent>
 
