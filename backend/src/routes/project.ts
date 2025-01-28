@@ -12,6 +12,7 @@ import {
   getProjectsByStudentId,
   getMemebersByProjectId,
   getProjectsBySemesterName,
+  updateProjectStatus,
 } from "../controllers/projectController.js";
 import { authorize } from "../middleware/authorization.js";
 const router = express.Router();
@@ -49,5 +50,5 @@ router.delete(
   removeStudentFromProject
 );
 router.get("/semester/:semesterName", getProjectsBySemesterName);
-
+router.patch("/status/:id", updateProjectStatus);
 export default router;

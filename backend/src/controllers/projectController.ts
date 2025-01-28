@@ -230,6 +230,26 @@ export const updateProject = async (req: Request, res: Response) => {
   }
 };
 
+export const updateProjectStatus = async (req: Request, res: Response) => {
+  try {
+    const { abstract_status, abstract_comment } = req.body;
+    const [updated] = await Project.update(
+      { abstract_status, abstract_comment },
+      {
+        where: { project_id: req.params.id },
+      }
+    );
+    if (!updated) {
+      res.status(404).json({ error: "Project not found" });
+      return;
+    }
+    const updatedProject = await Project.findByPk(req.params.id);
+    res.status(200).json(updatedProject);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 export const deleteProject = async (req: Request, res: Response) => {
   try {
     const deleted = await Project.destroy({

@@ -28,3 +28,15 @@ export const getProjectsBySemesterName = async (semesterName: string) => {
     throw error;
   }
 };
+
+export const updateProjectStatus = async (projectId: string, project: any) => {
+  try {
+    const response = await axiosInstance.patch(
+      `projects/status/${projectId}`,
+      project
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};

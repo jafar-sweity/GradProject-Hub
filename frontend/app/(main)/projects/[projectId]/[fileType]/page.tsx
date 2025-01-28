@@ -1,18 +1,15 @@
 "use client";
 
-import {
-  CldUploadWidget,
-  // CldImage,
-  // CloudinaryUploadWidgetInfo,
-} from "next-cloudinary";
+import { CldUploadWidget } from "next-cloudinary";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Trash, Download, Upload } from "lucide-react";
+import { Trash, Download, Upload, X, Check } from "lucide-react";
 import { deleteUrl, uploadUrl } from "@/services/upload";
 import useFetchData from "@/hooks/useFetchData";
-import { getProject } from "@/services/project";
+import { getProject, updateProjectStatus } from "@/services/project";
 import { Alert, Snackbar } from "@mui/material";
+import { useAuth } from "@/hooks/useAuth";
 
 function UploadAndDisplayContent({
   params,
@@ -34,9 +31,8 @@ function UploadAndDisplayContent({
     "success" | "error" | "warning" | "info"
   >("success");
   const [snackBarMessage, setSnackBarMessage] = useState("");
-  // const [resource, setResource] = useState<
-  //   string | CloudinaryUploadWidgetInfo | null
-  // >(null);
+  const { user } = useAuth();
+  const [comment, setComment] = useState("");
 
   const handleClose = (
     event?: React.SyntheticEvent | Event,
@@ -101,34 +97,22 @@ function UploadAndDisplayContent({
     );
   }
 
+  const handleDecision = async (status: "approve" | "reject") => {
+    try {
+      await updateProjectStatus(projectId, {
+        abstract_comment: comment,
+        abstract_status: status,
+      });
+
+      setComment("");
+    } catch (error) {
+      console.error("Error updating project:", error);
+      alert("An error occurred while updating the project. Please try again.");
+    }
+  };
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-6 w-full">
-      {/* <CldUploadWidget
-        uploadPreset="avatars"
-        options={{ cropping: true, folder: "avatars", multiple: false }}
-        onSuccess={(result) => {
-          if (result?.info) {
-            setResource(result.info);
-          }
-        }}
-      >
-        {({ open }) => {
-          return <button onClick={() => open()}>Upload an Image</button>;
-        }}
-      </CldUploadWidget>
-      <CldImage
-        src={
-          typeof resource === "object" && resource?.secure_url
-            ? resource.secure_url
-            : ""
-        }
-        width="300"
-        height="300"
-        crop="fill"
-        alt=""
-        className="rounded-full shadow-lg mb-6"
-        sizes="100vw"
-      /> */}
       <Card className="w-[70%]">
         <CardHeader>
           <CardTitle className="text-lg font-semibold">
@@ -187,43 +171,113 @@ function UploadAndDisplayContent({
                   </video>
                 ) : null}
               </div>
-              <div className="flex flex-col sm:flex-row justify-between items-center gap-4 p-4 rounded-lg shadow-md">
-                <a
-                  href={uploadedContentUrl}
-                  download
-                  className="flex items-center gap-2 bg-secondary text-secondary-foreground px-4 py-2 rounded-lg shadow transition-all duration-200 hover:bg-secondary/50 focus:ring-4 focus:ring-secondary-300 focus:outline-none"
-                  aria-label="Download uploaded content"
-                >
-                  <Download className="h-5 w-5" />
-                  <span className="hidden sm:inline">Download</span>
-                </a>
+              {fileType === "abstract" &&
+                user?.role !== "admin" &&
+                project?.abstract_comment && (
+                  <div className="p-4 rounded-lg shadow-md bg-secondary flex flex-row items-center justify-between">
+                    <h4 className="text-md font-semibold">
+                      Admin&apos;s Comment:
+                    </h4>
+                    <p className="text-sm text-foreground ml-4">
+                      {project.abstract_comment}
+                    </p>
+                  </div>
+                )}
 
-                <CldUploadWidget
-                  uploadPreset={fileType}
-                  options={{ clientAllowedFormats: ["pdf", "mp4"] }}
-                  onSuccess={handleUploadSuccess}
-                >
-                  {({ open }) => (
-                    <Button
-                      onClick={() => open()}
-                      className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg shadow transition-all duration-200 hover:bg-primary/75 hover:text-white focus:ring-4 focus:ring-primary-300 focus:outline-none"
-                      aria-label="Upload a new file"
+              {fileType === "abstract" &&
+                user?.role !== "admin" &&
+                project?.abstract_status && (
+                  <div className="p-4 rounded-lg shadow-md bg-secondary mt-4 flex items-center justify-between">
+                    <h4 className="text-md font-semibold">Abstract Status:</h4>
+                    <p
+                      className={`text-sm ml-4 ${
+                        project.abstract_status === "reject"
+                          ? "text-red-600"
+                          : "text-green-600"
+                      }`}
                     >
-                      <Upload className="h-5 w-5" />
-                      <span className="hidden sm:inline">Upload</span>
-                    </Button>
-                  )}
-                </CldUploadWidget>
+                      {project.abstract_status === "reject" ||
+                      project.abstract_status === "approve"
+                        ? project.abstract_status.charAt(0).toUpperCase() +
+                          project.abstract_status.slice(1)
+                        : "Pending"}
+                    </p>
+                  </div>
+                )}
+              {user?.role === "student" ? (
+                <div className="flex flex-col sm:flex-row justify-between items-center gap-4 p-4 rounded-lg shadow-md">
+                  <a
+                    href={uploadedContentUrl}
+                    download
+                    className="flex items-center gap-2 bg-secondary text-secondary-foreground px-4 py-2 rounded-lg shadow transition-all duration-200 hover:bg-secondary/50 focus:ring-4 focus:ring-secondary-300 focus:outline-none"
+                    aria-label="Download uploaded content"
+                  >
+                    <Download className="h-5 w-5" />
+                    <span className="hidden sm:inline">Download</span>
+                  </a>
 
-                <Button
-                  onClick={handleDeleteContent}
-                  className="flex items-center gap-2 bg-destructive text-white px-4 py-2 rounded-lg shadow transition-all duration-200 hover:bg-red-700 hover:text-white focus:ring-4 focus:ring-red-300 focus:outline-none"
-                  aria-label="Delete uploaded content"
-                >
-                  <Trash className="h-5 w-5" />
-                  <span className="hidden sm:inline">Delete</span>
-                </Button>
-              </div>
+                  {(fileType !== "abstract" ||
+                    project?.abstract_status !== "approve") && (
+                    <>
+                      <CldUploadWidget
+                        uploadPreset={fileType}
+                        options={{ clientAllowedFormats: ["pdf", "mp4"] }}
+                        onSuccess={handleUploadSuccess}
+                      >
+                        {({ open }) => (
+                          <Button
+                            onClick={() => open()}
+                            className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg shadow transition-all duration-200 hover:bg-primary/75 hover:text-white focus:ring-4 focus:ring-primary-300 focus:outline-none"
+                            aria-label="Upload a new file"
+                          >
+                            <Upload className="h-5 w-5" />
+                            <span className="hidden sm:inline">Upload</span>
+                          </Button>
+                        )}
+                      </CldUploadWidget>
+
+                      <Button
+                        onClick={handleDeleteContent}
+                        className="flex items-center gap-2 bg-destructive text-white px-4 py-2 rounded-lg shadow transition-all duration-200 hover:bg-red-700 hover:text-white focus:ring-4 focus:ring-red-300 focus:outline-none"
+                        aria-label="Delete uploaded content"
+                      >
+                        <Trash className="h-5 w-5" />
+                        <span className="hidden sm:inline">Delete</span>
+                      </Button>
+                    </>
+                  )}
+                </div>
+              ) : (
+                user?.role === "admin" && (
+                  <div className="flex flex-col gap-4 p-4 rounded-lg shadow-md">
+                    <textarea
+                      className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                      rows={4}
+                      placeholder="Write a comment..."
+                      value={comment}
+                      onChange={(e) => setComment(e.target.value)}
+                    />
+                    <div className="flex gap-4">
+                      <Button
+                        onClick={() => handleDecision("approve")}
+                        className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg shadow transition-all duration-200 hover:bg-green-700 focus:ring-4 focus:ring-green-300 focus:outline-none"
+                        aria-label="Approve report"
+                      >
+                        <Check className="h-5 w-5" />
+                        Approve
+                      </Button>
+                      <Button
+                        onClick={() => handleDecision("reject")}
+                        className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg shadow transition-all duration-200 hover:bg-red-700 focus:ring-4 focus:ring-red-300 focus:outline-none"
+                        aria-label="Reject report"
+                      >
+                        <X className="h-5 w-5" />
+                        Reject
+                      </Button>
+                    </div>
+                  </div>
+                )
+              )}
             </div>
           )}
         </CardContent>

@@ -30,7 +30,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import ProjectDialog from "@/components/projectDialog";
-import { addProject, updateProject } from "@/services/supervisorProjects";
+import { addProject } from "@/services/supervisorProjects";
+import { updateProject } from "@/services/project";
 import { getProjectsBySemesterName } from "@/services/project";
 interface User {
   user_id: number;
@@ -324,7 +325,7 @@ export default function ProjectsPage() {
                                 .map((supervisor) => (
                                   <span
                                     key={supervisor.user_id}
-                                    className="text-blue-50 font-semibold"
+                                    className="text-bg-primary font-semibold"
                                   >
                                     {supervisor.User.name}
                                   </span>
