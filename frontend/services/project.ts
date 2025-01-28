@@ -17,3 +17,14 @@ export const getProject = async (projectId: string) => {
     throw error;
   }
 };
+
+export const getProjectsBySemesterName = async (semesterName: string) => {
+  try {
+    const response = await axiosInstance.get(
+      `projects/semester/${semesterName}`
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};

@@ -106,10 +106,32 @@ export const deleteProjectBySupervisor = async (
     res.status(500).json({ error: error.message });
   }
 };
-
 export const getProjects = async (req: Request, res: Response) => {
   try {
     const projects = await Project.findAll();
+    res.status(200).json(projects);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const getProjectsBySemesterName = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const { semesterName } = req.params;
+
+    const projects = await Project.findAll({
+      include: [
+        {
+          model: Semester,
+          where: { name: semesterName },
+          attributes: ["name", "start_date", "end_date"],
+        },
+      ],
+    });
+
     res.status(200).json(projects);
   } catch (error: any) {
     res.status(500).json({ error: error.message });

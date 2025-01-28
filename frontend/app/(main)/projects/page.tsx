@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/select";
 import ProjectDialog from "@/components/projectDialog";
 import { addProject, updateProject } from "@/services/supervisorProjects";
+import { getProjectsBySemesterName } from "@/services/project";
 interface User {
   user_id: number;
   name: string;
@@ -53,17 +54,30 @@ interface ProjectMember {
 export default function ProjectsPage() {
   const { user } = useAuth();
 
-  const { data: semesters } = useFetchData(getSemesters, []);
+  const { data: semesters, loading: semestersLoading } = useFetchData(
+    getSemesters,
+    []
+  );
 
   const [selectedSemester, setSelectedSemester] = useState<string | undefined>(
     semesters?.[0]?.name
   );
+  useEffect(() => {
+    if (!semestersLoading) {
+      setSelectedSemester(semesters?.[0]?.name);
+    }
+  }, [semesters, semestersLoading]);
 
   const [searchQuery, setSearchQuery] = useState<string>("");
 
   const { data: projects, loading: projectsLoading } = useFetchData(
-    getSupervisorProjects,
-    [user?.id ?? "", selectedSemester ?? ""]
+    user?.role === "supervisor"
+      ? getSupervisorProjects
+      : getProjectsBySemesterName,
+    [
+      user?.role === "supervisor" ? user?.id ?? "" : selectedSemester ?? "",
+      selectedSemester ?? "",
+    ]
   );
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -75,11 +89,12 @@ export default function ProjectsPage() {
   };
 
   const handleEditProject = (project: any) => {
+    if (user?.role === "supervisor") project = project.Project;
     setIsDialogOpen(true);
     setEditingProject({
       project_id: project.project_id,
-      name: project.Project.name,
-      description: project.Project.description,
+      name: project.name,
+      description: project.description,
       students: project.members.map((member: any) => member.User.email),
     });
   };
@@ -150,7 +165,8 @@ export default function ProjectsPage() {
   }, [projects, projectMembersMap]);
 
   const filteredProjects = projects?.filter((project: any) => {
-    const projectName = project.Project?.name?.toLowerCase() || "";
+    if (user?.role === "supervisor") project = project.Project;
+    const projectName = project?.name?.toLowerCase() || "";
     const members = projectMembersMap[project.project_id] || [];
     const memberNames = members
       .map((member) => member.User?.name?.toLowerCase())
@@ -173,13 +189,25 @@ export default function ProjectsPage() {
     setOpenSnackBar(false);
   };
 
+  console.log("projects", projects);
+
   return (
     <div className="container mx-auto px-4 py-6">
       <header className="mb-6">
-        <h1 className="text-3xl font-bold">Supervised Projects</h1>
-        <p className="text-muted-foreground">
-          A list of all the projects you are supervising.
-        </p>
+        {user?.role === "supervisor" && (
+          <>
+            <h1 className="text-3xl font-bold">Supervised Projects</h1>
+            <p className="text-muted-foreground">
+              A list of all the projects you are supervising.
+            </p>
+          </>
+        )}
+        {user?.role === "admin" && (
+          <>
+            <h1 className="text-3xl font-bold">All Projects</h1>
+            <p className="text-muted-foreground">A list of all the projects</p>
+          </>
+        )}
       </header>
 
       <div className="flex flex-wrap items-center gap-4 mb-6">
@@ -216,15 +244,17 @@ export default function ProjectsPage() {
             </SelectContent>
           </Select>
         </div>
-        <Button
-          className="ml-auto"
-          onClick={() => {
-            handleAddProject();
-          }}
-        >
-          <Plus className="w-4 h-4" />
-          Add Project
-        </Button>
+        {user?.role === "supervisor" && (
+          <Button
+            className="ml-auto"
+            onClick={() => {
+              handleAddProject();
+            }}
+          >
+            <Plus className="w-4 h-4" />
+            Add Project
+          </Button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -233,105 +263,110 @@ export default function ProjectsPage() {
             <Skeleton key={idx} className="h-48 w-full" />
           ))
         ) : filteredProjects?.length ? (
-          filteredProjects.map((project: any) => (
-            <Card
-              key={project.project_id}
-              className="hover:shadow-lg transition-shadow"
-            >
-              <CardHeader>
-                <CardTitle>{project.Project.name}</CardTitle>
-              </CardHeader>
+          filteredProjects.map((project: any) => {
+            if (user?.role === "supervisor") project = project.Project;
+            return (
+              <Card
+                key={project.project_id}
+                className="hover:shadow-lg transition-shadow"
+              >
+                <CardHeader>
+                  <CardTitle>{project.name}</CardTitle>
+                </CardHeader>
 
-              <CardContent>
-                <p className="text-muted-foreground text-sm line-clamp-3">
-                  {project.Project.description || "No description available."}
-                </p>
-                <div className="mt-4">
-                  <h3 className="font-medium mb-2">Team Members:</h3>
-                  {loadingMembers[project.project_id] ? (
-                    <Skeleton className="h-4 w-3/4" />
-                  ) : (
-                    <div className="flex flex-wrap gap-2">
-                      {projectMembersMap[project.project_id]?.length ? (
-                        projectMembersMap[project.project_id].map(
-                          (member) =>
-                            member.role === "student" && (
-                              <Link
-                                href={`/users/${member.User.name}`}
-                                key={member.user_id}
-                              >
-                                <Badge
+                <CardContent>
+                  <p className="text-muted-foreground text-sm line-clamp-3">
+                    {project.description || "No description available."}
+                  </p>
+                  <div className="mt-4">
+                    <h3 className="font-medium mb-2">Team Members:</h3>
+                    {loadingMembers[project.project_id] ? (
+                      <Skeleton className="h-4 w-3/4" />
+                    ) : (
+                      <div className="flex flex-wrap gap-2">
+                        {projectMembersMap[project.project_id]?.length ? (
+                          projectMembersMap[project.project_id].map(
+                            (member) =>
+                              member.role === "student" && (
+                                <Link
+                                  href={`/users/${member.User.name}`}
                                   key={member.user_id}
-                                  className={`flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 hover:bg-blue-100/80 text-blue-700`}
                                 >
-                                  <UserIcon className="w-4 h-4" />
-                                  {member.User.name}
-                                </Badge>
-                              </Link>
-                            )
-                        )
-                      ) : (
-                        <span className="text-muted-foreground text-sm">
-                          No members found.
-                        </span>
-                      )}
+                                  <Badge
+                                    key={member.user_id}
+                                    className={`flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 hover:bg-blue-100/80 text-blue-700`}
+                                  >
+                                    <UserIcon className="w-4 h-4" />
+                                    {member.User.name}
+                                  </Badge>
+                                </Link>
+                              )
+                          )
+                        ) : (
+                          <span className="text-muted-foreground text-sm">
+                            No members found.
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex justify-between w-full mt-6 text-xs ">
+                    <Link
+                      href={`/projects/${project.project_id}/abstract`}
+                      className="flex items-center gap-2 px-4 py-2 rounded-lg border border-blue-50 transition-colors"
+                    >
+                      <FileText className="h-4 w-4" />
+                      Abstract
+                    </Link>
+                    <Link
+                      href={`/projects/${project.project_id}/report`}
+                      className="flex items-center gap-2 px-4 py-2 rounded-lg border border-blue-50 transition-colors"
+                    >
+                      <FileText className="h-4 w-4" />
+                      Report
+                    </Link>
+                    <Link
+                      href={`/projects/${project.project_id}/video_demo`}
+                      className="flex items-center gap-2 px-4 py-2 rounded-lg border border-blue-50 transition-colors"
+                    >
+                      <Video className="h-4 w-4" />
+                      Demo
+                    </Link>
+                  </div>
+                </CardContent>
+
+                <CardFooter className="flex justify-between items-center p-4 rounded-b-lg bg-card border-t">
+                  {user?.role === "supervisor" && (
+                    <div className="flex items-center space-x-4">
+                      <Link href={`/projects/${project.project_id}`} passHref>
+                        <Button className="text-primary-foreground bg-primary hover:bg-primary/90 transition-all rounded-lg px-4 py-2 text-sm font-semibold">
+                          View Details
+                        </Button>
+                      </Link>
+                      <Button
+                        className="text-secondary-foreground bg-secondary hover:bg-secondary/90 transition-all rounded-lg px-4 py-2 text-sm font-semibold"
+                        onClick={() =>
+                          handleEditProject({
+                            ...project,
+                            members: projectMembersMap[project.project_id],
+                          })
+                        }
+                      >
+                        Edit
+                      </Button>
                     </div>
                   )}
-                </div>
-                <div className="flex justify-between w-full mt-6 text-xs ">
-                  <Link
-                    href={`/projects/${project.project_id}/abstract`}
-                    className="flex items-center gap-2 px-4 py-2 rounded-lg border border-blue-50 transition-colors"
-                  >
-                    <FileText className="h-4 w-4" />
-                    Abstract
-                  </Link>
-                  <Link
-                    href={`/projects/${project.project_id}/report`}
-                    className="flex items-center gap-2 px-4 py-2 rounded-lg border border-blue-50 transition-colors"
-                  >
-                    <FileText className="h-4 w-4" />
-                    Report
-                  </Link>
-                  <Link
-                    href={`/projects/${project.project_id}/video_demo`}
-                    className="flex items-center gap-2 px-4 py-2 rounded-lg border border-blue-50 transition-colors"
-                  >
-                    <Video className="h-4 w-4" />
-                    Demo
-                  </Link>
-                </div>
-              </CardContent>
 
-              <CardFooter className="flex justify-between items-center p-4 rounded-b-lg bg-card shadow-md border-t">
-                <div className="flex items-center space-x-4">
-                  <Link href={`/projects/${project.project_id}`} passHref>
-                    <Button className="text-primary-foreground bg-primary hover:bg-primary/90 transition-all rounded-lg px-4 py-2 text-sm font-semibold">
-                      View Details
-                    </Button>
-                  </Link>
-                  <Button
-                    className="text-secondary-foreground bg-secondary hover:bg-secondary/90 transition-all rounded-lg px-4 py-2 text-sm font-semibold"
-                    onClick={() =>
-                      handleEditProject({
-                        ...project,
-                        members: projectMembersMap[project.project_id],
-                      })
-                    }
-                  >
-                    Edit
-                  </Button>
-                </div>
-
-                <div className="flex items-center text-muted-foreground text-xs space-x-2">
-                  <time dateTime={project.updatedAt}>
-                    Last Updated:{" "}
-                    {new Date(project.updatedAt).toLocaleDateString("en-GB")}
-                  </time>
-                </div>
-              </CardFooter>
-            </Card>
-          ))
+                  <div className="flex items-center text-muted-foreground text-xs space-x-2">
+                    <time dateTime={project.updatedAt}>
+                      Last Updated:{" "}
+                      {new Date(project.updatedAt).toLocaleDateString("en-GB")}
+                    </time>
+                  </div>
+                </CardFooter>
+              </Card>
+            );
+          })
         ) : (
           <p className="text-center text-muted-foreground col-span-full">
             No projects found.

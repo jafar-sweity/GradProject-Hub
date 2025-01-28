@@ -143,7 +143,7 @@ export default function MenuBar({ className }: MenuBarProps) {
           </AnimatePresence>
         </Collapsible>
       ) : (
-        user?.role === "supervisor" && (
+        (user?.role === "supervisor" || user?.role === "admin") && (
           <Button
             variant="ghost"
             className="flex items-center justify-start gap-3"

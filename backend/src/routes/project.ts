@@ -11,6 +11,7 @@ import {
   deleteProjectBySupervisor,
   getProjectsByStudentId,
   getMemebersByProjectId,
+  getProjectsBySemesterName,
 } from "../controllers/projectController.js";
 import { authorize } from "../middleware/authorization.js";
 const router = express.Router();
@@ -47,5 +48,6 @@ router.delete(
   authorize(["supervisor"]),
   removeStudentFromProject
 );
+router.get("/semester/:semesterName", getProjectsBySemesterName);
 
 export default router;
