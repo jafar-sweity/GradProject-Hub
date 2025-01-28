@@ -181,8 +181,7 @@ function UploadAndDisplayContent({
                     key={uploadedContentUrl}
                     src={uploadedContentUrl}
                     width="100%"
-                    height="auto"
-                    className="rounded-lg"
+                    className="rounded-lg h-[500px]"
                   >
                     Your browser does not support the video tag.
                   </video>
