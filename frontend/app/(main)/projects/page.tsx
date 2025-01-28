@@ -145,12 +145,14 @@ export default function ProjectsPage() {
           }));
           getProjectMembers(project.project_id)
             .then((members) => {
-              const studentMembers = members.filter(
-                (member: any) => member.role === "student"
-              );
+              console.log("members", members);
+
+              // const studentMembers = members.filter(
+              //   (member: any) => member.role === "student"
+              // );
               setProjectMembersMap((prev) => ({
                 ...prev,
-                [project.project_id]: studentMembers,
+                [project.project_id]: members,
               }));
             })
             .finally(() => {
@@ -188,8 +190,6 @@ export default function ProjectsPage() {
 
     setOpenSnackBar(false);
   };
-
-  console.log("projects", projects);
 
   return (
     <div className="container mx-auto px-4 py-6">
@@ -283,33 +283,63 @@ export default function ProjectsPage() {
                     {loadingMembers[project.project_id] ? (
                       <Skeleton className="h-4 w-3/4" />
                     ) : (
-                      <div className="flex flex-wrap gap-2">
-                        {projectMembersMap[project.project_id]?.length ? (
-                          projectMembersMap[project.project_id].map(
-                            (member) =>
-                              member.role === "student" && (
-                                <Link
-                                  href={`/users/${member.User.name}`}
-                                  key={member.user_id}
-                                >
-                                  <Badge
+                      <div>
+                        <div className="flex flex-wrap gap-2">
+                          {projectMembersMap[project.project_id]?.length ? (
+                            projectMembersMap[project.project_id].map(
+                              (member) =>
+                                member.role === "student" && (
+                                  <Link
+                                    href={`/users/${member.User.name}`}
                                     key={member.user_id}
-                                    className={`flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 hover:bg-blue-100/80 text-blue-700`}
                                   >
-                                    <UserIcon className="w-4 h-4" />
-                                    {member.User.name}
-                                  </Badge>
-                                </Link>
-                              )
-                          )
-                        ) : (
-                          <span className="text-muted-foreground text-sm">
-                            No members found.
-                          </span>
+                                    <Badge
+                                      key={member.user_id}
+                                      className={`flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 hover:bg-blue-100/80 text-blue-700`}
+                                    >
+                                      <UserIcon className="w-4 h-4" />
+                                      {member.User.name}
+                                    </Badge>
+                                  </Link>
+                                )
+                            )
+                          ) : (
+                            <span className="text-muted-foreground text-sm">
+                              No members found.
+                            </span>
+                          )}
+                        </div>
+                        {user.role === "admin" && (
+                          <div className="mt-4">
+                            <h4 className="font-medium text-sm text-muted-foreground">
+                              Supervisor:
+                            </h4>
+                            {projectMembersMap[project.project_id]?.find(
+                              (member) => member.role === "supervisor"
+                            ) ? (
+                              projectMembersMap[project.project_id]
+                                .filter(
+                                  (member) => member.role === "supervisor"
+                                )
+                                .map((supervisor) => (
+                                  <span
+                                    key={supervisor.user_id}
+                                    className="text-blue-50 font-semibold"
+                                  >
+                                    {supervisor.User.name}
+                                  </span>
+                                ))
+                            ) : (
+                              <span className="text-muted-foreground text-sm">
+                                No supervisor found.
+                              </span>
+                            )}
+                          </div>
                         )}
                       </div>
                     )}
                   </div>
+
                   <div className="flex justify-between w-full mt-6 text-xs ">
                     <Link
                       href={`/projects/${project.project_id}/abstract`}
