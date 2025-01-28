@@ -597,7 +597,7 @@ export const Search = async (req: Request, res: Response): Promise<void> => {
       },
       {
         $lookup: {
-          from: "users", // Fetch user details from the User collection
+          from: "usercommunities", // Fetch user details from the UserCommunity collection
           localField: "user_id",
           foreignField: "_id",
           as: "user_details",
@@ -621,8 +621,8 @@ export const Search = async (req: Request, res: Response): Promise<void> => {
         },
       },
     ]);
-    // set the post user is from cuurent user
 
+    // Map over the posts to ensure the username is from the current user
     const updatedPosts = posts.map((post: any) => ({
       ...post,
       username: userCommunity.username,
