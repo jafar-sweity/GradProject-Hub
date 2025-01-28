@@ -43,11 +43,6 @@ function AdminDashboard() {
     { name: "Fall 2023", startDate: "2023-09-01", endDate: "2023-12-31" },
     { name: "Spring 2024", startDate: "2024-01-01", endDate: "2024-05-31" },
   ]);
-  const [newSemester, setNewSemester] = useState<Semester>({
-    name: "",
-    startDate: "",
-    endDate: "",
-  });
 
   // Data with TypeScript types
   const projects: Project[] = [
@@ -79,12 +74,6 @@ function AdminDashboard() {
   ];
 
   const COLORS = ["#0088FE", "#00C49F"];
-
-  // Event handler with TypeScript types
-  const handleAddSemester = () => {
-    setSemesters([...semesters, newSemester]);
-    setNewSemester({ name: "", startDate: "", endDate: "" });
-  };
 
   return (
     <div className="p-8 bg-background text-foreground">

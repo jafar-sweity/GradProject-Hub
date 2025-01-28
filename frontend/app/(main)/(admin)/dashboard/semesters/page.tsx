@@ -19,7 +19,10 @@ type Semester = {
 };
 
 export default function SemestersPage() {
-  const [semesters, setSemesters] = useState<Semester[]>([]);
+  const [semesters, setSemesters] = useState<Semester[]>([
+    { name: "Fall 2023", startDate: "2023-09-01", endDate: "2023-12-31" },
+    { name: "Spring 2024", startDate: "2024-01-01", endDate: "2024-05-31" },
+  ]);
   const [newSemester, setNewSemester] = useState<Semester>({
     name: "",
     startDate: "",
