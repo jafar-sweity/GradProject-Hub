@@ -13,7 +13,6 @@ import {
   Cell,
 } from "recharts";
 
-// Define types
 type Semester = {
   name: string;
   startDate: string;
