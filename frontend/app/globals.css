@@ -2,7 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 @import "~stream-chat-react/dist/css/v2/index.css";
-
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #adb5bd;
+  pointer-events: none;
+  height: 0;
+}
 @layer base {
   :root {
     --background: 224, 5%, 95%;

@@ -34,7 +34,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ReactQueryProvider>
+        <ReactQueryProvider >
           <ThemeProvider
             attribute="class"
             defaultTheme="system"
