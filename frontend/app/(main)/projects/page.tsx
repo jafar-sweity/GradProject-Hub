@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/select";
 import ProjectDialog from "@/components/projectDialog";
 import { addProject } from "@/services/supervisorProjects";
-import { updateProject } from "@/services/project";
+import { updateProject } from "@/services/supervisorProjects";
 import { getProjectsBySemesterName } from "@/services/project";
 interface User {
   user_id: number;
@@ -90,13 +90,14 @@ export default function ProjectsPage() {
   };
 
   const handleEditProject = (project: any) => {
-    if (user?.role === "supervisor") project = project.Project;
     setIsDialogOpen(true);
     setEditingProject({
       project_id: project.project_id,
       name: project.name,
       description: project.description,
-      students: project.members.map((member: any) => member.User.email),
+      students: project.members
+        .filter((member: any) => member.User.role == "student")
+        .map((member: any) => member.User.email),
     });
   };
 
@@ -310,7 +311,7 @@ export default function ProjectsPage() {
                             </span>
                           )}
                         </div>
-                        {user.role === "admin" && (
+                        {user?.role === "admin" && (
                           <div className="mt-4">
                             <h4 className="font-medium text-sm text-muted-foreground">
                               Supervisor:

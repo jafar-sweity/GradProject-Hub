@@ -30,12 +30,12 @@ export const addProject = async (data: Project) => {
   }
 };
 
-// export const updateProject = async (projectId: string, data: Project) => {
-//   try {
-//     const response = await axiosInstance.patch(`projects/${projectId}`, data);
-//     return response.data;
-//   } catch (error) {
-//     console.error("Error updating project:", error);
-//     throw error;
-//   }
-// };
+export const updateProject = async (projectId: string, data: Project) => {
+  try {
+    const response = await axiosInstance.patch(`projects/${projectId}`, data);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating project:", error);
+    throw error;
+  }
+};
