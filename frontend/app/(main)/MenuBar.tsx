@@ -9,7 +9,6 @@ import { useAuth } from "@/hooks/useAuth";
 import useFetchData from "@/hooks/useFetchData";
 import { getStudentProject } from "@/services/studentProjects";
 import { motion, AnimatePresence } from "framer-motion";
-
 import {
   Bell,
   Bookmark,
@@ -19,6 +18,8 @@ import {
   ChevronRight,
   FileText,
   Video,
+  LayoutDashboard,
+  Calendar,
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -28,13 +29,14 @@ interface MenuBarProps {
 }
 
 export default function MenuBar({ className }: MenuBarProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isProjectsOpen, setIsProjectsOpen] = useState(false);
   const { user } = useAuth();
 
   const { data: projectData, loading } = useFetchData(
     user?.role === "student" ? getStudentProject : async () => null,
     [user?.role === "student" ? user?.id ?? "" : ""]
   );
+
   return (
     <div className={className}>
       <Button
@@ -50,20 +52,20 @@ export default function MenuBar({ className }: MenuBarProps) {
       </Button>
 
       {user?.role === "student" ? (
-        <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+        <Collapsible open={isProjectsOpen} onOpenChange={setIsProjectsOpen}>
           <CollapsibleTrigger asChild>
             <Button
               variant="ghost"
               className="flex items-center justify-between w-full px-4 py-2 hover:bg-accent hover:text-accent-foreground"
               title="Projects"
-              onClick={() => setIsOpen(!isOpen)}
+              onClick={() => setIsProjectsOpen(!isProjectsOpen)}
             >
               <div className="flex items-center gap-3">
                 <ListChecks className="h-4 w-4" />
                 <span className="hidden lg:inline">Projects</span>
               </div>
               <motion.div
-                animate={{ rotate: isOpen ? 90 : 0 }}
+                animate={{ rotate: isProjectsOpen ? 90 : 0 }}
                 transition={{ duration: 0.2 }}
               >
                 <ChevronRight className="h-4 w-4" />
@@ -72,7 +74,7 @@ export default function MenuBar({ className }: MenuBarProps) {
           </CollapsibleTrigger>
 
           <AnimatePresence>
-            {isOpen &&
+            {isProjectsOpen &&
               !loading &&
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               projectData?.map((project: any) => (
@@ -141,17 +143,49 @@ export default function MenuBar({ className }: MenuBarProps) {
           </AnimatePresence>
         </Collapsible>
       ) : (
-        <Button
-          variant="ghost"
-          className="flex items-center justify-start gap-3"
-          title="Projects"
-          asChild
-        >
-          <Link href="/projects">
-            <ListChecks className="h-4 w-4" />
-            <span className="hidden lg:inline">Projects</span>
-          </Link>
-        </Button>
+        (user?.role === "supervisor" || user?.role === "admin") && (
+          <Button
+            variant="ghost"
+            className="flex items-center justify-start gap-3"
+            title="Projects"
+            asChild
+          >
+            <Link href="/projects">
+              <ListChecks className="h-4 w-4" />
+              <span className="hidden lg:inline">Projects</span>
+            </Link>
+          </Button>
+        )
+      )}
+
+      {user?.role === "admin" && (
+        <>
+          {/* Dashboard Button */}
+          <Button
+            variant="ghost"
+            className="flex items-center justify-start gap-3 w-full px-4 py-2 hover:bg-accent hover:text-accent-foreground"
+            title="Dashboard"
+            asChild
+          >
+            <Link href="/dashboard">
+              <LayoutDashboard className="h-4 w-4" />
+              <span className="hidden lg:inline">Dashboard</span>
+            </Link>
+          </Button>
+
+          {/* Always Open Semesters Section */}
+          <div className="pl-6 mt-1">
+            <div className="border-l-2 border-muted pl-4 py-1 space-y-2">
+              <Link
+                href="/dashboard/semesters"
+                className="flex items-center gap-3 py-2 hover:text-primary transition-colors"
+              >
+                <Calendar className="h-4 w-4" />
+                <span className="text-base">Semesters</span>
+              </Link>
+            </div>
+          </div>
+        </>
       )}
 
       <Button

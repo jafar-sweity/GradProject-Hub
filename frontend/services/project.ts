@@ -17,3 +17,26 @@ export const getProject = async (projectId: string) => {
     throw error;
   }
 };
+
+export const getProjectsBySemesterName = async (semesterName: string) => {
+  try {
+    const response = await axiosInstance.get(
+      `projects/semester/${semesterName}`
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const updateProjectStatus = async (projectId: string, project: any) => {
+  try {
+    const response = await axiosInstance.patch(
+      `projects/status/${projectId}`,
+      project
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};

@@ -119,7 +119,7 @@ export default function TaskPage({
             </div>
             <div className="flex items-end space-x-2 flex-col ">
               <p className="text-muted-foreground text-sm">
-                Your Supervisor(s) : {Object.values(supervisors).join(", ")}
+                Supervisor(s) : {Object.values(supervisors).join(", ")}
               </p>
               <p className="text-muted-foreground text-sm">
                 Project Members : {Object.values(students).join(", ")}{" "}
