@@ -13,7 +13,7 @@ export const createPost = async (
   req: Request,
   res: Response
 ): Promise<void> => {
-  const { user_id, content, username } = req.body;
+  const { user_id, content, username, photoUrls } = req.body;
 
   try {
     if (!content || !user_id) {
@@ -30,6 +30,7 @@ export const createPost = async (
       user_id: userCommunity._id,
       content,
       username,
+      photoUrls: photoUrls,
     });
 
     const savedPost = await newPost.save();
@@ -88,7 +89,7 @@ export const getForYouPosts = async (
     }
 
     const posts = await Post.find({ user_id: currentUser._id }).select(
-      "_id user_id content likes createdAt comments username avatarurl"
+      "_id user_id content likes createdAt comments username avatarurl photoUrls"
     );
 
     // log the avaatrurl
@@ -109,7 +110,9 @@ export const getForYouPosts = async (
         comments: any[];
         createdAt: Date;
         avatarurl: string;
+        photoUrls: string[];
       };
+
       return {
         id: typedPost._id.toString(),
         user_id: typedPost.user_id?.toString(),
@@ -122,6 +125,7 @@ export const getForYouPosts = async (
         ),
         comments: post.comments.length || 0,
         avatarurl: avatrurl.avatarurl || "",
+        photoUrls: typedPost.photoUrls,
       };
     });
     res.status(200).json(transformedPosts);
@@ -174,7 +178,9 @@ export const getFollowingPosts = async (
       user_id: { $in: followingMongoIds },
     })
       .sort({ createdAt: -1 })
-      .select("_id user_id content likes createdAt comments username");
+      .select(
+        "_id user_id content likes createdAt comments username photoUrls"
+      );
 
     const bookmarkedPosts = await Bookmark.find({
       user_id: userCommunity._id,
@@ -204,6 +210,7 @@ export const getFollowingPosts = async (
       createdAt: post.createdAt,
       isBookmarkedByUser: bookmarkedPostIds.includes(post._id.toString()),
       avatarurl: avatarMap[post.user_id?.toString()] || "",
+      photoUrls: post.photoUrls,
     }));
 
     res.status(200).json(transformedPosts);
@@ -491,7 +498,12 @@ export const getBookmarkedPosts = async (
       .populate({
         path: "post_id",
         model: "Post", // Reference to the Post model
-        select: "_id content createdAt username avatarurl", // Include relevant fields
+        select: "_id content createdAt username user_id", // Include relevant fields
+        populate: {
+          path: "user_id", // Populate the user_id field in the Post model
+          model: "UserCommunity", // Reference to the UserCommunity model
+          select: "avatarurl", // Include the avatarurl field
+        },
       });
 
     // Check if there are any bookmarks
@@ -511,7 +523,7 @@ export const getBookmarkedPosts = async (
             content: post.content,
             createdAt: post.createdAt ? post.createdAt.toISOString() : "", // Ensure a valid date format
             username: post.username,
-            avatarurl: post.avatarurl,
+            avatarurl: (post.user_id as any)?.avatarurl || "", // Access avatarurl from the populated user_id
             isBookmarkedByUser: true,
           };
         } else {
@@ -585,7 +597,7 @@ export const Search = async (req: Request, res: Response): Promise<void> => {
       },
       {
         $lookup: {
-          from: "users", // Fetch user details from the User collection
+          from: "usercommunities", // Fetch user details from the UserCommunity collection
           localField: "user_id",
           foreignField: "_id",
           as: "user_details",
@@ -609,8 +621,8 @@ export const Search = async (req: Request, res: Response): Promise<void> => {
         },
       },
     ]);
-    // set the post user is from cuurent user
 
+    // Map over the posts to ensure the username is from the current user
     const updatedPosts = posts.map((post: any) => ({
       ...post,
       username: userCommunity.username,

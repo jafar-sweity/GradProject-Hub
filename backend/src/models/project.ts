@@ -32,6 +32,12 @@ class Project extends Model<Project> {
   @Column({ type: DataType.STRING, allowNull: true })
   video_demo_url!: string | null;
 
+  @Column({ type: DataType.STRING, allowNull: true })
+  abstract_status!: string | null;
+
+  @Column({ type: DataType.STRING, allowNull: true })
+  abstract_comment!: string | null;
+
   @Column({ type: DataType.DATE, allowNull: false })
   createdAt!: Date;
 

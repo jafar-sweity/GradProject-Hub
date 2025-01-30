@@ -106,10 +106,32 @@ export const deleteProjectBySupervisor = async (
     res.status(500).json({ error: error.message });
   }
 };
-
 export const getProjects = async (req: Request, res: Response) => {
   try {
     const projects = await Project.findAll();
+    res.status(200).json(projects);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const getProjectsBySemesterName = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const { semesterName } = req.params;
+
+    const projects = await Project.findAll({
+      include: [
+        {
+          model: Semester,
+          where: { name: semesterName },
+          attributes: ["name", "start_date", "end_date"],
+        },
+      ],
+    });
+
     res.status(200).json(projects);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -200,6 +222,26 @@ export const updateProject = async (req: Request, res: Response) => {
           );
         }
       }
+    }
+    const updatedProject = await Project.findByPk(req.params.id);
+    res.status(200).json(updatedProject);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const updateProjectStatus = async (req: Request, res: Response) => {
+  try {
+    const { abstract_status, abstract_comment } = req.body;
+    const [updated] = await Project.update(
+      { abstract_status, abstract_comment },
+      {
+        where: { project_id: req.params.id },
+      }
+    );
+    if (!updated) {
+      res.status(404).json({ error: "Project not found" });
+      return;
     }
     const updatedProject = await Project.findByPk(req.params.id);
     res.status(200).json(updatedProject);
