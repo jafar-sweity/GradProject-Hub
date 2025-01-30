@@ -50,6 +50,14 @@ const MeetingLayout = () => {
 
   const tokenProvider = async () => {
     try {
+      console.log(
+        "Generating user token for:",
+        currentUser.id,
+        currentUser.name,
+        currentUser.email,
+        currentUser.avatarurl
+      );
+
       const response = await axiosInstance.post("/meeting/generateUserToken", {
         userId: currentUser.id,
         name: currentUser.name,
@@ -57,12 +65,10 @@ const MeetingLayout = () => {
         email: currentUser.email,
       });
 
+      console.log("User token generated:", response.data.token);
       return response.data.token;
     } catch (error: any) {
-      console.error(
-        "Error generating user token:",
-        error.response.data.message
-      );
+      console.error("Error generating user token:", error.response);
       throw error;
     }
   };

@@ -121,7 +121,7 @@ export default function TabLayout() {
           ),
         }}
       />
-      <Tabs.Screen
+      {/* <Tabs.Screen
         name="explore"
         options={{
           title: "Explore",
@@ -129,7 +129,7 @@ export default function TabLayout() {
             <IconSymbol size={28} name="paperplane.fill" color={color} />
           ),
         }}
-      />
+      /> */}
 
       <Tabs.Screen
         name="supervisorProjects"
@@ -175,15 +175,7 @@ export default function TabLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="Recommendation"
-        options={{
-          title: "Recommendation",
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="star.fill" color={color} />
-          ),
-        }}
-      />
+
       <Tabs.Screen
         name="meeting"
         options={{
