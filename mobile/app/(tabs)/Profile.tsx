@@ -18,7 +18,6 @@ import { useAuth } from "@/hooks/useAuth";
 import axiosInstance from "@/lib/axiosInstance";
 import Post from "@/components/Post";
 import { getallPostsCurrentUser } from "@/services/PostData";
-
 const fetchUser = async (username: string, currentUserId: string) => {
   const response = await axiosInstance.get(`/community/users/${username}`, {
     params: { currentUserId },
@@ -50,7 +49,7 @@ const UserProfile = () => {
   const [editedName, setEditedName] = useState("");
   const [editedBio, setEditedBio] = useState("");
 
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   useEffect(() => {
     loadUserProfile();
@@ -175,13 +174,14 @@ const UserProfile = () => {
   if (!userdata) {
     return (
       <View style={styles.container}>
-        <Text style={styles.errorText}>User profile could not be loaded.</Text>
+        <Button title="Log out" onPress={logout} />
       </View>
     );
   }
 
   return (
     <>
+      <Button title="Log out" onPress={logout} />
       <FlatList
         data={data}
         keyExtractor={(item, index) => `${item.type}-${index}`}

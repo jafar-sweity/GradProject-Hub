@@ -143,13 +143,13 @@ const SignUp = () => {
   };
   return (
     <View className="flex-1 justify-center items-center bg-background px-6">
-      <View className="w-full max-w-md bg-card p-6 rounded-lg shadow-lg border border-border">
+      <View className="w-full max-w-md bg-card p-6  shadow-lg border border-border">
         <Text className="text-center text-2xl font-bold mb-6 text-foreground">
           Sign Up
         </Text>
         <View className="mb-4">
           <TextInput
-            className="bg-input text-foreground p-3 rounded-lg border border-border focus:border-ring"
+            className="bg-input text-foreground p-3  border border-border focus:border-ring"
             placeholder="Full name"
             placeholderTextColor="hsl(240 5% 40%)"
             value={formData.name}
@@ -161,7 +161,7 @@ const SignUp = () => {
         </View>
         <View className="mb-4">
           <TextInput
-            className="bg-input text-foreground p-3 rounded-lg border border-border focus:border-ring"
+            className="bg-input text-foreground p-3  border border-border focus:border-ring"
             placeholder="Email"
             placeholderTextColor="hsl(240 5% 40%)"
             value={formData.email}
@@ -175,7 +175,7 @@ const SignUp = () => {
         </View>
         <View className="mb-4">
           <TextInput
-            className="bg-input text-foreground p-3 rounded-lg border border-border focus:border-ring"
+            className="bg-input text-foreground p-3  border border-border focus:border-ring"
             placeholder="Password"
             placeholderTextColor="hsl(240 5% 40%)"
             secureTextEntry
@@ -191,7 +191,7 @@ const SignUp = () => {
           )}
         </View>
         <TouchableOpacity
-          className="bg-primary py-3 rounded-lg text-center mb-4"
+          className="bg-primary py-3  text-center mb-4"
           onPress={handleSignUp}
         >
           <Text className="text-primary-foreground font-bold text-center">
@@ -222,7 +222,7 @@ const SignUp = () => {
             {verificationCode.map((digit, index) => (
               <TextInput
                 key={index}
-                className="bg-input text-foreground p-3 rounded-lg text-center border border-border focus:border-ring w-12 text-xl"
+                className="bg-input text-foreground p-3  text-center border border-border focus:border-ring w-12 text-xl"
                 maxLength={1}
                 keyboardType="numeric"
                 value={digit}
@@ -240,7 +240,7 @@ const SignUp = () => {
             ))}
           </View>
           <TouchableOpacity
-            className="bg-primary py-3 rounded-lg text-center w-full max-w-sm"
+            className="bg-primary py-3  text-center w-full max-w-sm"
             onPress={handleVerifyCode}
           >
             <Text className="text-primary-foreground font-bold text-center">
