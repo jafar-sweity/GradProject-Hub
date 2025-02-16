@@ -27,4 +27,4 @@ npm run dev
 ## ☕ Grab some coffee and enjoy coding!
 
 # 📽️ Demo
-🎥 [Watch it here]:(https://drive.google.com/drive/folders/1u-l-_IMp5I3NVZF5QtoExvlape7BXv9H)
+🎥 [Watch it here](https://drive.google.com/drive/folders/1u-l-_IMp5I3NVZF5QtoExvlape7BXv9H)
